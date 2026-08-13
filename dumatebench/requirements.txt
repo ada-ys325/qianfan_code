@@ -1,0 +1,17 @@
+# Host-side dependencies for running DuMateBench runners and evaluators.
+# Docker itself is required as a system dependency, not a Python package.
+# PPT LLM judge slide rendering also needs host system tools:
+# LibreOffice/soffice and Poppler/pdftoppm. They cannot be installed by pip.
+
+# Python >=3.10, recommended: Python 3.12
+
+openpyxl>=3.1.5
+python-docx>=1.1.2
+python-pptx>=1.0.2
+Pillow>=9.0
+pypdf>=5.0.0
+PyMuPDF>=1.24.0
+PyYAML>=6.0
+icalendar>=5.0.13
+pytz>=2024.2
+openai>=1.0.0

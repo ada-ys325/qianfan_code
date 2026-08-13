@@ -1,0 +1,27 @@
+services:
+  task:
+    build:
+      context: /data/sx/dumatebench/runs/reasoning_probe/reasoning-probe-claude-code-claude-opus-4-8-20260803-084544/reasoning_probe_quick_task/.batch_runtime/smoke
+      dockerfile: environment/Dockerfile
+      args:
+        DUMATE_BASE_IMAGE: ${DUMATE_BASE_IMAGE:-python:3.12-slim}
+        DUMATE_APT_DEBIAN_MIRROR: ${DUMATE_APT_DEBIAN_MIRROR:-}
+        DUMATE_APT_SECURITY_MIRROR: ${DUMATE_APT_SECURITY_MIRROR:-}
+        DUMATE_AGENT_BACKEND: ${DUMATE_AGENT_BACKEND:-react}
+        DUMATE_CLAUDE_CODE_VERSION: ${DUMATE_CLAUDE_CODE_VERSION:-stable}
+        DUMATE_CODEX_VERSION: ${DUMATE_CODEX_VERSION:-latest}
+    image: dumatebench-batch-claude-code-reasoning_probe_quick_task:latest
+    cpus: "1"
+    mem_limit: 8192m
+    labels:
+      dumatebench.storage_mb: "4000"
+    working_dir: /workspace
+    environment:
+      DUMATE_TASK_SEED: "20260706"
+      DUMATE_NETWORK_FAULT_CONFIG: "/opt/dumate/network_faults.yaml"
+      DUMATE_TOOL_FAULT_CONFIG: "/opt/dumate/tool_faults.yaml"
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - /data/sx/dumatebench/runs/reasoning_probe/reasoning-probe-claude-code-claude-opus-4-8-20260803-084544/reasoning_probe_quick_task/run_outputs:/outputs
+      - /data/sx/dumatebench/runs/reasoning_probe/reasoning-probe-claude-code-claude-opus-4-8-20260803-084544/reasoning_probe_quick_task/run_logs:/logs

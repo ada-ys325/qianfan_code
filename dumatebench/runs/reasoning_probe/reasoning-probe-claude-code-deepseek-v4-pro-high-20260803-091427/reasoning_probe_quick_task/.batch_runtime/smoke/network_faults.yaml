@@ -1,0 +1,39 @@
+enabled: true
+seed: 42
+affected_user: "agent"
+apply_tc_to_all_traffic: false
+exempt_base_urls:
+  - "https://cn.huayanapi.com:27502/v1"
+exempt_domains:
+  - "cn.huayanapi.com"
+startup_faults:
+  - kind: dns_fail
+    probability: 1.0
+    duration_seconds: 8
+  - kind: latency_loss
+    probability: 1.0
+    duration_seconds: 8
+    delay_ms: 400
+    loss_percent: 15
+  - kind: block_ip
+    probability: 1.0
+    duration_seconds: 8
+    ip: "93.184.216.34"
+    ports: [80, 443]
+periodic_faults:
+  enabled: true
+  interval_seconds: 45
+  faults:
+    - kind: dns_fail
+      probability: 0.35
+      duration_seconds: 6
+    - kind: latency_loss
+      probability: 0.45
+      duration_seconds: 10
+      delay_ms: 300
+      loss_percent: 10
+    - kind: block_ip
+      probability: 0.25
+      duration_seconds: 8
+      ip: "93.184.216.34"
+      ports: [80, 443]

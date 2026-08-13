@@ -1,0 +1,43 @@
+{
+  "status": "selected",
+  "selected": true,
+  "files": [
+    {
+      "path": "history_agent_files/角色参考_女店员.png",
+      "score": 155,
+      "selected": true,
+      "reasons": [
+        "file name appears in instruction",
+        "file stem appears in instruction"
+      ]
+    },
+    {
+      "path": "history_agent_files/角色参考_男顾客.png",
+      "score": 155,
+      "selected": true,
+      "reasons": [
+        "file name appears in instruction",
+        "file stem appears in instruction"
+      ]
+    },
+    {
+      "path": "history_agent_files/分镜脚本_水本身没有味道.docx",
+      "score": 0,
+      "selected": false,
+      "reasons": [
+        "no explicit instruction match"
+      ]
+    },
+    {
+      "path": "history_agent_files/剧本_水本身没有味道.txt",
+      "score": 0,
+      "selected": false,
+      "reasons": [
+        "no explicit instruction match"
+      ]
+    }
+  ],
+  "candidate_count": 4,
+  "max_files": 20,
+  "context_source": "instruction.md"
+}

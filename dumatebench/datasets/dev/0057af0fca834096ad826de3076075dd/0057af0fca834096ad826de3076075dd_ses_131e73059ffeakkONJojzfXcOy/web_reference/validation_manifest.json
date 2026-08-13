@@ -1,0 +1,88 @@
+{
+  "kept_files": [
+    "ref_001_dry_run.md",
+    "ref_01_furina_profile.md",
+    "ref_02_mualani_profile.md",
+    "ref_03_xiangling_profile.md",
+    "ref_04_columbina_profile.md",
+    "ref_05_sandrone_profile.md",
+    "ref_06_winter_nights_lazzo_official.md",
+    "ref_07_shaou_cp_context.md",
+    "ref_08_columbina_sandrone_fan_analysis.md"
+  ],
+  "rejected_files": [
+    "low_quality_note.md"
+  ],
+  "kept_assets": [
+    "assets/asset_001_dry_run.txt"
+  ],
+  "rejected_assets": [
+    "assets/low_quality_asset.txt"
+  ],
+  "validator": {
+    "files": [
+      {
+        "file": "low_quality_note.md",
+        "keep": false,
+        "reason": "dry-run keeps generated reference files and rejects placeholders"
+      },
+      {
+        "file": "ref_001_dry_run.md",
+        "keep": true,
+        "reason": "dry-run keeps generated reference files and rejects placeholders"
+      },
+      {
+        "file": "ref_01_furina_profile.md",
+        "keep": true,
+        "reason": "dry-run keeps generated reference files and rejects placeholders"
+      },
+      {
+        "file": "ref_02_mualani_profile.md",
+        "keep": true,
+        "reason": "dry-run keeps generated reference files and rejects placeholders"
+      },
+      {
+        "file": "ref_03_xiangling_profile.md",
+        "keep": true,
+        "reason": "dry-run keeps generated reference files and rejects placeholders"
+      },
+      {
+        "file": "ref_04_columbina_profile.md",
+        "keep": true,
+        "reason": "dry-run keeps generated reference files and rejects placeholders"
+      },
+      {
+        "file": "ref_05_sandrone_profile.md",
+        "keep": true,
+        "reason": "dry-run keeps generated reference files and rejects placeholders"
+      },
+      {
+        "file": "ref_06_winter_nights_lazzo_official.md",
+        "keep": true,
+        "reason": "dry-run keeps generated reference files and rejects placeholders"
+      },
+      {
+        "file": "ref_07_shaou_cp_context.md",
+        "keep": true,
+        "reason": "dry-run keeps generated reference files and rejects placeholders"
+      },
+      {
+        "file": "ref_08_columbina_sandrone_fan_analysis.md",
+        "keep": true,
+        "reason": "dry-run keeps generated reference files and rejects placeholders"
+      }
+    ],
+    "assets": [
+      {
+        "file": "assets/asset_001_dry_run.txt",
+        "keep": true,
+        "reason": "dry-run keeps generated assets and rejects placeholders"
+      },
+      {
+        "file": "assets/low_quality_asset.txt",
+        "keep": false,
+        "reason": "dry-run keeps generated assets and rejects placeholders"
+      }
+    ]
+  }
+}

@@ -1,0 +1,34 @@
+schema_version: 0.1
+task_id: f75de5c6f997409a8fe1e26d190680e8_ses_14b7d6eceffeQehcO2M8QjQpbq
+task_name: 大学选课系统设计报告生成
+split: dev
+difficulty: unreviewed
+tags:
+  - edit_docx
+  - code_writing
+  - web_retrieval
+  - text_generation
+  - image_generation_or_editing
+  - history_turns
+agent:
+  timeout_sec: 900
+  user: agent
+  workdir: /workspace
+  direct_shell: true
+  runtime: in_container
+environment:
+  backend: docker-compose
+  dockerfile: environment/Dockerfile
+  compose_file: environment/docker-compose.yaml
+  cpus: 2
+  memory_mb: 4096
+  storage_mb: 12000
+  allow_internet: true
+  allow_package_install: true
+evaluation:
+  entrypoint: evaluator/evaluator.py
+  checks_file: evaluator/checks.yaml
+  hidden_tests: false
+  metrics:
+    - complete_pass
+    - partial_pass

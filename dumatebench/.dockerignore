@@ -1,0 +1,7 @@
+.DS_Store
+**/.DS_Store
+**/__pycache__/
+**/*.pyc
+datasets/dev/odyssey_2_12_smoke/run_logs/
+datasets/dev/odyssey_2_12_smoke/run_outputs/
+datasets/dev/odyssey_2_12_smoke/.dockerignore

@@ -1,0 +1,6 @@
+checks:
+  - id: mp4_file_exist
+    description: 生成的万马奔腾 mp4 文件存在于指定输出路径
+    type: evaluate_file_exist
+    weight: 1.0
+    args: {"file": "run_outputs/media/ten-thousand-horses.mp4"}

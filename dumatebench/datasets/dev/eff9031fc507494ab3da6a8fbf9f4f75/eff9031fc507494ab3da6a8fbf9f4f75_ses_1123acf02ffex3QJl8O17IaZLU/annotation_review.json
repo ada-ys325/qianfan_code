@@ -1,0 +1,1835 @@
+{
+  "task_id": "eff9031fc507494ab3da6a8fbf9f4f75_ses_1123acf02ffex3QJl8O17IaZLU",
+  "source_session_dir": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU",
+  "user_queries": [
+    {
+      "index": 1,
+      "ts": "2026-06-23T11:28:04.017+08:00",
+      "ms": 1782185284017,
+      "request_id": "f6f90884-edb7-4402-9fe0-7fbb70dd11f4",
+      "text": "产品单号按产品系列+物料编码或规格(规格可能和文字写一起例如500/500JH)+数量+需要时间(例如:下午2点左右用)+发单时间(例如:6.17)整理。不用整理:端子台、塑胶框、Y电容、绝缘纸、接地排、绝缘注塑、放电线束、磁环、热敏电阻、绝缘件等。华为500/570和P09560D09200340JM是不同产品，注意区分。完成塑壳领料单整理，去掉6.20前发单的，更新到表格:塑壳领料单_20260622更新.xlsx。更改表格名为:塑壳领料单_20260623.xlsx",
+      "part_types": [
+        "file",
+        "text"
+      ],
+      "uploaded_files": [
+        {
+          "display_name": "塑壳领料群_2026年6月22日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3e3378a9-5506-4c88-8a91-dbc12d88aa5c.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260622更新.xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/ae8bb0f8-dff0-47b2-a654-5c446504f5d4.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月23日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6a896cfe-b8c0-4985-8ad2-311fe3315789.docx"
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "ts": "2026-06-27T09:57:10.881+08:00",
+      "ms": 1782525430881,
+      "request_id": "e336cf66-6667-475c-91e5-dbbd541d07ba",
+      "text": "产品单号(去的“M o”)按产品系列+物料编码或规格(规格可能和文字写一起例如500/500JH)+数量+需要时间(例如:下午2点左右用)+发单时间(例如:6.17)整理。不用整理:端子台、塑胶框、Y电容、绝缘纸、接地排、绝缘注塑、放电线束、磁环、热敏电阻、绝缘件，端子台打单领料等。华为500/570和P09560D09200340JM是不同产品，注意区分。完成塑壳领料单整理，更新到表格:塑壳领料单_20260626.xlsx。更改表格名为:塑壳领料单_20260627.xlsx",
+      "part_types": [
+        "file",
+        "text"
+      ],
+      "uploaded_files": [
+        {
+          "display_name": "塑壳领料群_2026年6月22日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3e3378a9-5506-4c88-8a91-dbc12d88aa5c.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260622更新.xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/ae8bb0f8-dff0-47b2-a654-5c446504f5d4.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月23日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6a896cfe-b8c0-4985-8ad2-311fe3315789.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月23日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/b16aad4f-a772-49d0-b1ea-a46fc39ac0aa.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260623正式.xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/56d2cc73-7e49-47dc-8d54-5a088957eae3.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月24日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3803182e-d5c4-4841-8061-7b0b94e2b1c2.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月24日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/4a365efc-daae-468b-852d-29c198461407.docx"
+        },
+        {
+          "display_name": "母排领料_2026年6月24日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/5ea6831d-a197-443a-8234-c9c6a96908a0.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月25日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/0f0e835b-505e-4587-ace5-a111958fa4e7.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月25日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/2ec0cfff-8e8a-42dd-9c9f-4b147cde1b4e.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月26日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/71e94f5d-63b8-43df-bb06-dba4d4a6511a.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月27日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/0744eb27-3798-4d5c-bd69-42a03465dd8a.docx"
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "ts": "2026-06-27T14:13:45.526+08:00",
+      "ms": 1782540825526,
+      "request_id": "ae463fcc-537d-41ea-a875-c9434fd269f3",
+      "text": "产品单号(去的“M o”)按产品系列+物料编码或规格(规格可能和文字写一起例如500/500JH)+数量+需要时间(例如:下午2点左右用)+发单时间(例如:6.17)整理。不用整理:端子台、塑胶框、Y电容、绝缘纸、接地排、绝缘注塑、放电线束、磁环、热敏电阻、绝缘件，端子台打单领料等。华为500/570和P09560D09200340JM是不同产品，注意区分。完成塑壳领料单整理，更新到表格:塑壳领料单_20260627xlsx。更改表格名为:塑壳领料单_20260627正式.xlsx",
+      "part_types": [
+        "text"
+      ],
+      "uploaded_files": []
+    },
+    {
+      "index": 4,
+      "ts": "2026-07-02T08:27:19.106+08:00",
+      "ms": 1782952039106,
+      "request_id": "64b66da1-69a7-495b-a570-c3445a64ec88",
+      "text": "产品单号(去的“M o”)按产品系列+物料编码或规格(规格可能和文字写一起例如500/500JH)+数量+需要时间(例如:下午2点左右用)+发单时间(例如:6.17)整理。不用整理:端子台、塑胶框、Y电容、绝缘纸、接地排、绝缘注塑、放电线束、磁环、热敏电阻、绝缘件，端子台打单领料等。华为500/570和P09560D09200340JM是不同产品，注意区分。完成塑壳领料单整理，清除6.29日前数据，更新到表格:塑壳领料单_20260628.xlsx。更改表格名为:塑壳领料单_20260701.xlsx",
+      "part_types": [
+        "file",
+        "text"
+      ],
+      "uploaded_files": [
+        {
+          "display_name": "塑壳领料群_2026年6月22日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3e3378a9-5506-4c88-8a91-dbc12d88aa5c.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260622更新.xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/ae8bb0f8-dff0-47b2-a654-5c446504f5d4.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月23日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6a896cfe-b8c0-4985-8ad2-311fe3315789.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月23日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/b16aad4f-a772-49d0-b1ea-a46fc39ac0aa.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260623正式.xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/56d2cc73-7e49-47dc-8d54-5a088957eae3.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月24日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3803182e-d5c4-4841-8061-7b0b94e2b1c2.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月24日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/4a365efc-daae-468b-852d-29c198461407.docx"
+        },
+        {
+          "display_name": "母排领料_2026年6月24日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/5ea6831d-a197-443a-8234-c9c6a96908a0.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月25日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/0f0e835b-505e-4587-ace5-a111958fa4e7.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月25日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/2ec0cfff-8e8a-42dd-9c9f-4b147cde1b4e.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月26日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/71e94f5d-63b8-43df-bb06-dba4d4a6511a.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月27日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/0744eb27-3798-4d5c-bd69-42a03465dd8a.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月27日(2).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6f9850c2-a2a1-48a3-b324-becce93a33d7.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月28日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6d3cf400-5a92-4f1c-a089-9af6d9a5ddd6.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/1e45fa03-dd11-4911-9a1e-086a4741d117.docx"
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "ts": "2026-07-02T11:22:22.655+08:00",
+      "ms": 1782962542655,
+      "request_id": "8490e581-9219-4030-8a13-fd81324d1b8c",
+      "text": "产品单号(去的“M o”)必须整理。按产品系列+物料编码或规格(规格可能和文字写一起例如500/500JH)+数量+需要时间(例如:下午2点左右用)+发单时间(例如:6.17)整理。不用整理:端子台、塑胶框、Y电容、绝缘纸、接地排、绝缘注塑、放电线束、磁环、热敏电阻、绝缘件，端子台打单领料等。华为500/570和P09560D09200340JM是不同产品，注意区分。完成塑壳领料单整理，更新到表格:塑壳领料单_20260701.xlsx。更改表格名为:塑壳领料单_20260701半.xlsx",
+      "part_types": [
+        "file",
+        "text"
+      ],
+      "uploaded_files": [
+        {
+          "display_name": "塑壳领料群_2026年6月22日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3e3378a9-5506-4c88-8a91-dbc12d88aa5c.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260622更新.xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/ae8bb0f8-dff0-47b2-a654-5c446504f5d4.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月23日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6a896cfe-b8c0-4985-8ad2-311fe3315789.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月23日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/b16aad4f-a772-49d0-b1ea-a46fc39ac0aa.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260623正式.xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/56d2cc73-7e49-47dc-8d54-5a088957eae3.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月24日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3803182e-d5c4-4841-8061-7b0b94e2b1c2.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月24日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/4a365efc-daae-468b-852d-29c198461407.docx"
+        },
+        {
+          "display_name": "母排领料_2026年6月24日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/5ea6831d-a197-443a-8234-c9c6a96908a0.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月25日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/0f0e835b-505e-4587-ace5-a111958fa4e7.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月25日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/2ec0cfff-8e8a-42dd-9c9f-4b147cde1b4e.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月26日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/71e94f5d-63b8-43df-bb06-dba4d4a6511a.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月27日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/0744eb27-3798-4d5c-bd69-42a03465dd8a.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月27日(2).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6f9850c2-a2a1-48a3-b324-becce93a33d7.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月28日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6d3cf400-5a92-4f1c-a089-9af6d9a5ddd6.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/1e45fa03-dd11-4911-9a1e-086a4741d117.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/9f902f80-288c-4113-ba7e-4bd24cde1776.docx"
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "ts": "2026-07-02T14:45:59.684+08:00",
+      "ms": 1782974759684,
+      "request_id": "8632ada7-cd24-48ca-9ff7-bc4ad0753e1e",
+      "text": "产品单号(去的“M o”)必须整理。按产品系列+物料编码或规格(规格可能和文字写一起例如500/500JH)+数量+需要时间(例如:下午2点左右用)+发单时间(例如:6.17)整理。不用整理:端子台、塑胶框、Y电容、绝缘纸、接地排、绝缘注塑、放电线束、磁环、热敏电阻、绝缘件，端子台打单领料等。华为500/570和P09560D09200340JM是不同产品，注意区分。完成塑壳领料单整理，更新到表格:塑壳领料单_20260701半.xlsx。更改表格名为:塑壳领料单_20260701全.xlsx",
+      "part_types": [
+        "file",
+        "text"
+      ],
+      "uploaded_files": [
+        {
+          "display_name": "塑壳领料群_2026年6月22日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3e3378a9-5506-4c88-8a91-dbc12d88aa5c.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260622更新.xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/ae8bb0f8-dff0-47b2-a654-5c446504f5d4.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月23日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6a896cfe-b8c0-4985-8ad2-311fe3315789.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月23日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/b16aad4f-a772-49d0-b1ea-a46fc39ac0aa.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260623正式.xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/56d2cc73-7e49-47dc-8d54-5a088957eae3.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月24日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3803182e-d5c4-4841-8061-7b0b94e2b1c2.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月24日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/4a365efc-daae-468b-852d-29c198461407.docx"
+        },
+        {
+          "display_name": "母排领料_2026年6月24日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/5ea6831d-a197-443a-8234-c9c6a96908a0.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月25日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/0f0e835b-505e-4587-ace5-a111958fa4e7.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月25日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/2ec0cfff-8e8a-42dd-9c9f-4b147cde1b4e.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月26日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/71e94f5d-63b8-43df-bb06-dba4d4a6511a.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月27日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/0744eb27-3798-4d5c-bd69-42a03465dd8a.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月27日(2).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6f9850c2-a2a1-48a3-b324-becce93a33d7.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月28日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6d3cf400-5a92-4f1c-a089-9af6d9a5ddd6.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/1e45fa03-dd11-4911-9a1e-086a4741d117.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/9f902f80-288c-4113-ba7e-4bd24cde1776.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日(2).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/b9bf95c6-bf55-41b6-bd9a-20f424156632.docx"
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "ts": "2026-07-04T10:53:00.093+08:00",
+      "ms": 1783133580093,
+      "request_id": "528b66e3-225d-47a0-b8eb-d1c5cc5c09a8",
+      "text": "产品单号(必须整理，去的“M o”)按产品系列+物料编码或规格(规格可能和文字写一起例如500/500JH)+数量+需要时间(例如:下午2点左右用)+发单时间(例如:6.17)整理。不用整理:端子台、塑胶框、Y电容、绝缘纸、接地排、绝缘注塑、放电线束、磁环、热敏电阻、绝缘件，端子台打单领料等。华为500/570和P09560D09200340JM是不同产品，注意区分。完成塑壳领料单整理，更新到表格:塑壳领料单_2026070.xlsx(具体位置工作表:塑壳领料单)。更改表格名为:塑壳领料单_20260704.xlsx",
+      "part_types": [
+        "file",
+        "text"
+      ],
+      "uploaded_files": [
+        {
+          "display_name": "塑壳领料群_2026年6月22日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3e3378a9-5506-4c88-8a91-dbc12d88aa5c.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260622更新.xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/ae8bb0f8-dff0-47b2-a654-5c446504f5d4.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月23日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6a896cfe-b8c0-4985-8ad2-311fe3315789.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月23日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/b16aad4f-a772-49d0-b1ea-a46fc39ac0aa.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260623正式.xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/56d2cc73-7e49-47dc-8d54-5a088957eae3.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月24日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3803182e-d5c4-4841-8061-7b0b94e2b1c2.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月24日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/4a365efc-daae-468b-852d-29c198461407.docx"
+        },
+        {
+          "display_name": "母排领料_2026年6月24日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/5ea6831d-a197-443a-8234-c9c6a96908a0.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月25日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/0f0e835b-505e-4587-ace5-a111958fa4e7.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月25日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/2ec0cfff-8e8a-42dd-9c9f-4b147cde1b4e.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月26日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/71e94f5d-63b8-43df-bb06-dba4d4a6511a.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月27日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/0744eb27-3798-4d5c-bd69-42a03465dd8a.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月27日(2).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6f9850c2-a2a1-48a3-b324-becce93a33d7.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月28日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6d3cf400-5a92-4f1c-a089-9af6d9a5ddd6.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/1e45fa03-dd11-4911-9a1e-086a4741d117.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/9f902f80-288c-4113-ba7e-4bd24cde1776.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日(2).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/b9bf95c6-bf55-41b6-bd9a-20f424156632.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260703半 (3).xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/9ddee8f4-2cef-4402-91b1-53fd09304e64.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月4日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/cb273ddb-f6bb-498b-847c-1fcf7adefe0c.docx"
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "ts": "2026-07-04T16:32:30.675+08:00",
+      "ms": 1783153950675,
+      "request_id": "21817667-d9d7-4111-bcd3-d403f83c0999",
+      "text": "更新到:塑壳领料单_20260704.xlsx",
+      "part_types": [
+        "file",
+        "text"
+      ],
+      "uploaded_files": [
+        {
+          "display_name": "塑壳领料群_2026年6月22日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3e3378a9-5506-4c88-8a91-dbc12d88aa5c.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260622更新.xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/ae8bb0f8-dff0-47b2-a654-5c446504f5d4.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月23日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6a896cfe-b8c0-4985-8ad2-311fe3315789.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月23日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/b16aad4f-a772-49d0-b1ea-a46fc39ac0aa.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260623正式.xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/56d2cc73-7e49-47dc-8d54-5a088957eae3.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月24日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3803182e-d5c4-4841-8061-7b0b94e2b1c2.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月24日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/4a365efc-daae-468b-852d-29c198461407.docx"
+        },
+        {
+          "display_name": "母排领料_2026年6月24日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/5ea6831d-a197-443a-8234-c9c6a96908a0.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月25日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/0f0e835b-505e-4587-ace5-a111958fa4e7.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月25日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/2ec0cfff-8e8a-42dd-9c9f-4b147cde1b4e.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月26日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/71e94f5d-63b8-43df-bb06-dba4d4a6511a.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月27日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/0744eb27-3798-4d5c-bd69-42a03465dd8a.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月27日(2).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6f9850c2-a2a1-48a3-b324-becce93a33d7.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月28日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6d3cf400-5a92-4f1c-a089-9af6d9a5ddd6.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/1e45fa03-dd11-4911-9a1e-086a4741d117.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/9f902f80-288c-4113-ba7e-4bd24cde1776.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日(2).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/b9bf95c6-bf55-41b6-bd9a-20f424156632.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260703半 (3).xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/9ddee8f4-2cef-4402-91b1-53fd09304e64.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月4日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/cb273ddb-f6bb-498b-847c-1fcf7adefe0c.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月4日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/5be9564a-b603-4fde-bbfc-2f3b3b0e13af.docx"
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "ts": "2026-07-05T14:47:53.339+08:00",
+      "ms": 1783234073339,
+      "request_id": "11296569-d97b-4c4a-a156-bafa52bbd19d",
+      "text": "更新到:塑壳领料单_20260704.xlsx",
+      "part_types": [
+        "file",
+        "text"
+      ],
+      "uploaded_files": [
+        {
+          "display_name": "塑壳领料群_2026年6月22日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3e3378a9-5506-4c88-8a91-dbc12d88aa5c.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260622更新.xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/ae8bb0f8-dff0-47b2-a654-5c446504f5d4.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月23日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6a896cfe-b8c0-4985-8ad2-311fe3315789.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月23日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/b16aad4f-a772-49d0-b1ea-a46fc39ac0aa.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260623正式.xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/56d2cc73-7e49-47dc-8d54-5a088957eae3.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月24日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3803182e-d5c4-4841-8061-7b0b94e2b1c2.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月24日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/4a365efc-daae-468b-852d-29c198461407.docx"
+        },
+        {
+          "display_name": "母排领料_2026年6月24日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/5ea6831d-a197-443a-8234-c9c6a96908a0.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月25日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/0f0e835b-505e-4587-ace5-a111958fa4e7.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月25日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/2ec0cfff-8e8a-42dd-9c9f-4b147cde1b4e.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月26日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/71e94f5d-63b8-43df-bb06-dba4d4a6511a.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月27日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/0744eb27-3798-4d5c-bd69-42a03465dd8a.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月27日(2).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6f9850c2-a2a1-48a3-b324-becce93a33d7.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月28日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6d3cf400-5a92-4f1c-a089-9af6d9a5ddd6.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/1e45fa03-dd11-4911-9a1e-086a4741d117.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/9f902f80-288c-4113-ba7e-4bd24cde1776.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日(2).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/b9bf95c6-bf55-41b6-bd9a-20f424156632.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260703半 (3).xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/9ddee8f4-2cef-4402-91b1-53fd09304e64.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月4日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/cb273ddb-f6bb-498b-847c-1fcf7adefe0c.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月4日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/5be9564a-b603-4fde-bbfc-2f3b3b0e13af.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月5日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/1601ddfa-b6a3-4bae-8930-f3571767f405.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月5日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/da3ba73a-3f3a-4cac-a82f-d24d82d6ca94.docx"
+        }
+      ]
+    },
+    {
+      "index": 10,
+      "ts": "2026-07-06T11:00:10.232+08:00",
+      "ms": 1783306810232,
+      "request_id": "78f3bed4-5e0c-4b3d-8828-a3566ff1f2d4",
+      "text": "更新到:塑壳领料单_20260704.xlsx",
+      "part_types": [
+        "file",
+        "text"
+      ],
+      "uploaded_files": [
+        {
+          "display_name": "塑壳领料群_2026年6月22日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3e3378a9-5506-4c88-8a91-dbc12d88aa5c.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260622更新.xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/ae8bb0f8-dff0-47b2-a654-5c446504f5d4.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月23日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6a896cfe-b8c0-4985-8ad2-311fe3315789.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月23日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/b16aad4f-a772-49d0-b1ea-a46fc39ac0aa.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260623正式.xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/56d2cc73-7e49-47dc-8d54-5a088957eae3.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月24日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3803182e-d5c4-4841-8061-7b0b94e2b1c2.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月24日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/4a365efc-daae-468b-852d-29c198461407.docx"
+        },
+        {
+          "display_name": "母排领料_2026年6月24日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/5ea6831d-a197-443a-8234-c9c6a96908a0.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月25日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/0f0e835b-505e-4587-ace5-a111958fa4e7.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月25日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/2ec0cfff-8e8a-42dd-9c9f-4b147cde1b4e.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月26日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/71e94f5d-63b8-43df-bb06-dba4d4a6511a.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月27日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/0744eb27-3798-4d5c-bd69-42a03465dd8a.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月27日(2).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6f9850c2-a2a1-48a3-b324-becce93a33d7.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月28日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6d3cf400-5a92-4f1c-a089-9af6d9a5ddd6.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/1e45fa03-dd11-4911-9a1e-086a4741d117.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/9f902f80-288c-4113-ba7e-4bd24cde1776.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日(2).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/b9bf95c6-bf55-41b6-bd9a-20f424156632.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260703半 (3).xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/9ddee8f4-2cef-4402-91b1-53fd09304e64.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月4日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/cb273ddb-f6bb-498b-847c-1fcf7adefe0c.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月4日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/5be9564a-b603-4fde-bbfc-2f3b3b0e13af.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月5日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/1601ddfa-b6a3-4bae-8930-f3571767f405.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月5日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/da3ba73a-3f3a-4cac-a82f-d24d82d6ca94.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月6日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/59b874e9-c161-48c3-8352-d2be3a922664.docx"
+        }
+      ]
+    },
+    {
+      "index": 11,
+      "ts": "2026-07-07T09:15:43.704+08:00",
+      "ms": 1783386943704,
+      "request_id": "77269c84-e770-40e6-99fd-8d17bdf9d9c3",
+      "text": "Extract text from the docx file at /home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/46b54a9f-8e66-4dff-867b-16488838b70a.docx and display all paragraphs with their content. Use zipfile and xml.etree.ElementTree to parse the word/document.xml.",
+      "part_types": [
+        "text"
+      ],
+      "uploaded_files": [
+        {
+          "display_name": "塑壳领料群_2026年6月22日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3e3378a9-5506-4c88-8a91-dbc12d88aa5c.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260622更新.xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/ae8bb0f8-dff0-47b2-a654-5c446504f5d4.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月23日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6a896cfe-b8c0-4985-8ad2-311fe3315789.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月23日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/b16aad4f-a772-49d0-b1ea-a46fc39ac0aa.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260623正式.xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/56d2cc73-7e49-47dc-8d54-5a088957eae3.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月24日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3803182e-d5c4-4841-8061-7b0b94e2b1c2.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月24日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/4a365efc-daae-468b-852d-29c198461407.docx"
+        },
+        {
+          "display_name": "母排领料_2026年6月24日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/5ea6831d-a197-443a-8234-c9c6a96908a0.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月25日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/0f0e835b-505e-4587-ace5-a111958fa4e7.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月25日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/2ec0cfff-8e8a-42dd-9c9f-4b147cde1b4e.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月26日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/71e94f5d-63b8-43df-bb06-dba4d4a6511a.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月27日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/0744eb27-3798-4d5c-bd69-42a03465dd8a.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月27日(2).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6f9850c2-a2a1-48a3-b324-becce93a33d7.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月28日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6d3cf400-5a92-4f1c-a089-9af6d9a5ddd6.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/1e45fa03-dd11-4911-9a1e-086a4741d117.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/9f902f80-288c-4113-ba7e-4bd24cde1776.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日(2).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/b9bf95c6-bf55-41b6-bd9a-20f424156632.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260703半 (3).xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/9ddee8f4-2cef-4402-91b1-53fd09304e64.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月4日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/cb273ddb-f6bb-498b-847c-1fcf7adefe0c.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月4日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/5be9564a-b603-4fde-bbfc-2f3b3b0e13af.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月5日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/1601ddfa-b6a3-4bae-8930-f3571767f405.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月5日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/da3ba73a-3f3a-4cac-a82f-d24d82d6ca94.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月6日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/59b874e9-c161-48c3-8352-d2be3a922664.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月6日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/8b4d594c-2b70-4c46-b79f-b1ae806a0a6f.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月6日(2).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/d8f2bb84-a45a-4301-824d-a998e0b06e20.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月7日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/46b54a9f-8e66-4dff-867b-16488838b70a.docx"
+        }
+      ]
+    },
+    {
+      "index": 12,
+      "ts": "2026-07-07T09:16:05.563+08:00",
+      "ms": 1783386965563,
+      "request_id": "77269c84-e770-40e6-99fd-8d17bdf9d9c3",
+      "text": "Update the Excel file at /home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/塑壳领料单_20260704.xlsx with new entries from the 7月7日 docx. First read the existing data from sheet '塑壳领料单' to get existing order numbers (normalize by removing MO prefix and converting float to int string). Then add these new entries (all with 发单时间 '7.7'): - 宗唤唤 7/7 08:02 - EV5线伊控PB0033D08700400JA, 843326=200, 下午四点左右用 - 宗唤唤 7/7 08:03 - EV4线德尔福500/650JC, 842336=200夜班用, 842337=200夜…[+1734]",
+      "part_types": [
+        "text"
+      ],
+      "uploaded_files": [
+        {
+          "display_name": "塑壳领料群_2026年6月22日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3e3378a9-5506-4c88-8a91-dbc12d88aa5c.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260622更新.xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/ae8bb0f8-dff0-47b2-a654-5c446504f5d4.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月23日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6a896cfe-b8c0-4985-8ad2-311fe3315789.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月23日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/b16aad4f-a772-49d0-b1ea-a46fc39ac0aa.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260623正式.xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/56d2cc73-7e49-47dc-8d54-5a088957eae3.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月24日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3803182e-d5c4-4841-8061-7b0b94e2b1c2.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月24日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/4a365efc-daae-468b-852d-29c198461407.docx"
+        },
+        {
+          "display_name": "母排领料_2026年6月24日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/5ea6831d-a197-443a-8234-c9c6a96908a0.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月25日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/0f0e835b-505e-4587-ace5-a111958fa4e7.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月25日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/2ec0cfff-8e8a-42dd-9c9f-4b147cde1b4e.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月26日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/71e94f5d-63b8-43df-bb06-dba4d4a6511a.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月27日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/0744eb27-3798-4d5c-bd69-42a03465dd8a.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月27日(2).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6f9850c2-a2a1-48a3-b324-becce93a33d7.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月28日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6d3cf400-5a92-4f1c-a089-9af6d9a5ddd6.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/1e45fa03-dd11-4911-9a1e-086a4741d117.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/9f902f80-288c-4113-ba7e-4bd24cde1776.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日(2).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/b9bf95c6-bf55-41b6-bd9a-20f424156632.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260703半 (3).xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/9ddee8f4-2cef-4402-91b1-53fd09304e64.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月4日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/cb273ddb-f6bb-498b-847c-1fcf7adefe0c.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月4日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/5be9564a-b603-4fde-bbfc-2f3b3b0e13af.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月5日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/1601ddfa-b6a3-4bae-8930-f3571767f405.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月5日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/da3ba73a-3f3a-4cac-a82f-d24d82d6ca94.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月6日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/59b874e9-c161-48c3-8352-d2be3a922664.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月6日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/8b4d594c-2b70-4c46-b79f-b1ae806a0a6f.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月6日(2).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/d8f2bb84-a45a-4301-824d-a998e0b06e20.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月7日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/46b54a9f-8e66-4dff-867b-16488838b70a.docx"
+        }
+      ]
+    },
+    {
+      "index": 13,
+      "ts": "2026-07-08T16:19:06.693+08:00",
+      "ms": 1783498746693,
+      "request_id": "760a11a5-4d9f-477a-ac67-17e9782e52dd",
+      "text": "更新到:塑壳领料单_20260704.xlsx",
+      "part_types": [
+        "file",
+        "text"
+      ],
+      "uploaded_files": [
+        {
+          "display_name": "塑壳领料群_2026年6月22日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3e3378a9-5506-4c88-8a91-dbc12d88aa5c.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260622更新.xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/ae8bb0f8-dff0-47b2-a654-5c446504f5d4.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月23日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6a896cfe-b8c0-4985-8ad2-311fe3315789.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月23日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/b16aad4f-a772-49d0-b1ea-a46fc39ac0aa.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260623正式.xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/56d2cc73-7e49-47dc-8d54-5a088957eae3.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月24日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3803182e-d5c4-4841-8061-7b0b94e2b1c2.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月24日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/4a365efc-daae-468b-852d-29c198461407.docx"
+        },
+        {
+          "display_name": "母排领料_2026年6月24日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/5ea6831d-a197-443a-8234-c9c6a96908a0.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月25日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/0f0e835b-505e-4587-ace5-a111958fa4e7.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月25日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/2ec0cfff-8e8a-42dd-9c9f-4b147cde1b4e.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月26日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/71e94f5d-63b8-43df-bb06-dba4d4a6511a.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月27日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/0744eb27-3798-4d5c-bd69-42a03465dd8a.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月27日(2).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6f9850c2-a2a1-48a3-b324-becce93a33d7.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年6月28日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6d3cf400-5a92-4f1c-a089-9af6d9a5ddd6.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/1e45fa03-dd11-4911-9a1e-086a4741d117.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/9f902f80-288c-4113-ba7e-4bd24cde1776.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月2日(2).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/b9bf95c6-bf55-41b6-bd9a-20f424156632.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260703半 (3).xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/9ddee8f4-2cef-4402-91b1-53fd09304e64.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月4日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/cb273ddb-f6bb-498b-847c-1fcf7adefe0c.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月4日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/5be9564a-b603-4fde-bbfc-2f3b3b0e13af.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月5日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/1601ddfa-b6a3-4bae-8930-f3571767f405.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月5日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/da3ba73a-3f3a-4cac-a82f-d24d82d6ca94.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月6日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/59b874e9-c161-48c3-8352-d2be3a922664.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月6日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/8b4d594c-2b70-4c46-b79f-b1ae806a0a6f.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月6日(2).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/d8f2bb84-a45a-4301-824d-a998e0b06e20.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月7日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/46b54a9f-8e66-4dff-867b-16488838b70a.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月7日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/623554c1-4d14-4f01-aed0-7fdc488fad2d.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月7日(2).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/74317f02-9c25-46a1-be3a-2a05ea273272.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260706-.xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/d0446a64-63d5-4a90-b364-e471eb5bdbf0.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月8日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/e0b7da9c-e51d-4a90-a806-9bac7a01558f.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月8日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/4409c056-ca14-43cf-8fec-44aecf91d2b3.docx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月8日(2).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/e2db0d63-e097-4966-a182-e9c3d916e463.docx"
+        }
+      ]
+    },
+    {
+      "index": 14,
+      "ts": "2026-07-09T09:58:16.939+08:00",
+      "ms": 1783562296939,
+      "request_id": "9e6e7666-1a76-47dd-9ed0-9444753dcfb2",
+      "text": "文件中这个(PB0033D05000600JA)整理错误 单号也少整理了一个846266-846268",
+      "part_types": [
+        "text"
+      ],
+      "uploaded_files": [
+        {
+          "display_name": "塑壳领料群_2026年6月22日(1).docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3e3378a9-5506-4c88-8a91-dbc12d88aa5c.docx"
+        },
+        {
+          "display_name": "塑壳领料单_20260622更新.xlsx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/ae8bb0f8-dff0-47b2-a654-5c446504f5d4.xlsx"
+        },
+        {
+          "display_name": "塑壳领料群_2026年7月9日.docx",
+          "mime": "application/octet-stream",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/09c501b1-473c-4f3a-8284-2f8f8a44a2f5.docx"
+        }
+      ]
+    },
+    {
+      "index": 15,
+      "ts": "2026-07-09T10:56:54.143+08:00",
+      "ms": 1783565814143,
+      "request_id": "e2ab879e-4032-422a-97a0-41bc2ad8964e",
+      "text": "更新到塑壳领料单_20260704.xlsx",
+      "part_types": [
+        "file",
+        "text"
+      ],
+      "uploaded_files": []
+    },
+    {
+      "index": 16,
+      "ts": "2026-07-09T11:00:58.826+08:00",
+      "ms": 1783566058826,
+      "request_id": "8e730b92-9f61-4ce1-b5c5-60cb3f23ac51",
+      "text": "更新到塑壳领料单_20260704.xlsx",
+      "part_types": [
+        "file",
+        "text"
+      ],
+      "uploaded_files": []
+    },
+    {
+      "index": 17,
+      "ts": "2026-07-09T11:01:21.620+08:00",
+      "ms": 1783566081620,
+      "request_id": "029cdb01-01f1-4803-beb1-fd3809fb3a42",
+      "text": "更新到塑壳领料单_20260704.xlsx",
+      "part_types": [
+        "file",
+        "text"
+      ],
+      "uploaded_files": []
+    },
+    {
+      "index": 18,
+      "ts": "2026-07-09T11:30:16.246+08:00",
+      "ms": 1783567816246,
+      "request_id": "a8335d2e-6487-49d0-b568-27c37c84dc19",
+      "text": "更新到塑壳领料单_20260704.xlsx",
+      "part_types": [
+        "file",
+        "text"
+      ],
+      "uploaded_files": []
+    },
+    {
+      "index": 19,
+      "ts": "2026-07-09T11:53:42.969+08:00",
+      "ms": 1783569222969,
+      "request_id": "8fd2393a-b4b3-476b-a8b3-a76428b3f9e7",
+      "text": "再次执行",
+      "part_types": [
+        "text"
+      ],
+      "uploaded_files": []
+    },
+    {
+      "index": 20,
+      "ts": "2026-07-09T11:54:02.692+08:00",
+      "ms": 1783569242692,
+      "request_id": "343f6076-00ea-4a93-9e22-509ebd77f0a6",
+      "text": "再次执行",
+      "part_types": [
+        "text"
+      ],
+      "uploaded_files": []
+    }
+  ],
+  "cut_decision": {
+    "cut_after_turn": 13,
+    "history_turn_count": 13,
+    "task_turn_indices": [
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "rationale": "前13轮建立了完整的塑壳领料单整理规则与历史上下文（包括产品单号整理规则、不需整理项、docx提取与Excel更新流程）。从第14轮起任务类型更丰富：14轮是纠错任务（发现整理错误并补充遗漏单号），15-18轮是更新任务，19-20轮是重复执行任务，保留历史后这些请求可作为多样化的新benchmark任务。"
+  },
+  "task_requirement": "文件中这个(PB0033D05000600JA)整理错误 单号也少整理了一个846266-846268\n\n更新到塑壳领料单_20260704.xlsx\n\n更新到塑壳领料单_20260704.xlsx\n\n更新到塑壳领料单_20260704.xlsx\n\n更新到塑壳领料单_20260704.xlsx\n\n再次执行\n\n再次执行",
+  "checklist_explanation": "任务核心是修正 PB0033D05000600JA 相关记录并补录连号 846266-846268，然后更新主表。checklist 采用规则型检查：文件存在性(evaluate_file_exist)、xlsx 格式有效性(evaluate_file_format_valid)、目标工作表存在(evaluate_excel_sheet_exists)、补录单号与物料编码是否写入(evaluate_contain)、以及无 MO 前缀残留(evaluate_not_contain)。由于连号补录的确切数量/需要时间无法从上下文精确断定，未使用具体单元格坐标数值检查，避免编造答案；补录单号 846266/846267/846268 来自用户明确反馈，可作为客观关键词。workspace_seed_paths 提供了主表及7月7日相关 docx 源文件供 agent 读取。",
+  "checklist": [
+    {
+      "id": "output_file_exists",
+      "description": "输出的更新后表格必须存在于指定路径",
+      "type": "evaluate_file_exist",
+      "weight": 0.2,
+      "args": {
+        "file": "run_outputs/lingliao/塑壳领料单_20260704.xlsx"
+      }
+    },
+    {
+      "id": "output_file_valid_xlsx",
+      "description": "输出文件必须是可被 openpyxl 正常打开的有效 xlsx",
+      "type": "evaluate_file_format_valid",
+      "weight": 0.2,
+      "args": {
+        "file": "run_outputs/lingliao/塑壳领料单_20260704.xlsx",
+        "doc_type": "xlsx"
+      }
+    },
+    {
+      "id": "sheet_exists",
+      "description": "输出工作簿必须包含名为 塑壳领料单 的工作表",
+      "type": "evaluate_excel_sheet_exists",
+      "weight": 0.2,
+      "args": {
+        "file": "run_outputs/lingliao/塑壳领料单_20260704.xlsx",
+        "required_sheets": [
+          "塑壳领料单"
+        ]
+      }
+    },
+    {
+      "id": "contains_supplement_orders",
+      "description": "表格中应包含补录的连号单据 846266、846267、846268 及物料编码 PB0033D05000600JA",
+      "type": "evaluate_contain",
+      "weight": 0.2,
+      "args": {
+        "file": "run_outputs/lingliao/塑壳领料单_20260704.xlsx",
+        "doc_type": "xlsx",
+        "keywords": [
+          "846266",
+          "846267",
+          "846268",
+          "PB0033D05000600JA"
+        ]
+      }
+    },
+    {
+      "id": "no_mo_prefix",
+      "description": "表格中不得残留 Mo/MO 单号前缀",
+      "type": "evaluate_not_contain",
+      "weight": 0.2,
+      "args": {
+        "file": "run_outputs/lingliao/塑壳领料单_20260704.xlsx",
+        "doc_type": "xlsx",
+        "keywords": [
+          "MO846266"
+        ]
+      }
+    }
+  ],
+  "evaluator_smoke_test": {
+    "ok": true,
+    "returncode": 1,
+    "accepted_failed_checks": true,
+    "structural_errors": [],
+    "complete_pass": 0,
+    "partial_pass": 0.2,
+    "check_count": 5
+  },
+  "task_type_feature_schema_source": "annotation_pipeline.fixed",
+  "task_type_features": {
+    "uid": "eff9031fc507494ab3da6a8fbf9f4f75",
+    "sessionId": "ses_1123acf02ffex3QJl8O17IaZLU",
+    "read_docx": 1,
+    "read_pptx": 0,
+    "read_excel": 1,
+    "read_pdf": 0,
+    "edit_docx": 0,
+    "edit_pptx": 0,
+    "edit_excel": 1,
+    "edit_pdf": 0,
+    "file_organization": 0,
+    "code_writing": 1,
+    "web_retrieval": 0,
+    "text_generation": 0,
+    "image_generation_or_editing": 0,
+    "video_generation_or_editing": 0,
+    "audio_generation_or_editing": 0,
+    "email_processing": 0,
+    "calendar_processing": 0,
+    "history_turns": 20,
+    "file_count": 40,
+    "file_size_mb": 1.134,
+    "user_config_chars": 300,
+    "cross_app_count": 2,
+    "checklist_length": 5,
+    "missing_tools_or_dependencies": 0,
+    "resource_limited": 0,
+    "network_or_api_errors": 0,
+    "workspace_noise_file_count": 19
+  },
+  "instruction_expected_outputs": [
+    "/outputs/lingliao/塑壳领料单_20260704.xlsx"
+  ],
+  "evaluator_expected_outputs": [
+    "run_outputs/lingliao/塑壳领料单_20260704.xlsx"
+  ],
+  "workspace_seed_files": [
+    "history_agent_files/update_0707.py",
+    "history_agent_files/塑壳领料单_20260624.xlsx",
+    "history_agent_files/塑壳领料单_20260704.xlsx",
+    "uploads/塑壳领料单_20260623正式.xlsx",
+    "uploads/塑壳领料单_20260703半 (3).xlsx",
+    "uploads/塑壳领料单_20260706-.xlsx",
+    "uploads/塑壳领料群_2026年6月23日(1).docx",
+    "uploads/塑壳领料群_2026年6月23日.docx",
+    "uploads/塑壳领料群_2026年6月24日(1).docx",
+    "uploads/塑壳领料群_2026年6月24日.docx",
+    "uploads/塑壳领料群_2026年6月25日(1).docx",
+    "uploads/塑壳领料群_2026年6月25日.docx",
+    "uploads/塑壳领料群_2026年6月26日.docx",
+    "uploads/塑壳领料群_2026年6月27日(1).docx",
+    "uploads/塑壳领料群_2026年6月27日(2).docx",
+    "uploads/塑壳领料群_2026年6月28日.docx",
+    "uploads/塑壳领料群_2026年7月2日(1).docx",
+    "uploads/塑壳领料群_2026年7月2日(2).docx",
+    "uploads/塑壳领料群_2026年7月2日.docx",
+    "uploads/塑壳领料群_2026年7月4日(1).docx",
+    "uploads/塑壳领料群_2026年7月4日.docx",
+    "uploads/塑壳领料群_2026年7月5日(1).docx",
+    "uploads/塑壳领料群_2026年7月5日.docx",
+    "uploads/塑壳领料群_2026年7月6日(1).docx",
+    "uploads/塑壳领料群_2026年7月6日(2).docx",
+    "uploads/塑壳领料群_2026年7月6日.docx",
+    "uploads/塑壳领料群_2026年7月7日(1).docx",
+    "uploads/塑壳领料群_2026年7月7日(2).docx",
+    "uploads/塑壳领料群_2026年7月7日.docx",
+    "uploads/塑壳领料群_2026年7月8日(1).docx",
+    "uploads/塑壳领料群_2026年7月8日(2).docx",
+    "uploads/塑壳领料群_2026年7月8日.docx",
+    "uploads/塑壳领料群_2026年7月9日.docx",
+    "uploads/母排领料_2026年6月24日.docx",
+    "uploads_raw/eff9031fc507494ab3da6a8fbf9f4f75/0809c40a-81f3-4430-9db6-8c656d55c664.docx",
+    "uploads_raw/eff9031fc507494ab3da6a8fbf9f4f75/45e5b5c7-9289-4e39-b976-497c256fbb7e.docx",
+    "uploads_raw/eff9031fc507494ab3da6a8fbf9f4f75/88fe58e6-753e-48ba-81ea-374a392b2ad2.docx",
+    "uploads_raw/eff9031fc507494ab3da6a8fbf9f4f75/b2d4980b-8ecb-40fe-b535-3e4be5e4da7c.jpeg",
+    "uploads_raw/eff9031fc507494ab3da6a8fbf9f4f75/c690f921-bc3a-45b5-a552-5d124aa35b03.docx",
+    "uploads_raw/eff9031fc507494ab3da6a8fbf9f4f75/df7c71bc-59a6-4904-b2b8-79e2ecd79902.xlsx"
+  ],
+  "workspace_seed_report": {
+    "copied_upload_count": 31,
+    "copied_upload_raw_count": 6,
+    "copied_history_agent_file_count": 3,
+    "upload_name_path_map": [
+      {
+        "display_name": "塑壳领料群_2026年6月22日(1).docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3e3378a9-5506-4c88-8a91-dbc12d88aa5c.docx",
+        "local_path": ""
+      },
+      {
+        "display_name": "塑壳领料单_20260622更新.xlsx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/ae8bb0f8-dff0-47b2-a654-5c446504f5d4.xlsx",
+        "local_path": ""
+      },
+      {
+        "display_name": "塑壳领料群_2026年6月23日.docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6a896cfe-b8c0-4985-8ad2-311fe3315789.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6a896cfe-b8c0-4985-8ad2-311fe3315789.docx"
+      },
+      {
+        "display_name": "塑壳领料群_2026年6月23日(1).docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/b16aad4f-a772-49d0-b1ea-a46fc39ac0aa.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/b16aad4f-a772-49d0-b1ea-a46fc39ac0aa.docx"
+      },
+      {
+        "display_name": "塑壳领料单_20260623正式.xlsx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/56d2cc73-7e49-47dc-8d54-5a088957eae3.xlsx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/56d2cc73-7e49-47dc-8d54-5a088957eae3.xlsx"
+      },
+      {
+        "display_name": "塑壳领料群_2026年6月24日.docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3803182e-d5c4-4841-8061-7b0b94e2b1c2.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3803182e-d5c4-4841-8061-7b0b94e2b1c2.docx"
+      },
+      {
+        "display_name": "塑壳领料群_2026年6月24日(1).docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/4a365efc-daae-468b-852d-29c198461407.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/4a365efc-daae-468b-852d-29c198461407.docx"
+      },
+      {
+        "display_name": "母排领料_2026年6月24日.docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/5ea6831d-a197-443a-8234-c9c6a96908a0.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/5ea6831d-a197-443a-8234-c9c6a96908a0.docx"
+      },
+      {
+        "display_name": "塑壳领料群_2026年6月25日.docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/0f0e835b-505e-4587-ace5-a111958fa4e7.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/0f0e835b-505e-4587-ace5-a111958fa4e7.docx"
+      },
+      {
+        "display_name": "塑壳领料群_2026年6月25日(1).docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/2ec0cfff-8e8a-42dd-9c9f-4b147cde1b4e.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/2ec0cfff-8e8a-42dd-9c9f-4b147cde1b4e.docx"
+      },
+      {
+        "display_name": "塑壳领料群_2026年6月26日.docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/71e94f5d-63b8-43df-bb06-dba4d4a6511a.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/71e94f5d-63b8-43df-bb06-dba4d4a6511a.docx"
+      },
+      {
+        "display_name": "塑壳领料群_2026年6月27日(1).docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/0744eb27-3798-4d5c-bd69-42a03465dd8a.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/0744eb27-3798-4d5c-bd69-42a03465dd8a.docx"
+      },
+      {
+        "display_name": "塑壳领料群_2026年6月27日(2).docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6f9850c2-a2a1-48a3-b324-becce93a33d7.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6f9850c2-a2a1-48a3-b324-becce93a33d7.docx"
+      },
+      {
+        "display_name": "塑壳领料群_2026年6月28日.docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6d3cf400-5a92-4f1c-a089-9af6d9a5ddd6.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/6d3cf400-5a92-4f1c-a089-9af6d9a5ddd6.docx"
+      },
+      {
+        "display_name": "塑壳领料群_2026年7月2日.docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/1e45fa03-dd11-4911-9a1e-086a4741d117.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/1e45fa03-dd11-4911-9a1e-086a4741d117.docx"
+      },
+      {
+        "display_name": "塑壳领料群_2026年7月2日(1).docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/9f902f80-288c-4113-ba7e-4bd24cde1776.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/9f902f80-288c-4113-ba7e-4bd24cde1776.docx"
+      },
+      {
+        "display_name": "塑壳领料群_2026年7月2日(2).docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/b9bf95c6-bf55-41b6-bd9a-20f424156632.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/b9bf95c6-bf55-41b6-bd9a-20f424156632.docx"
+      },
+      {
+        "display_name": "塑壳领料单_20260703半 (3).xlsx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/9ddee8f4-2cef-4402-91b1-53fd09304e64.xlsx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/9ddee8f4-2cef-4402-91b1-53fd09304e64.xlsx"
+      },
+      {
+        "display_name": "塑壳领料群_2026年7月4日.docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/cb273ddb-f6bb-498b-847c-1fcf7adefe0c.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/cb273ddb-f6bb-498b-847c-1fcf7adefe0c.docx"
+      },
+      {
+        "display_name": "塑壳领料群_2026年7月4日(1).docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/5be9564a-b603-4fde-bbfc-2f3b3b0e13af.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/5be9564a-b603-4fde-bbfc-2f3b3b0e13af.docx"
+      },
+      {
+        "display_name": "塑壳领料群_2026年7月5日.docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/1601ddfa-b6a3-4bae-8930-f3571767f405.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/1601ddfa-b6a3-4bae-8930-f3571767f405.docx"
+      },
+      {
+        "display_name": "塑壳领料群_2026年7月5日(1).docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/da3ba73a-3f3a-4cac-a82f-d24d82d6ca94.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/da3ba73a-3f3a-4cac-a82f-d24d82d6ca94.docx"
+      },
+      {
+        "display_name": "塑壳领料群_2026年7月6日.docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/59b874e9-c161-48c3-8352-d2be3a922664.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/59b874e9-c161-48c3-8352-d2be3a922664.docx"
+      },
+      {
+        "display_name": "塑壳领料群_2026年7月6日(1).docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/8b4d594c-2b70-4c46-b79f-b1ae806a0a6f.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/8b4d594c-2b70-4c46-b79f-b1ae806a0a6f.docx"
+      },
+      {
+        "display_name": "塑壳领料群_2026年7月6日(2).docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/d8f2bb84-a45a-4301-824d-a998e0b06e20.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/d8f2bb84-a45a-4301-824d-a998e0b06e20.docx"
+      },
+      {
+        "display_name": "塑壳领料群_2026年7月7日.docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/46b54a9f-8e66-4dff-867b-16488838b70a.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/46b54a9f-8e66-4dff-867b-16488838b70a.docx"
+      },
+      {
+        "display_name": "塑壳领料群_2026年7月7日(1).docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/623554c1-4d14-4f01-aed0-7fdc488fad2d.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/623554c1-4d14-4f01-aed0-7fdc488fad2d.docx"
+      },
+      {
+        "display_name": "塑壳领料群_2026年7月7日(2).docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/74317f02-9c25-46a1-be3a-2a05ea273272.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/74317f02-9c25-46a1-be3a-2a05ea273272.docx"
+      },
+      {
+        "display_name": "塑壳领料单_20260706-.xlsx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/d0446a64-63d5-4a90-b364-e471eb5bdbf0.xlsx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/d0446a64-63d5-4a90-b364-e471eb5bdbf0.xlsx"
+      },
+      {
+        "display_name": "塑壳领料群_2026年7月8日.docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/e0b7da9c-e51d-4a90-a806-9bac7a01558f.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/e0b7da9c-e51d-4a90-a806-9bac7a01558f.docx"
+      },
+      {
+        "display_name": "塑壳领料群_2026年7月8日(1).docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/4409c056-ca14-43cf-8fec-44aecf91d2b3.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/4409c056-ca14-43cf-8fec-44aecf91d2b3.docx"
+      },
+      {
+        "display_name": "塑壳领料群_2026年7月8日(2).docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/e2db0d63-e097-4966-a182-e9c3d916e463.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/e2db0d63-e097-4966-a182-e9c3d916e463.docx"
+      },
+      {
+        "display_name": "塑壳领料群_2026年7月9日.docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/09c501b1-473c-4f3a-8284-2f8f8a44a2f5.docx",
+        "local_path": "/mnt/cfs_algo_bj/models/experiments/shenxu/dumate_data/group_6/eff9031fc507494ab3da6a8fbf9f4f75/workspace/ses_1123acf02ffex3QJl8O17IaZLU/uploads/eff9031fc507494ab3da6a8fbf9f4f75/09c501b1-473c-4f3a-8284-2f8f8a44a2f5.docx"
+      }
+    ],
+    "missing_uploaded_files": [
+      {
+        "display_name": "塑壳领料群_2026年6月22日(1).docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3e3378a9-5506-4c88-8a91-dbc12d88aa5c.docx",
+        "error": "上传文件在原始 uploads 中找不到"
+      },
+      {
+        "display_name": "塑壳领料单_20260622更新.xlsx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/ae8bb0f8-dff0-47b2-a654-5c446504f5d4.xlsx",
+        "error": "上传文件在原始 uploads 中找不到"
+      }
+    ],
+    "critical_missing_files": [
+      {
+        "display_name": "塑壳领料群_2026年6月22日(1).docx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3e3378a9-5506-4c88-8a91-dbc12d88aa5c.docx",
+        "error": "完成任务所需关键文件缺失"
+      },
+      {
+        "display_name": "塑壳领料单_20260622更新.xlsx",
+        "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/ae8bb0f8-dff0-47b2-a654-5c446504f5d4.xlsx",
+        "error": "完成任务所需关键文件缺失"
+      }
+    ],
+    "llm_requested_seed_paths": [
+      "塑壳领料单_20260704.xlsx",
+      "uploads/eff9031fc507494ab3da6a8fbf9f4f75/46b54a9f-8e66-4dff-867b-16488838b70a.docx",
+      "uploads/eff9031fc507494ab3da6a8fbf9f4f75/623554c1-4d14-4f01-aed0-7fdc488fad2d.docx",
+      "uploads/eff9031fc507494ab3da6a8fbf9f4f75/74317f02-9c25-46a1-be3a-2a05ea273272.docx"
+    ],
+    "copied_llm_selected_paths": [
+      "塑壳领料单_20260704.xlsx",
+      "uploads/eff9031fc507494ab3da6a8fbf9f4f75/46b54a9f-8e66-4dff-867b-16488838b70a.docx",
+      "uploads/eff9031fc507494ab3da6a8fbf9f4f75/623554c1-4d14-4f01-aed0-7fdc488fad2d.docx",
+      "uploads/eff9031fc507494ab3da6a8fbf9f4f75/74317f02-9c25-46a1-be3a-2a05ea273272.docx"
+    ],
+    "missing_llm_selected_paths": [],
+    "errors": [
+      {
+        "type": "critical_missing_files",
+        "message": "完成任务所需关键文件缺失",
+        "files": [
+          {
+            "display_name": "塑壳领料群_2026年6月22日(1).docx",
+            "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3e3378a9-5506-4c88-8a91-dbc12d88aa5c.docx",
+            "error": "完成任务所需关键文件缺失"
+          },
+          {
+            "display_name": "塑壳领料单_20260622更新.xlsx",
+            "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/ae8bb0f8-dff0-47b2-a654-5c446504f5d4.xlsx",
+            "error": "完成任务所需关键文件缺失"
+          }
+        ]
+      }
+    ]
+  },
+  "errors": [
+    {
+      "type": "critical_missing_files",
+      "message": "完成任务所需关键文件缺失",
+      "files": [
+        {
+          "display_name": "塑壳领料群_2026年6月22日(1).docx",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/3e3378a9-5506-4c88-8a91-dbc12d88aa5c.docx",
+          "error": "完成任务所需关键文件缺失"
+        },
+        {
+          "display_name": "塑壳领料单_20260622更新.xlsx",
+          "source_path": "/home/work/dumate/eff9031fc507494ab3da6a8fbf9f4f75/workspace/uploads/eff9031fc507494ab3da6a8fbf9f4f75/ae8bb0f8-dff0-47b2-a654-5c446504f5d4.xlsx",
+          "error": "完成任务所需关键文件缺失"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+checks:
+  - id: output_file_exists
+    description: 输出的更新后表格必须存在于指定路径
+    type: evaluate_file_exist
+    weight: 0.2
+    args: {"file": "run_outputs/lingliao/塑壳领料单_20260704.xlsx"}
+  - id: output_file_valid_xlsx
+    description: 输出文件必须是可被 openpyxl 正常打开的有效 xlsx
+    type: evaluate_file_format_valid
+    weight: 0.2
+    args: {"file": "run_outputs/lingliao/塑壳领料单_20260704.xlsx", "doc_type": "xlsx"}
+  - id: sheet_exists
+    description: 输出工作簿必须包含名为 塑壳领料单 的工作表
+    type: evaluate_excel_sheet_exists
+    weight: 0.2
+    args: {"file": "run_outputs/lingliao/塑壳领料单_20260704.xlsx", "required_sheets": ["塑壳领料单"]}
+  - id: contains_supplement_orders
+    description: 表格中应包含补录的连号单据 846266、846267、846268 及物料编码 PB0033D05000600JA
+    type: evaluate_contain
+    weight: 0.2
+    args: {"file": "run_outputs/lingliao/塑壳领料单_20260704.xlsx", "doc_type": "xlsx", "keywords": ["846266", "846267", "846268", "PB0033D05000600JA"]}
+  - id: no_mo_prefix
+    description: 表格中不得残留 Mo/MO 单号前缀
+    type: evaluate_not_contain
+    weight: 0.2
+    args: {"file": "run_outputs/lingliao/塑壳领料单_20260704.xlsx", "doc_type": "xlsx", "keywords": ["MO", "Mo"]}

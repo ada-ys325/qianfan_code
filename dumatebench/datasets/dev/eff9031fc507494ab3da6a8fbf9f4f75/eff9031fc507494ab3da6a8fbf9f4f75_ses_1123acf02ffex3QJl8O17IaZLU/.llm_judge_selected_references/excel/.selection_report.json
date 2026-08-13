@@ -1,0 +1,171 @@
+{
+  "status": "selected",
+  "selected": true,
+  "files": [
+    {
+      "path": "history_agent_files/塑壳领料单_20260704.xlsx",
+      "score": 175,
+      "selected": true,
+      "reasons": [
+        "file name appears in instruction",
+        "file stem appears in instruction",
+        "file stem matches normalized output stem"
+      ]
+    },
+    {
+      "path": "history_agent_files/update_0707.py",
+      "score": 0,
+      "selected": false,
+      "reasons": [
+        "no explicit instruction match"
+      ]
+    },
+    {
+      "path": "history_agent_files/塑壳领料单_20260624.xlsx",
+      "score": 0,
+      "selected": false,
+      "reasons": [
+        "no explicit instruction match"
+      ]
+    },
+    {
+      "path": "uploads/塑壳领料单_20260623正式.xlsx",
+      "score": 0,
+      "selected": false,
+      "reasons": [
+        "no explicit instruction match"
+      ]
+    },
+    {
+      "path": "uploads/塑壳领料单_20260703半 (3).xlsx",
+      "score": 0,
+      "selected": false,
+      "reasons": [
+        "no explicit instruction match"
+      ]
+    },
+    {
+      "path": "uploads/塑壳领料单_20260706-.xlsx",
+      "score": 0,
+      "selected": false,
+      "reasons": [
+        "no explicit instruction match"
+      ]
+    },
+    {
+      "path": "uploads/塑壳领料群_2026年6月23日(1).docx",
+      "score": 0,
+      "selected": false,
+      "reasons": [
+        "no explicit instruction match"
+      ]
+    },
+    {
+      "path": "uploads/塑壳领料群_2026年6月23日.docx",
+      "score": 0,
+      "selected": false,
+      "reasons": [
+        "no explicit instruction match"
+      ]
+    },
+    {
+      "path": "uploads/塑壳领料群_2026年6月24日(1).docx",
+      "score": 0,
+      "selected": false,
+      "reasons": [
+        "no explicit instruction match"
+      ]
+    },
+    {
+      "path": "uploads/塑壳领料群_2026年6月24日.docx",
+      "score": 0,
+      "selected": false,
+      "reasons": [
+        "no explicit instruction match"
+      ]
+    },
+    {
+      "path": "uploads/塑壳领料群_2026年6月25日(1).docx",
+      "score": 0,
+      "selected": false,
+      "reasons": [
+        "no explicit instruction match"
+      ]
+    },
+    {
+      "path": "uploads/塑壳领料群_2026年6月25日.docx",
+      "score": 0,
+      "selected": false,
+      "reasons": [
+        "no explicit instruction match"
+      ]
+    },
+    {
+      "path": "uploads/塑壳领料群_2026年6月26日.docx",
+      "score": 0,
+      "selected": false,
+      "reasons": [
+        "no explicit instruction match"
+      ]
+    },
+    {
+      "path": "uploads/塑壳领料群_2026年6月27日(1).docx",
+      "score": 0,
+      "selected": false,
+      "reasons": [
+        "no explicit instruction match"
+      ]
+    },
+    {
+      "path": "uploads/塑壳领料群_2026年6月27日(2).docx",
+      "score": 0,
+      "selected": false,
+      "reasons": [
+        "no explicit instruction match"
+      ]
+    },
+    {
+      "path": "uploads/塑壳领料群_2026年6月28日.docx",
+      "score": 0,
+      "selected": false,
+      "reasons": [
+        "no explicit instruction match"
+      ]
+    },
+    {
+      "path": "uploads/塑壳领料群_2026年7月2日(1).docx",
+      "score": 0,
+      "selected": false,
+      "reasons": [
+        "no explicit instruction match"
+      ]
+    },
+    {
+      "path": "uploads/塑壳领料群_2026年7月2日(2).docx",
+      "score": 0,
+      "selected": false,
+      "reasons": [
+        "no explicit instruction match"
+      ]
+    },
+    {
+      "path": "uploads/塑壳领料群_2026年7月2日.docx",
+      "score": 0,
+      "selected": false,
+      "reasons": [
+        "no explicit instruction match"
+      ]
+    },
+    {
+      "path": "uploads/塑壳领料群_2026年7月4日(1).docx",
+      "score": 0,
+      "selected": false,
+      "reasons": [
+        "no explicit instruction match"
+      ]
+    }
+  ],
+  "candidate_count": 34,
+  "max_files": 20,
+  "context_source": "instruction.md"
+}

@@ -1,0 +1,20 @@
+services:
+  task:
+    build:
+      context: /Users/niuzechun/Documents/DuMateBench/dumatebench
+      dockerfile: datasets/dev/24d6778af4354ccbbd19ee5a5e529beb_ses_124aedee2ffeZgWPdornLUhXG6/.batch_runtime/smoke/environment/Dockerfile
+      args:
+        DUMATE_BASE_IMAGE: ${DUMATE_BASE_IMAGE:-python:3.12-slim}
+        DUMATE_APT_DEBIAN_MIRROR: ${DUMATE_APT_DEBIAN_MIRROR:-}
+        DUMATE_APT_SECURITY_MIRROR: ${DUMATE_APT_SECURITY_MIRROR:-}
+    image: dumatebench-batch-24d6778af4354ccbbd19ee5a5e529beb_ses_124aedee2ffezgwpdornluhxg6:latest
+    working_dir: /workspace
+    environment:
+      DUMATE_TASK_SEED: "20260706"
+      DUMATE_NETWORK_FAULT_CONFIG: "/opt/dumate/network_faults.yaml"
+      DUMATE_TOOL_FAULT_CONFIG: "/opt/dumate/tool_faults.yaml"
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - /Users/niuzechun/Documents/DuMateBench/dumatebench/datasets/dev/24d6778af4354ccbbd19ee5a5e529beb_ses_124aedee2ffeZgWPdornLUhXG6/run_outputs:/outputs
+      - /Users/niuzechun/Documents/DuMateBench/dumatebench/datasets/dev/24d6778af4354ccbbd19ee5a5e529beb_ses_124aedee2ffeZgWPdornLUhXG6/run_logs:/logs

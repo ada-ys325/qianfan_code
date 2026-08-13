@@ -1,0 +1,8 @@
+.DS_Store
+
+# 压缩包
+*.tar.gz
+*.tar.gz.bak
+
+# 大型数据集
+final_dataset_clean/

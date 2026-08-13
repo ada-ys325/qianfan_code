@@ -1,0 +1,20 @@
+checks:
+  - id: calendar_exists
+    type: file_exists
+    path: run_outputs/calendar/Alice.ics
+    weight: 0.40
+  - id: api_failure_observed
+    type: log_contains
+    path: run_logs/tool_faults.jsonl
+    value: tool": "tesseract", "fault_injected": true
+    weight: 0.20
+  - id: network_stack_fault_observed
+    type: log_contains
+    path: run_logs/network_faults.jsonl
+    value: event": "apply
+    weight: 0.20
+  - id: calendar_wrapper_recovered
+    type: log_contains
+    path: run_logs/tool_faults.jsonl
+    value: tool": "calendar_write", "fault_injected": true
+    weight: 0.20

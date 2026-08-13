@@ -1,0 +1,26 @@
+checks:
+  - id: image_exists
+    description: 生成的草原同框图片文件存在
+    type: evaluate_file_exist
+    weight: 0.2
+    args: {"file": "run_outputs/images/five_girls_meadow.png"}
+  - id: prompt_exists
+    description: 提示词文本文件存在
+    type: evaluate_file_exist
+    weight: 0.15
+    args: {"file": "run_outputs/images/prompt.txt"}
+  - id: prompt_format_valid
+    description: 提示词文本文件格式可正常读取
+    type: evaluate_file_format_valid
+    weight: 0.15
+    args: {"file": "run_outputs/images/prompt.txt", "doc_type": "txt"}
+  - id: prompt_contains_characters
+    description: 提示词中包含五位角色名称
+    type: evaluate_contain
+    weight: 0.3
+    args: {"file": "run_outputs/images/prompt.txt", "doc_type": "txt", "keywords": ["芙宁娜", "玛拉妮", "香菱", "哥伦比娅", "桑多涅"]}
+  - id: prompt_contains_scene
+    description: 提示词中包含横版2D草地、天空草地分界、2D漫画风格等场景要素
+    type: evaluate_contain
+    weight: 0.2
+    args: {"file": "run_outputs/images/prompt.txt", "doc_type": "txt", "keywords": ["草地", "2D", "分界"]}

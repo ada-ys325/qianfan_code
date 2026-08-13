@@ -1,0 +1,27 @@
+services:
+  task:
+    build:
+      context: /data/sx/dumatebench/datasets/dev/runs/react-gpt-4o-20260726-040502-2608081/0057af0fca834096ad826de3076075dd__0057af0fca834096ad826de3076075dd_ses_131e73059ffeakkonjojzfxco/.batch_runtime/smoke
+      dockerfile: environment/Dockerfile
+      args:
+        DUMATE_BASE_IMAGE: ${DUMATE_BASE_IMAGE:-python:3.12-slim}
+        DUMATE_APT_DEBIAN_MIRROR: ${DUMATE_APT_DEBIAN_MIRROR:-}
+        DUMATE_APT_SECURITY_MIRROR: ${DUMATE_APT_SECURITY_MIRROR:-}
+        DUMATE_AGENT_BACKEND: ${DUMATE_AGENT_BACKEND:-react}
+        DUMATE_CLAUDE_CODE_VERSION: ${DUMATE_CLAUDE_CODE_VERSION:-stable}
+        DUMATE_CODEX_VERSION: ${DUMATE_CODEX_VERSION:-latest}
+    image: dumatebench-batch-0057af0fca834096ad826de3076075dd_ses_131e73059ffeakkonjojzfxcoy:latest
+    cpus: "2"
+    mem_limit: 4096m
+    labels:
+      dumatebench.storage_mb: "12000"
+    working_dir: /workspace
+    environment:
+      DUMATE_TASK_SEED: "20260706"
+      DUMATE_NETWORK_FAULT_CONFIG: "/opt/dumate/network_faults.yaml"
+      DUMATE_TOOL_FAULT_CONFIG: "/opt/dumate/tool_faults.yaml"
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - /data/sx/dumatebench/datasets/dev/runs/react-gpt-4o-20260726-040502-2608081/0057af0fca834096ad826de3076075dd__0057af0fca834096ad826de3076075dd_ses_131e73059ffeakkonjojzfxco/run_outputs:/outputs
+      - /data/sx/dumatebench/datasets/dev/runs/react-gpt-4o-20260726-040502-2608081/0057af0fca834096ad826de3076075dd__0057af0fca834096ad826de3076075dd_ses_131e73059ffeakkonjojzfxco/run_logs:/logs

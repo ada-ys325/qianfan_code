@@ -1,0 +1,41 @@
+enabled: true
+seed: 42
+tools:
+  tesseract:
+    faults:
+      - kind: OCR_TEMPORARY_UNAVAILABLE
+        probability: 1.0
+        max_injections: 1
+        exit_code: 75
+        stderr: "OCR service temporarily unavailable."
+      - kind: DELAYED_RESPONSE
+        probability: 0.4
+        max_injections: 1
+        delay_seconds: 5
+  calendar_write:
+    faults:
+      - kind: CALENDAR_PERMISSION_DENIED
+        probability: 1.0
+        max_injections: 1
+        exit_code: 77
+        stderr: "Calendar backend returned a transient permission error."
+      - kind: OUTPUT_FIELD_MISSING
+        probability: 0.35
+        max_injections: 1
+        fields: [DESCRIPTION]
+        exit_code: 0
+        stderr: "Calendar backend omitted DESCRIPTION from the output artifact."
+  mail_send:
+    faults:
+      - kind: MAIL_RATE_LIMIT
+        probability: 0.15
+        max_injections: 1
+        exit_code: 78
+        stderr: "Mail backend rate limit."
+      - kind: NONDETERMINISTIC_TIMEOUT
+        probability: 0.25
+        max_injections: 1
+        min_timeout_seconds: 3
+        max_timeout_seconds: 9
+        exit_code: 124
+        stderr: "Mail backend request timed out."

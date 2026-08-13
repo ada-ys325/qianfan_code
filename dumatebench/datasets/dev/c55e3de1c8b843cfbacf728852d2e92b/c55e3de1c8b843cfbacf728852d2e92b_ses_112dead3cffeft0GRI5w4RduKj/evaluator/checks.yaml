@@ -1,0 +1,21 @@
+checks:
+  - id: pdf_exists
+    description: 最终PDF简历文件存在
+    type: evaluate_file_exist
+    weight: 0.2
+    args: {"file": "run_outputs/resume/覃广燕_简历.pdf"}
+  - id: pdf_format_valid
+    description: PDF文件格式有效可读取
+    type: evaluate_file_format_valid
+    weight: 0.2
+    args: {"file": "run_outputs/resume/覃广燕_简历.pdf", "doc_type": "pdf"}
+  - id: pdf_contains_core_info
+    description: PDF包含姓名与联系电话等核心信息
+    type: evaluate_contain
+    weight: 0.3
+    args: {"file": "run_outputs/resume/覃广燕_简历.pdf", "doc_type": "pdf", "keywords": ["覃广燕", "***"]}
+  - id: pdf_contains_core_info
+    description: PDF包含核心信息
+    type: evaluate_contain
+    weight: 0.3
+    args: {"file": "run_outputs/resume/覃广燕_简历.pdf", "doc_type": "pdf", "keywords": ["国家开放大学", "高州市永盛幼儿园"]}

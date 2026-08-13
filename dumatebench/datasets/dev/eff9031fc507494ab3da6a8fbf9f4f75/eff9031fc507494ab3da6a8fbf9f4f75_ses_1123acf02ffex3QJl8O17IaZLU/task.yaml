@@ -1,0 +1,32 @@
+schema_version: 0.1
+task_id: eff9031fc507494ab3da6a8fbf9f4f75_ses_1123acf02ffex3QJl8O17IaZLU
+task_name: 塑壳领料单纠错与补单更新
+split: dev
+difficulty: unreviewed
+tags:
+  - read_docx
+  - read_excel
+  - edit_excel
+  - code_writing
+agent:
+  timeout_sec: 900
+  user: agent
+  workdir: /workspace
+  direct_shell: true
+  runtime: in_container
+environment:
+  backend: docker-compose
+  dockerfile: environment/Dockerfile
+  compose_file: environment/docker-compose.yaml
+  cpus: 2
+  memory_mb: 4096
+  storage_mb: 12000
+  allow_internet: true
+  allow_package_install: true
+evaluation:
+  entrypoint: evaluator/evaluator.py
+  checks_file: evaluator/checks.yaml
+  hidden_tests: false
+  metrics:
+    - complete_pass
+    - partial_pass
