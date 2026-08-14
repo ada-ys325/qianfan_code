@@ -1,8 +1,12 @@
 name: Submission Check
 
-# This workflow runs trusted code from the base branch. It downloads files
-# added by the PR through the GitHub API as data and never checks out or runs
-# code supplied by the PR author.
+# This workflow is deliberately pull_request_target: it runs the validator
+# checked into the base branch and reads the PR manifest through the GitHub API
+# as data. It never checks out or executes code from the contributor branch.
+#
+# The Harbor job is checked first, then copied into a leaderboard-owned Harbor
+# job. The copied job is checked again and placed in a bot-owned PR. A human
+# review of that bot PR is the final merge gate.
 on:
   pull_request_target:
     types: [opened, synchronize, reopened]
@@ -17,9 +21,18 @@ permissions:
   contents: read
   pull-requests: read
 
+env:
+  DUMATEBENCH_HARBOR_DATASET: ${{ vars.DUMATEBENCH_HARBOR_DATASET }}
+  DUMATEBENCH_HARBOR_DATASET_REF: ${{ vars.DUMATEBENCH_HARBOR_DATASET_REF }}
+  DUMATEBENCH_EXPECTED_TASK_COUNT: ${{ vars.DUMATEBENCH_EXPECTED_TASK_COUNT || '200' }}
+  DUMATEBENCH_MIN_TRIALS_PER_TASK: ${{ vars.DUMATEBENCH_MIN_TRIALS_PER_TASK || '1' }}
+
 jobs:
-  validate:
+  verify:
     runs-on: ubuntu-latest
+    outputs:
+      found: ${{ steps.fetch.outputs.found }}
+      path: ${{ steps.fetch.outputs.path }}
     env:
       PR_NUMBER: ${{ github.event.pull_request.number }}
       PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
@@ -35,76 +48,164 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install validator dependency
-        run: python -m pip install --disable-pip-version-check PyYAML
+      - name: Install trusted verifier dependencies
+        run: |
+          python -m pip install --disable-pip-version-check -e dumatebench_cli
+          python -m pip install --disable-pip-version-check PyYAML
+          python -m pip install --disable-pip-version-check -r leaderboard/ci/requirements.txt
 
-      - name: Fetch the added submission as data
+      - name: Fetch one newly added submission manifest as data
+        id: fetch
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           mapfile -t added < <(
             gh api --paginate "repos/$REPOSITORY/pulls/$PR_NUMBER/files" \
-              --jq '.[] | select(.status == "added") | .filename'
+              --jq '.[] | select(.status == "added") | .filename | select(startswith("submissions/"))'
           )
 
-          manifests=()
-          roots=()
-          for path in "${added[@]}"; do
-            if [[ "$path" =~ ^submissions/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+\.json$ ]]; then
-              manifests+=("$path")
-            elif [[ "$path" =~ ^submissions/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+/ ]]; then
-              root=$(sed -E 's#^(submissions/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+)/.*#\1#' <<< "$path")
-              roots+=("$root")
-            fi
-          done
-
-          if [[ "${#manifests[@]}" -gt 0 ]]; then
-            if [[ "${#manifests[@]}" -ne 1 || "${#roots[@]}" -ne 0 ]]; then
-              echo "A PR must add exactly one submission manifest or one bundle."
-              exit 1
-            fi
-            mkdir -p "$RUNNER_TEMP/submission"
-            gh api "repos/$REPOSITORY/contents/${manifests[0]}?ref=$PR_HEAD_SHA" \
-              -H 'Accept: application/vnd.github.raw' > "$RUNNER_TEMP/submission.json"
-            echo "SUBMISSION_FOUND=true" >> "$GITHUB_ENV"
-            echo "SUBMISSION_PATH=$RUNNER_TEMP/submission.json" >> "$GITHUB_ENV"
-            echo "Fetched ${manifests[0]}"
+          # Match Terminal-Bench's intake semantics: maintenance edits to
+          # existing submission records do not trigger Harbor promotion.
+          if [[ "${#added[@]}" -eq 0 ]]; then
+            echo "No newly added submission manifest; validation and promotion are skipped."
+            echo "found=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          if [[ "${#roots[@]}" -eq 0 ]]; then
-            echo "No new submission bundle was added; nothing to validate."
-            exit 0
-          fi
-          mapfile -t roots < <(printf '%s\n' "${roots[@]}" | sort -u)
-          if [[ "${#roots[@]}" -ne 1 ]]; then
-            printf 'A PR must add exactly one submission bundle, found:\n%s\n' "${roots[*]}"
+          if [[ "${#added[@]}" -ne 1 ]]; then
+            printf 'A submission PR must add exactly one manifest. Added submission files:\n%s\n' "${added[*]}"
             exit 1
           fi
 
-          root="${roots[0]}"
-          mkdir -p "$RUNNER_TEMP/submission"
-          for path in "${added[@]}"; do
-            [[ "$path" == "$root/"* ]] || continue
-            relative="${path#"$root/"}"
-            [[ "$relative" != */../* && "$relative" != ../* ]] || {
-              echo "Unsafe submission path: $path"; exit 1; }
-            destination="$RUNNER_TEMP/submission/$relative"
-            mkdir -p "$(dirname "$destination")"
-            gh api "repos/$REPOSITORY/contents/$path?ref=$PR_HEAD_SHA" \
-              -H 'Accept: application/vnd.github.raw' > "$destination"
-          done
+          path="${added[0]}"
+          [[ "$path" =~ ^submissions/dumatebench/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+__[A-Za-z0-9._-]+\.json$ ]] || {
+            echo "Invalid submission path: $path"; exit 1; }
 
-          echo "SUBMISSION_FOUND=true" >> "$GITHUB_ENV"
-          echo "SUBMISSION_PATH=$RUNNER_TEMP/submission" >> "$GITHUB_ENV"
-          echo "Fetched $root"
+          mkdir -p "$RUNNER_TEMP/dumatebench-submission"
+          gh api "repos/$REPOSITORY/contents/$path?ref=$PR_HEAD_SHA" \
+            -H 'Accept: application/vnd.github.raw' > "$RUNNER_TEMP/dumatebench-submission/submission.json"
+          echo "found=true" >> "$GITHUB_OUTPUT"
+          echo "path=$path" >> "$GITHUB_OUTPUT"
+          echo "SUBMISSION_PATH=$RUNNER_TEMP/dumatebench-submission/submission.json" >> "$GITHUB_ENV"
+          echo "Fetched $path from PR head $PR_HEAD_SHA as data."
 
-      - name: Validate submission
+      - name: Verify the source Harbor job
         env:
-          PYTHONPATH: dumatebench_cli
+          HARBOR_API_KEY: ${{ secrets.HARBOR_API_KEY }}
         run: |
-          if [[ "${SUBMISSION_FOUND:-false}" != "true" ]]; then
-            echo "No new submission manifest or bundle; structural check skipped."
-            exit 0
+          set -euo pipefail
+          : "${HARBOR_API_KEY:?Set the HARBOR_API_KEY Actions secret}"
+          : "${DUMATEBENCH_HARBOR_DATASET:?Set repository variable DUMATEBENCH_HARBOR_DATASET}"
+          : "${DUMATEBENCH_HARBOR_DATASET_REF:?Set repository variable DUMATEBENCH_HARBOR_DATASET_REF}"
+          python leaderboard/ci/harbor_verify.py "$SUBMISSION_PATH" \
+            --dataset "$DUMATEBENCH_HARBOR_DATASET" \
+            --dataset-ref "$DUMATEBENCH_HARBOR_DATASET_REF" \
+            --expected-task-count "$DUMATEBENCH_EXPECTED_TASK_COUNT" \
+            --min-trials-per-task "$DUMATEBENCH_MIN_TRIALS_PER_TASK" \
+            --report "$RUNNER_TEMP/source-verification.json"
+
+  promote:
+    needs: verify
+    if: >
+      success() &&
+      needs.verify.outputs.found == 'true' &&
+      !startsWith(github.event.pull_request.head.ref, 'submission/pr-')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      REPOSITORY: ${{ github.repository }}
+      SUBMISSION_PATH: ${{ needs.verify.outputs.path }}
+      BOT_BRANCH: submission/pr-${{ github.event.pull_request.number }}
+    steps:
+      - name: Check out trusted base-branch code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Check promotion idempotency
+        id: guard
+        run: |
+          set -euo pipefail
+          existing=$(gh pr list --head "$BOT_BRANCH" --state all --json number --jq length)
+          if [[ "$existing" -gt 0 ]]; then
+            echo "fresh=false" >> "$GITHUB_OUTPUT"
+            echo "A bot PR for $BOT_BRANCH already exists; no second snapshot will be created."
+          else
+            echo "fresh=true" >> "$GITHUB_OUTPUT"
           fi
-          python leaderboard/ci/validate_submission.py "$SUBMISSION_PATH"
+
+      - name: Set up Python
+        if: steps.guard.outputs.fresh == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install trusted verifier dependencies
+        if: steps.guard.outputs.fresh == 'true'
+        run: |
+          python -m pip install --disable-pip-version-check -e dumatebench_cli
+          python -m pip install --disable-pip-version-check PyYAML
+          python -m pip install --disable-pip-version-check -r leaderboard/ci/requirements.txt
+
+      - name: Fetch the source manifest as data
+        if: steps.guard.outputs.fresh == 'true'
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/dumatebench-submission"
+          gh api "repos/$REPOSITORY/contents/$SUBMISSION_PATH?ref=$PR_HEAD_SHA" \
+            -H 'Accept: application/vnd.github.raw' > "$RUNNER_TEMP/dumatebench-submission/source.json"
+
+      - name: Clone the Harbor job into a leaderboard-owned snapshot
+        if: steps.guard.outputs.fresh == 'true'
+        env:
+          HARBOR_API_KEY: ${{ secrets.HARBOR_API_KEY }}
+        run: |
+          set -euo pipefail
+          : "${HARBOR_API_KEY:?Set the HARBOR_API_KEY Actions secret}"
+          python leaderboard/ci/clone_harbor_job.py \
+            "$RUNNER_TEMP/dumatebench-submission/source.json" \
+            --name-prefix "lb-pr-$PR_NUMBER" \
+            --output "$RUNNER_TEMP/dumatebench-submission/promoted.json"
+
+      - name: Re-verify the leaderboard-owned Harbor snapshot
+        if: steps.guard.outputs.fresh == 'true'
+        env:
+          HARBOR_API_KEY: ${{ secrets.HARBOR_API_KEY }}
+        run: |
+          set -euo pipefail
+          : "${HARBOR_API_KEY:?Set the HARBOR_API_KEY Actions secret}"
+          python leaderboard/ci/harbor_verify.py \
+            "$RUNNER_TEMP/dumatebench-submission/promoted.json" \
+            --dataset "$DUMATEBENCH_HARBOR_DATASET" \
+            --dataset-ref "$DUMATEBENCH_HARBOR_DATASET_REF" \
+            --expected-task-count "$DUMATEBENCH_EXPECTED_TASK_COUNT" \
+            --min-trials-per-task "$DUMATEBENCH_MIN_TRIALS_PER_TASK" \
+            --clone-prefix "lb-pr-$PR_NUMBER" \
+            --write-verification
+
+      - name: Open bot PR with the verified snapshot
+        if: steps.guard.outputs.fresh == 'true'
+        env:
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BOT_BRANCH"
+          mkdir -p "$(dirname "$SUBMISSION_PATH")"
+          cp "$RUNNER_TEMP/dumatebench-submission/promoted.json" "$SUBMISSION_PATH"
+          git add -- "$SUBMISSION_PATH"
+          git commit -m "Promote DuMateBench submission from #$PR_NUMBER" \
+            -m "Co-authored-by: $AUTHOR"
+          git push --force origin "$BOT_BRANCH"
+          url=$(gh pr create \
+            --base main \
+            --head "$BOT_BRANCH" \
+            --title "Promoted DuMateBench submission from #$PR_NUMBER" \
+            --body "Harbor job was verified, cloned into a leaderboard-owned snapshot, and re-verified. Maintainer review is required before merge.")
+          gh pr close "$PR_NUMBER" --comment "Promoted to $url after Harbor verification. Review and merge the bot PR; this intake PR remains closed."

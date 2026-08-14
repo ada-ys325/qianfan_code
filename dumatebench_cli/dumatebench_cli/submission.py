@@ -139,8 +139,8 @@ def validate_submission(bundle_dir: Path) -> list[str]:
 
     This check proves that a submission is complete and internally consistent.
     It deliberately does not trust the copied reward values as an official
-    score. A future Harbor-backed checker must fetch the original trials and
-    recompute metrics from that external source.
+    score. The trusted GitHub workflow fetches the original Harbor trials and
+    recomputes the official DuMateBench metrics from that external source.
     """
     errors: list[str] = []
     bundle_dir = bundle_dir.resolve()
@@ -298,7 +298,10 @@ def validate_submission_manifest(manifest_path: Path) -> list[str]:
     if not isinstance(value, dict):
         return ["Submission manifest must contain an object"]
 
-    allowed = {"schema_version", "harbor_job_id", "metadata"}
+    allowed = {"schema_version", "harbor_job_id", "metadata", "verification"}
+    forbidden = {"score", "accuracy", "metrics", "final_score"} & set(value)
+    if forbidden:
+        errors.append(f"Submission manifest must not claim results: {sorted(forbidden)}")
     unknown = set(value) - allowed
     if unknown:
         errors.append(f"Submission manifest has unknown fields: {sorted(unknown)}")
@@ -314,7 +317,7 @@ def validate_submission_manifest(manifest_path: Path) -> list[str]:
         forbidden = {"score", "accuracy", "metrics", "final_score"} & set(metadata)
         if forbidden:
             errors.append(f"Submission manifest metadata must not claim results: {sorted(forbidden)}")
-    forbidden = {"score", "accuracy", "metrics", "final_score"} & set(value)
-    if forbidden:
-        errors.append(f"Submission manifest must not claim results: {sorted(forbidden)}")
+    verification = value.get("verification")
+    if verification is not None and not isinstance(verification, dict):
+        errors.append("Submission manifest verification must be an object")
     return errors

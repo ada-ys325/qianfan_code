@@ -1,9 +1,8 @@
-"""Trusted GitHub CI entry point for the file-based submission intake.
+"""Trusted local entry point for DuMateBench submission structure checks.
 
-The workflow checks out this script from the base branch and supplies a
-submission directory fetched from the PR as data. This command validates file
-completeness only; Harbor-backed authenticity and score recomputation are the
-next phase of the leaderboard implementation.
+The formal Harbor manifest is verified by ``harbor_verify.py`` in the GitHub
+workflow. This command remains useful for checking a local evidence bundle
+before it is uploaded or attached for manual review.
 """
 
 from __future__ import annotations
@@ -35,7 +34,7 @@ def main() -> int:
 
     if args.submission.is_file():
         print(f"{description} validation passed.")
-        print("Harbor fetch and score recomputation are the next verification step.")
+        print("Run leaderboard/ci/harbor_verify.py in trusted CI for Harbor verification.")
     else:
         summary_path = args.submission / "batch_summary.jsonl"
         records = [json.loads(line) for line in summary_path.read_text(encoding="utf-8").splitlines() if line.strip()]

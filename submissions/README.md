@@ -16,8 +16,18 @@ The minimum manifest is:
 }
 ```
 
-Do not add `score`, `accuracy`, or `metrics`. CI will fetch the real trials from
-Harbor and recompute the official metrics in the next verification phase.
+Do not add `score`, `accuracy`, `metrics`, or `verification`. CI runs the
+trusted verifier from the base branch, fetches the job and its trials from
+Harbor, checks the configured canonical dataset revision and task digests, and
+recomputes DuMateBench's `complete_pass`/`partial_pass` from Harbor verifier
+results. When LLM-judge fields are present, it also recomputes and checks
+`final_score` using DuMateBench's 30% complete + 30% partial + 40% judge formula.
 
-The older local evidence bundle from `dumate submission pack` is accepted under
-the corresponding directory layout while the intake format is being migrated.
+After the source job passes, CI copies it into a leaderboard-owned Harbor job,
+re-checks the copy, and opens a bot PR. The bot PR is the record that a
+maintainer reviews and merges. A source job ID by itself is not accepted as
+proof unless the Harbor API checks pass.
+
+The local evidence bundle from `dumate submission pack` is useful for debugging
+and manual review, but it is not an official score source. Official submission
+verification uses Harbor rather than copied `reward.json` files.

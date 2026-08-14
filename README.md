@@ -351,11 +351,20 @@ submissions/dumatebench/<version>/<agent>__<model>.json
 ```
 
 Then create a branch in your fork and open a pull request to this repository's
-`main` branch. A pull request is a reviewable request to merge this new result
-record; it does not require changing the benchmark code. GitHub Actions checks
-the added manifest automatically. It rejects claimed scores. Official score
-verification will fetch the uploaded Harbor trials and recompute metrics
-independently.
+`main` branch. A pull request is a reviewable request to add this result record;
+it does not require changing the benchmark code. GitHub Actions checks the
+manifest using trusted code from the base branch, fetches the real job from
+Harbor, verifies the canonical dataset revision and task digests, and computes
+DuMateBench's `complete_pass`/`partial_pass` summary from Harbor's verifier
+results. If the run includes DuMateBench's LLM-judge fields, CI also recomputes
+and checks `final_score`. It rejects claimed scores and copied local results.
+
+When the source job passes, CI creates a leaderboard-owned Harbor snapshot and
+opens a bot PR containing that verified snapshot. Maintainers review and merge
+the bot PR; the original intake PR is closed. Configure the repository's
+`HARBOR_API_KEY` Actions secret and the canonical dataset variables described
+in [`leaderboard/README.md`](leaderboard/README.md) before accepting
+submissions.
 
 ## License
 
