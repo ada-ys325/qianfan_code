@@ -179,9 +179,9 @@ def submission_pack(
             fg=typer.colors.YELLOW,
         )
     typer.echo(
-        "\nNext steps: fork the leaderboard repo, copy this directory under "
+        "\nNext steps: fork this repository, copy this directory under "
         "submissions/dumatebench/<version>/<agent>__<model>/, and open a PR. "
-        "The leaderboard repo's bot will re-run these same checks on your PR."
+        "The repository CI will re-run these same structural checks on your PR."
     )
 
 

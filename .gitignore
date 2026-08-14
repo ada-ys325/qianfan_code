@@ -1,5 +1,10 @@
 .DS_Store
 
+# Python build and test artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
 # 压缩包
 *.tar.gz
 *.tar.gz.bak

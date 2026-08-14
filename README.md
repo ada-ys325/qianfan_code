@@ -19,7 +19,8 @@ Evaluation captures the final artifact, execution logs, step count, and reward
 details.
 
 This repository contains the evaluation framework, a command-line harness, and
-local task datasets.
+development task datasets. The full benchmark dataset is distributed
+separately and is intentionally not committed here.
 
 ## Repository layout
 
@@ -28,9 +29,16 @@ local task datasets.
 | [`dumatebench/`](dumatebench/) | Core benchmark framework, task runners, evaluators, agent contracts, and example tasks |
 | [`dumatebench_cli/`](dumatebench_cli/) | The `dumate` CLI for running an agent against one task or a batch of tasks |
 | [`dumatebench/datasets/dev/`](dumatebench/datasets/dev/) | Development and smoke-test task packages |
-| [`final_dataset_clean/`](final_dataset_clean/) | Cleaned task dataset and task-level input/reference files |
 | [`dumatebench/scripts/`](dumatebench/scripts/) | Batch runners, smoke-test scripts, and evaluation utilities |
 | [`dumatebench/agents/`](dumatebench/agents/) | Agent adapter contract and example agents |
+| [`.github/workflows/`](.github/workflows/) | Automated code and submission checks |
+| [`leaderboard/`](leaderboard/) | Submission intake and CI validation logic |
+| [`submissions/`](submissions/) | Pull-request Harbor job manifests and local evidence bundles |
+
+The complete `final_dataset_clean/` data is raw benchmark material and is not
+included in this repository. CI uses the checked-in development tasks for
+lightweight tests; official score verification will use the canonical dataset
+reference and uploaded Harbor trials.
 
 Each runnable task is self-contained. A typical task package looks like:
 
@@ -328,9 +336,26 @@ Validate the bundle before sharing it:
 dumate submission check /absolute/path/to/submission
 ```
 
-The bundle records run metadata and task results. Follow the target
-leaderboard's submission layout and validation requirements when opening a
-submission or pull request.
+The bundle records run metadata and task results for local evidence. The formal
+PR submission is a small manifest containing the Harbor job ID:
+
+```text
+submissions/dumatebench/<version>/<agent>__<model>.json
+```
+
+```json
+{
+  "schema_version": 1,
+  "harbor_job_id": "job-12345678"
+}
+```
+
+Then create a branch in your fork and open a pull request to this repository's
+`main` branch. A pull request is a reviewable request to merge this new result
+record; it does not require changing the benchmark code. GitHub Actions checks
+the added manifest automatically. It rejects claimed scores. Official score
+verification will fetch the uploaded Harbor trials and recompute metrics
+independently.
 
 ## License
 

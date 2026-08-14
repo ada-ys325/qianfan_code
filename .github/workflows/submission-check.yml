@@ -1,0 +1,110 @@
+name: Submission Check
+
+# This workflow runs trusted code from the base branch. It downloads files
+# added by the PR through the GitHub API as data and never checks out or runs
+# code supplied by the PR author.
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "submissions/**"
+
+concurrency:
+  group: submission-check-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      REPOSITORY: ${{ github.repository }}
+    steps:
+      - name: Check out trusted base-branch code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install validator dependency
+        run: python -m pip install --disable-pip-version-check PyYAML
+
+      - name: Fetch the added submission as data
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mapfile -t added < <(
+            gh api --paginate "repos/$REPOSITORY/pulls/$PR_NUMBER/files" \
+              --jq '.[] | select(.status == "added") | .filename'
+          )
+
+          manifests=()
+          roots=()
+          for path in "${added[@]}"; do
+            if [[ "$path" =~ ^submissions/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+\.json$ ]]; then
+              manifests+=("$path")
+            elif [[ "$path" =~ ^submissions/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+/ ]]; then
+              root=$(sed -E 's#^(submissions/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+)/.*#\1#' <<< "$path")
+              roots+=("$root")
+            fi
+          done
+
+          if [[ "${#manifests[@]}" -gt 0 ]]; then
+            if [[ "${#manifests[@]}" -ne 1 || "${#roots[@]}" -ne 0 ]]; then
+              echo "A PR must add exactly one submission manifest or one bundle."
+              exit 1
+            fi
+            mkdir -p "$RUNNER_TEMP/submission"
+            gh api "repos/$REPOSITORY/contents/${manifests[0]}?ref=$PR_HEAD_SHA" \
+              -H 'Accept: application/vnd.github.raw' > "$RUNNER_TEMP/submission.json"
+            echo "SUBMISSION_FOUND=true" >> "$GITHUB_ENV"
+            echo "SUBMISSION_PATH=$RUNNER_TEMP/submission.json" >> "$GITHUB_ENV"
+            echo "Fetched ${manifests[0]}"
+            exit 0
+          fi
+          if [[ "${#roots[@]}" -eq 0 ]]; then
+            echo "No new submission bundle was added; nothing to validate."
+            exit 0
+          fi
+          mapfile -t roots < <(printf '%s\n' "${roots[@]}" | sort -u)
+          if [[ "${#roots[@]}" -ne 1 ]]; then
+            printf 'A PR must add exactly one submission bundle, found:\n%s\n' "${roots[*]}"
+            exit 1
+          fi
+
+          root="${roots[0]}"
+          mkdir -p "$RUNNER_TEMP/submission"
+          for path in "${added[@]}"; do
+            [[ "$path" == "$root/"* ]] || continue
+            relative="${path#"$root/"}"
+            [[ "$relative" != */../* && "$relative" != ../* ]] || {
+              echo "Unsafe submission path: $path"; exit 1; }
+            destination="$RUNNER_TEMP/submission/$relative"
+            mkdir -p "$(dirname "$destination")"
+            gh api "repos/$REPOSITORY/contents/$path?ref=$PR_HEAD_SHA" \
+              -H 'Accept: application/vnd.github.raw' > "$destination"
+          done
+
+          echo "SUBMISSION_FOUND=true" >> "$GITHUB_ENV"
+          echo "SUBMISSION_PATH=$RUNNER_TEMP/submission" >> "$GITHUB_ENV"
+          echo "Fetched $root"
+
+      - name: Validate submission
+        env:
+          PYTHONPATH: dumatebench_cli
+        run: |
+          if [[ "${SUBMISSION_FOUND:-false}" != "true" ]]; then
+            echo "No new submission manifest or bundle; structural check skipped."
+            exit 0
+          fi
+          python leaderboard/ci/validate_submission.py "$SUBMISSION_PATH"

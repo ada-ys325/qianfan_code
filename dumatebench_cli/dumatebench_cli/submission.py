@@ -12,6 +12,7 @@ construction identical to what the player already ran locally.
 from __future__ import annotations
 
 import json
+import re
 import shutil
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -22,6 +23,7 @@ import yaml
 
 RUN_OUTPUT_FILES = ("reward.json",)
 RUN_LOG_FILES = ("agent_status.json", "agent_adapter.jsonl", "compose.log")
+MANIFEST_JOB_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{7,255}$")
 
 
 class SubmissionError(RuntimeError):
@@ -84,7 +86,7 @@ def pack_submission(
     the summary itself can't be read or is empty — missing per-task artifacts are
     reported as warnings on the returned PackResult rather than aborting, since a
     partially-successful batch (e.g. one task errored) is still packable and the
-    real gatekeeping happens in the leaderboard repo's validate_submission.py.
+    repository CI performs the final intake check.
     """
     summary_path = summary_path.resolve()
     if not summary_path.exists():
@@ -133,25 +135,49 @@ def pack_submission(
 
 
 def validate_submission(bundle_dir: Path) -> list[str]:
-    """Run the same basic completeness checks the leaderboard repo's bot will run.
+    """Validate the untrusted, file-based submission intake format.
 
-    Returns a list of error strings; empty list means the bundle is well-formed
-    enough to submit (does not verify trajectory authenticity — that is the
-    human-review step described in the plan, not something checkable offline).
+    This check proves that a submission is complete and internally consistent.
+    It deliberately does not trust the copied reward values as an official
+    score. A future Harbor-backed checker must fetch the original trials and
+    recompute metrics from that external source.
     """
     errors: list[str] = []
     bundle_dir = bundle_dir.resolve()
+
+    if not bundle_dir.is_dir():
+        return [f"Submission directory does not exist: {bundle_dir}"]
+
+    task_id_pattern = re.compile(r"^[A-Za-z0-9._-]+$")
+
+    for path in bundle_dir.rglob("*"):
+        if path.is_symlink():
+            errors.append(f"Symlinks are not allowed: {path.relative_to(bundle_dir)}")
+
+    allowed_root_files = {"metadata.yaml", "batch_summary.jsonl", "config.json"}
+    for path in bundle_dir.iterdir():
+        if path.is_file() and path.name not in allowed_root_files:
+            errors.append(f"Unexpected file at submission root: {path.name}")
 
     metadata_path = bundle_dir / "metadata.yaml"
     if not metadata_path.exists():
         errors.append("Missing metadata.yaml")
     else:
-        metadata = yaml.safe_load(metadata_path.read_text()) or {}
+        try:
+            metadata = yaml.safe_load(metadata_path.read_text(encoding="utf-8")) or {}
+        except (OSError, yaml.YAMLError) as exc:
+            metadata = {}
+            errors.append(f"metadata.yaml is not valid YAML: {exc}")
+        if not isinstance(metadata, dict):
+            metadata = {}
+            errors.append("metadata.yaml must contain a mapping")
         for field_name in ("agent_display_name", "agent_org_display_name"):
             if not metadata.get(field_name):
                 errors.append(f"metadata.yaml missing required field: {field_name}")
         models = metadata.get("models") or []
-        if not models or not models[0].get("model_name"):
+        if not isinstance(models, list) or not models or not isinstance(models[0], dict):
+            errors.append("metadata.yaml missing required field: models[0].model_name")
+        elif not models[0].get("model_name") or not models[0].get("model_provider"):
             errors.append("metadata.yaml missing required field: models[0].model_name")
 
     summary_path = bundle_dir / "batch_summary.jsonl"
@@ -159,21 +185,136 @@ def validate_submission(bundle_dir: Path) -> list[str]:
         errors.append("Missing batch_summary.jsonl")
         return errors
 
-    records = _read_jsonl(summary_path)
-    task_ids = {r.get("task_id") for r in records if r.get("task_id")}
-    task_dirs = {p.name for p in bundle_dir.iterdir() if p.is_dir()}
-    missing_dirs = task_ids - task_dirs
-    if missing_dirs:
-        errors.append(f"batch_summary.jsonl references tasks with no submission directory: {sorted(missing_dirs)}")
+    try:
+        records = _read_jsonl(summary_path)
+    except (OSError, json.JSONDecodeError) as exc:
+        return [*errors, f"batch_summary.jsonl is not valid JSONL: {exc}"]
+    if not records:
+        errors.append("batch_summary.jsonl is empty")
+        return errors
 
-    for task_id in task_ids & task_dirs:
+    task_ids: list[str] = []
+    for line_number, record in enumerate(records, start=1):
+        if not isinstance(record, dict):
+            errors.append(f"batch_summary.jsonl line {line_number}: record must be an object")
+            continue
+        task_id = record.get("task_id")
+        if not isinstance(task_id, str) or not task_id_pattern.fullmatch(task_id):
+            errors.append(f"batch_summary.jsonl line {line_number}: invalid task_id")
+            continue
+        task_ids.append(task_id)
+        if record.get("status") not in {"completed", "ok"}:
+            errors.append(f"{task_id}: run status must be completed, got {record.get('status')!r}")
+        if record.get("evaluator_returncode") not in {None, 0}:
+            errors.append(f"{task_id}: evaluator_returncode must be 0")
+
+    if len(task_ids) != len(set(task_ids)):
+        errors.append("batch_summary.jsonl contains duplicate task_id values")
+
+    task_id_set = set(task_ids)
+    task_dirs = {
+        p.name for p in bundle_dir.iterdir()
+        if p.is_dir() and not p.name.startswith(".")
+    }
+    missing_dirs = task_id_set - task_dirs
+    if missing_dirs:
+        errors.append(
+            "batch_summary.jsonl references tasks with no submission directory: "
+            f"{sorted(missing_dirs)}"
+        )
+    extra_dirs = task_dirs - task_id_set
+    if extra_dirs:
+        errors.append(f"Submission contains task directories not listed in summary: {sorted(extra_dirs)}")
+
+    for task_id in task_id_set & task_dirs:
         task_dir = bundle_dir / task_id
-        if not (task_dir / "reward.json").exists():
+        reward_path = task_dir / "reward.json"
+        if not reward_path.exists():
             errors.append(f"{task_id}: missing reward.json")
+        else:
+            try:
+                reward = json.loads(reward_path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError) as exc:
+                errors.append(f"{task_id}: reward.json is not valid JSON: {exc}")
+            else:
+                if not isinstance(reward, dict):
+                    errors.append(f"{task_id}: reward.json must contain an object")
+                elif reward.get("task_id") != task_id:
+                    errors.append(f"{task_id}: reward.json task_id does not match directory")
+                else:
+                    for score_field in ("complete_pass", "partial_pass"):
+                        value = reward.get(score_field)
+                        if not isinstance(value, (int, float)) or not 0 <= float(value) <= 1:
+                            errors.append(f"{task_id}: reward.json has invalid {score_field}")
         adapter_log = task_dir / "agent_adapter.jsonl"
         if not adapter_log.exists():
             errors.append(f"{task_id}: missing agent_adapter.jsonl (trajectory evidence)")
-        elif not adapter_log.read_text().strip():
-            errors.append(f"{task_id}: agent_adapter.jsonl is empty")
+        else:
+            try:
+                if not adapter_log.read_text(encoding="utf-8").strip():
+                    errors.append(f"{task_id}: agent_adapter.jsonl is empty")
+            except OSError as exc:
+                errors.append(f"{task_id}: cannot read agent_adapter.jsonl: {exc}")
 
+    config_path = bundle_dir / "config.json"
+    if config_path.exists():
+        try:
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            errors.append(f"config.json is not valid JSON: {exc}")
+        else:
+            if not isinstance(config, dict):
+                errors.append("config.json must contain an object")
+            else:
+                forbidden = {"score", "accuracy", "metrics"} & set(config)
+                if forbidden:
+                    errors.append(
+                        "config.json must not contain claimed results: "
+                        f"{sorted(forbidden)}"
+                    )
+                for field_name in ("max_steps", "concurrency"):
+                    if field_name in config and (
+                        not isinstance(config[field_name], int) or config[field_name] <= 0
+                    ):
+                        errors.append(f"config.json {field_name} must be a positive integer")
+
+    return errors
+
+
+def validate_submission_manifest(manifest_path: Path) -> list[str]:
+    """Validate the small, Harbor-backed manifest used by formal PR intake.
+
+    The manifest identifies the external run whose trials CI will fetch. It
+    contains no score field because scores must be recomputed from Harbor.
+    """
+    errors: list[str] = []
+    manifest_path = manifest_path.resolve()
+    if not manifest_path.is_file():
+        return [f"Submission manifest does not exist: {manifest_path}"]
+    try:
+        value = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return [f"Submission manifest is not valid JSON: {exc}"]
+    if not isinstance(value, dict):
+        return ["Submission manifest must contain an object"]
+
+    allowed = {"schema_version", "harbor_job_id", "metadata"}
+    unknown = set(value) - allowed
+    if unknown:
+        errors.append(f"Submission manifest has unknown fields: {sorted(unknown)}")
+    if value.get("schema_version") != 1:
+        errors.append("Submission manifest schema_version must be 1")
+    job_id = value.get("harbor_job_id")
+    if not isinstance(job_id, str) or not MANIFEST_JOB_ID.fullmatch(job_id):
+        errors.append("Submission manifest harbor_job_id must be a non-empty Harbor job ID or URL")
+    metadata = value.get("metadata", {})
+    if not isinstance(metadata, dict):
+        errors.append("Submission manifest metadata must be an object")
+    else:
+        forbidden = {"score", "accuracy", "metrics", "final_score"} & set(metadata)
+        if forbidden:
+            errors.append(f"Submission manifest metadata must not claim results: {sorted(forbidden)}")
+    forbidden = {"score", "accuracy", "metrics", "final_score"} & set(value)
+    if forbidden:
+        errors.append(f"Submission manifest must not claim results: {sorted(forbidden)}")
     return errors
