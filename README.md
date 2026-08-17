@@ -55,10 +55,34 @@ task/
 └── run_logs/                   # Generated execution logs
 ```
 
+## How a run works
+
+DuMateBench separates the component being evaluated from the component that
+controls the evaluation:
+
+```text
+agent -> one JSON action -> runner -> command in Docker
+  ^                                      |
+  |------------ observation ------------|
+
+agent finishes -> task evaluator -> reward.json
+```
+
+- The **agent** decides the next action. It may be backed by an LLM, a local
+  program, or a deterministic script.
+- The **runner** starts the task container, enforces step and timeout limits,
+  executes one agent command at a time, and records the trajectory.
+- **Docker** is the isolated command-execution environment. It contains the
+  seeded workspace, task tools, and fault-injection wrappers, but normally not
+  the agent's LLM.
+- The **evaluator** runs after the agent stops and checks the artifact and task
+  logs. Runner completion alone does not mean that the task passed.
+
 ## Quick start
 
-The fastest way to verify the local installation is to run the bundled smoke
-task with the example echo agent.
+Use the following checks in order. The first check is deterministic and is the
+recommended way to establish that a new installation works before connecting
+an LLM or custom agent.
 
 ### Prerequisites
 
@@ -87,7 +111,45 @@ dumate --help
 docker compose version
 ```
 
-### Run the smoke task
+### 1. Run the deterministic smoke test
+
+This test does not require an API key or call an LLM:
+
+```bash
+bash dumatebench/scripts/run_odyssey_2_12_smoke.sh
+```
+
+The script builds the smoke image, runs a fixed agent script in Docker,
+exercises the OCR, calendar, network, and tool-fault paths, writes a calendar
+artifact, and runs the task evaluator. It replaces the contents of this
+task's `run_outputs/` and `run_logs/` on every run.
+
+A successful run ends with a reward containing:
+
+```json
+{
+  "complete_pass": 1,
+  "partial_pass": 1.0,
+  "environment_recovery": 1,
+  "network_recovery": 1
+}
+```
+
+Inspect the generated artifact and full result:
+
+```bash
+ls -l dumatebench/datasets/dev/odyssey_2_12_smoke/run_outputs/calendar/Alice.ics
+cat dumatebench/datasets/dev/odyssey_2_12_smoke/run_outputs/reward.json
+```
+
+The expected messages `OCR service temporarily unavailable` and
+`Calendar backend returned a transient permission error` are injected faults,
+not installation failures. The fixed smoke agent retries them deliberately.
+
+### 2. Verify the CLI agent protocol
+
+The example echo agent verifies the `dumate` runner and stdin/stdout adapter
+contract:
 
 ```bash
 dumate run \
@@ -96,13 +158,45 @@ dumate run \
   --max-steps 3
 ```
 
-The smoke task builds a local Docker image, starts the task environment, drives
-the adapter for up to three steps, and runs the evaluator. A deterministic
-environment-only smoke test is also available:
+The echo agent lists the workspace once and then stops. It intentionally does
+not create the requested calendar, so the evaluator is expected to report a
+non-passing reward. Use this command to test protocol wiring, not benchmark
+quality. This run also replaces the smoke task's previous `run_outputs/` and
+`run_logs/`.
+
+### 3. Run the smoke task with an OpenAI-compatible LLM
+
+This repository also includes a command-agent integration test. It calls an
+OpenAI-compatible Chat Completions endpoint from the task container:
 
 ```bash
-bash dumatebench/scripts/run_odyssey_2_12_smoke.sh
+export OPENAI_API_KEY="..."
+export OPENAI_BASE_URL="https://your-provider.example/v1"
+export DUMATE_MODEL="your-model-id"
+
+# Required when OPENAI_BASE_URL is not already trusted by the script.
+export DUMATE_TRUSTED_BASE_URLS="$OPENAI_BASE_URL"
+
+bash dumatebench/scripts/run_odyssey_2_12_agent.sh --max-steps 20
 ```
+
+Do not commit API keys or place them in task files. The selected endpoint and
+model must support `temperature: 0`, OpenAI JSON-object response format, and
+the one-action-per-response contract below. API-compatible model names do not
+guarantee these behaviors; a provider may reject the request or return several
+concatenated JSON objects.
+
+After the run, inspect both agent completion and evaluator success:
+
+```bash
+cat dumatebench/datasets/dev/odyssey_2_12_smoke/run_logs/agent_status.json
+cat dumatebench/datasets/dev/odyssey_2_12_smoke/run_outputs/reward.json
+```
+
+A successful agent process is not sufficient. Treat the task as passed only
+when `evaluator_returncode` is `0` and `reward.json` reports
+`"complete_pass": 1`. Reaching `--max-steps`, returning `finish: true`, or
+producing a plausible artifact can still result in a partial or failed score.
 
 ## Setup details
 
@@ -158,6 +252,19 @@ bash dumatebench/scripts/run_odyssey_2_12_smoke.sh
 
 ## Usage
 
+Use `dumate run` for an actual agent evaluation. A runnable task directory must
+contain at least `task.yaml`, `instruction.md`, `environment/`, and
+`evaluator/`; raw task material without an environment is not directly
+runnable by the public CLI. Validate a task package before a long run:
+
+```bash
+dumate package check /absolute/path/to/task
+```
+
+The development tasks in this repository are suitable for local integration
+tests. The canonical full dataset used for official scoring is distributed and
+verified separately; local development rewards are not leaderboard results.
+
 ### Discover tasks
 
 List task directories that the CLI can run:
@@ -181,6 +288,11 @@ dumate run \
   --max-steps 20 \
   --adapter-timeout 180
 ```
+
+The command named by `--agent` runs on the host and is invoked once per step.
+It receives the current state on stdin and returns one action on stdout. The
+runner, not the agent process, executes that action inside the task container.
+See the protocol section below before connecting an LLM-backed adapter.
 
 Useful options include:
 
@@ -311,6 +423,34 @@ Task-specific evaluators write their result to:
 Depending on the task, the reward may include complete-pass and partial-pass
 scores together with the result of each check. Logs and intermediate artifacts
 are kept in `run_logs/` and `run_outputs/` for debugging and analysis.
+
+Use the evaluator result as the source of truth:
+
+```text
+run_logs/agent_status.json       Agent stop reason, steps, and evaluator return code
+run_logs/agent_adapter.jsonl     CLI action/observation trajectory
+run_logs/compose.log             Task-container logs
+run_outputs/reward.json          Evaluator checks and task score
+```
+
+`status: "completed"` in a CLI summary means that orchestration completed
+without an exception. It does not mean that the evaluator passed. Likewise,
+`agent_finished: true` only means that the agent returned `finish: true`.
+For a complete local pass, require both:
+
+```text
+evaluator_returncode == 0
+reward.json: complete_pass == 1
+```
+
+Common non-passing outcomes are:
+
+| Symptom | Meaning |
+|---------|---------|
+| `JSONDecodeError: Extra data` | The adapter returned multiple top-level JSON actions in one response |
+| `Unsupported value: temperature` | The selected API model does not accept the command agent's request parameters |
+| `reached max steps` | The agent never returned `finish: true` within the configured budget |
+| `partial_pass < 1.0` | The artifact or one or more required recovery behaviors failed an evaluator check |
 
 For lower-level environment details, including workspace initialization,
 Docker Compose mounts, tool wrappers, and fault injection, see
