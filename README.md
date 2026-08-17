@@ -18,6 +18,9 @@ OCR, calendars, web references, and unreliable tools or network conditions.
 Evaluation captures the final artifact, execution logs, step count, and reward
 details.
 
+The full task dataset is available on Hugging Face:
+[DuMateBench Dataset](https://huggingface.co/datasets/Annihi/dumate_bench).
+
 This repository contains the evaluation framework, a command-line harness, and
 development task datasets. The full benchmark dataset is distributed
 separately and is intentionally not committed here.
@@ -36,9 +39,11 @@ separately and is intentionally not committed here.
 | [`submissions/`](submissions/) | Pull-request Harbor job manifests and local evidence bundles |
 
 The complete `final_dataset_clean/` data is raw benchmark material and is not
-included in this repository. CI uses the checked-in development tasks for
-lightweight tests; official score verification will use the canonical dataset
-reference and uploaded Harbor trials.
+included in this repository. It is available from the
+[DuMateBench Dataset on Hugging Face](https://huggingface.co/datasets/Annihi/dumate_bench).
+CI uses the checked-in development tasks for lightweight tests; official score
+verification will use the canonical dataset reference and uploaded Harbor
+trials.
 
 Each runnable task is self-contained. A typical task package looks like:
 
