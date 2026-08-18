@@ -12,9 +12,17 @@ from typing import Optional
 
 import typer
 
+from dumatebench_cli.harbor_export import HarborExportError, export_batch, export_task
 from dumatebench_cli.packager import CheckResult, check_task_dir
 from dumatebench_cli.runner import default_run_id, discover_tasks, run_batch, run_single_task
-from dumatebench_cli.submission import SubmissionError, pack_submission, validate_submission
+from dumatebench_cli.submission import (
+    SubmissionError,
+    pack_submission,
+    pack_submission_from_harbor_job,
+    validate_submission,
+    validate_submission_manifest,
+)
+from dumatebench_cli.template import TemplateFillError, fill_batch, fill_task
 
 app = typer.Typer(
     name="dumate",
@@ -24,9 +32,13 @@ app = typer.Typer(
 datasets_app = typer.Typer(help="Inspect local task datasets.")
 package_app = typer.Typer(help="Task package authoring checks (for task authors).")
 submission_app = typer.Typer(help="Package a completed run for leaderboard submission.")
+harbor_app = typer.Typer(help="Export dumatebench task directories into Harbor task.toml packages.")
+template_app = typer.Typer(help="Fill a task's missing environment/ from a template task (task authors).")
 app.add_typer(datasets_app, name="datasets")
 app.add_typer(package_app, name="package")
 app.add_typer(submission_app, name="submission")
+app.add_typer(harbor_app, name="harbor")
+app.add_typer(template_app, name="template")
 
 
 @app.command()
@@ -197,6 +209,158 @@ def submission_check(
     for error in errors:
         typer.secho(f"FAIL {error}", fg=typer.colors.RED)
     raise typer.Exit(code=1)
+
+
+@submission_app.command("from-harbor-job")
+def submission_from_harbor_job(
+    job_dir: Path = typer.Option(
+        ..., "--job-dir", help="Harbor job directory produced by `harbor run --jobs-dir ...`."
+    ),
+    out: Path = typer.Option(..., "--out", help="Path to write the submission manifest JSON file (must not exist)."),
+    agent_name: str = typer.Option(..., "--agent-name", help="Display name of your agent/scaffold."),
+    agent_org: str = typer.Option(..., "--agent-org", help="Organization or individual submitting the run."),
+    model_name: str = typer.Option(..., "--model-name", help="Model identifier used by the agent."),
+    model_provider: str = typer.Option(..., "--model-provider", help="Model provider (e.g. openai, anthropic)."),
+    agent_repo: Optional[str] = typer.Option(None, "--agent-repo", help="Optional URL to the agent's source repo."),
+    agent_docs: Optional[str] = typer.Option(None, "--agent-docs", help="Optional URL to the agent's docs."),
+) -> None:
+    """Point a submission at a real `harbor run` job instead of packing local reward files.
+
+    Records only the Harbor job id and which dumatebench task_ids it covers.
+    No score is written here -- the leaderboard CI fetches this same Harbor
+    job independently and recomputes the official metrics from it.
+    """
+    try:
+        result = pack_submission_from_harbor_job(
+            job_dir=job_dir,
+            out_path=out,
+            agent_name=agent_name,
+            agent_org=agent_org,
+            model_name=model_name,
+            model_provider=model_provider,
+            agent_repo=agent_repo,
+            agent_docs=agent_docs,
+        )
+    except SubmissionError as exc:
+        typer.secho(str(exc), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2)
+
+    for warning in result.warnings:
+        typer.secho(f"WARN {warning}", fg=typer.colors.YELLOW)
+    typer.secho(
+        f"Wrote manifest for {result.task_count} task(s) to {result.manifest_path}", fg=typer.colors.GREEN
+    )
+    typer.echo(
+        "\nNext steps: fork this repository, copy this manifest under "
+        "submissions/dumatebench/<version>/<agent>__<model>.json, and open a PR. "
+        "CI will fetch the referenced Harbor job and recompute the official score from it."
+    )
+
+
+@submission_app.command("check-manifest")
+def submission_check_manifest(
+    manifest: Path = typer.Argument(..., help="Submission manifest JSON file produced by `dumate submission from-harbor-job`."),
+) -> None:
+    """Validate a Harbor-job-pointer submission manifest before opening a PR."""
+    errors = validate_submission_manifest(manifest)
+    if not errors:
+        typer.secho("OK   Submission manifest looks complete.", fg=typer.colors.GREEN)
+        raise typer.Exit(code=0)
+    for error in errors:
+        typer.secho(f"FAIL {error}", fg=typer.colors.RED)
+    raise typer.Exit(code=1)
+
+
+@harbor_app.command("export")
+def harbor_export(
+    task: Optional[Path] = typer.Option(None, "--task", "-t", help="Path to a single task directory to export."),
+    dataset: Optional[Path] = typer.Option(
+        None, "--dataset", "-d", help="Path to a directory containing many task directories."
+    ),
+    output: Path = typer.Option(..., "--output", "-o", help="Output directory (single task) or output root (batch)."),
+    task_glob: str = typer.Option("*", "--task-glob", help="Glob used when --dataset is a directory of tasks."),
+    overwrite: bool = typer.Option(False, "--overwrite", help="Overwrite existing output directories."),
+) -> None:
+    """Generate Harbor task.toml + tests/test.sh for one task (--task) or a batch (--dataset)."""
+    target = task or dataset
+    if target is None:
+        typer.secho("Provide --task <dir> or --dataset <dir>.", fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2)
+    target = target.resolve()
+    if not target.exists():
+        typer.secho(f"Path does not exist: {target}", fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2)
+
+    try:
+        if task is not None:
+            results = [export_task(target, output.resolve(), overwrite=overwrite)]
+        else:
+            results = export_batch(target, output.resolve(), task_glob=task_glob, overwrite=overwrite)
+    except HarborExportError as exc:
+        typer.secho(str(exc), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2)
+
+    for result in results:
+        typer.secho(f"OK   {result.task_id} -> {result.output_dir}", fg=typer.colors.GREEN)
+        for warning in result.warnings:
+            typer.secho(f"WARN {warning}", fg=typer.colors.YELLOW)
+    total_warnings = sum(len(r.warnings) for r in results)
+    typer.echo(f"Exported {len(results)} task(s), {total_warnings} warning(s).")
+    raise typer.Exit(code=0)
+
+
+@template_app.command("fill")
+def template_fill(
+    task: Optional[Path] = typer.Option(None, "--task", "-t", help="Path to a single task directory to fill."),
+    dataset: Optional[Path] = typer.Option(
+        None, "--dataset", "-d", help="Path to a directory containing many task directories."
+    ),
+    template: Path = typer.Option(
+        ..., "--template", help="Template task directory whose environment/ and fault configs are reused."
+    ),
+    task_glob: str = typer.Option("*", "--task-glob", help="Glob used when --dataset is a directory of tasks."),
+    overwrite: bool = typer.Option(False, "--overwrite", help="Overwrite an existing environment/ if present."),
+    reuse_template_setup: bool = typer.Option(
+        False, "--reuse-template-setup", help="Keep the template's own setup.sh verbatim instead of a generic one."
+    ),
+) -> None:
+    """Fill a task's (or a batch of tasks') missing environment/ from a template task."""
+    target = task or dataset
+    if target is None:
+        typer.secho("Provide --task <dir> or --dataset <dir>.", fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2)
+    target = target.resolve()
+    if not target.exists():
+        typer.secho(f"Path does not exist: {target}", fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2)
+
+    try:
+        if task is not None:
+            results = [
+                fill_task(target, template.resolve(), overwrite=overwrite, reuse_template_setup=reuse_template_setup)
+            ]
+        else:
+            results = fill_batch(
+                target,
+                template.resolve(),
+                task_glob=task_glob,
+                overwrite=overwrite,
+                reuse_template_setup=reuse_template_setup,
+            )
+    except TemplateFillError as exc:
+        typer.secho(str(exc), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2)
+
+    for result in results:
+        color = typer.colors.GREEN if result.filled else typer.colors.YELLOW
+        label = "OK  " if result.filled else "SKIP"
+        typer.secho(f"{label} {result.task_id}", fg=color)
+        for warning in result.warnings:
+            typer.secho(f"WARN {warning}", fg=typer.colors.YELLOW)
+    filled_count = sum(1 for r in results if r.filled)
+    total_warnings = sum(len(r.warnings) for r in results)
+    typer.echo(f"Filled {filled_count}/{len(results)} task(s), {total_warnings} warning(s).")
+    raise typer.Exit(code=0)
 
 
 if __name__ == "__main__":

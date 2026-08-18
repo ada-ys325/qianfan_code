@@ -13,7 +13,6 @@ from urllib.parse import urlparse
 from pathlib import Path
 
 
-DEFAULT_TASK = Path(__file__).resolve().parents[1] / "datasets" / "dev" / "odyssey_2_12_smoke"
 MAX_OBS_CHARS = 6000
 DEFAULT_TRUSTED_BASE_URLS = {
     "https://api.openai.com/v1",
@@ -286,7 +285,7 @@ def write_log(log_path, record):
 
 def main():
     parser = argparse.ArgumentParser(description="Run a DuMateBench task with an OdysseyBench-style command agent.")
-    parser.add_argument("--task-dir", type=Path, default=DEFAULT_TASK)
+    parser.add_argument("--task-dir", type=Path, required=True)
     parser.add_argument("--model", default=os.environ.get("DUMATE_MODEL", "gpt-4o"))
     parser.add_argument("--max-steps", type=int, default=20)
     parser.add_argument("--keep-containers", action="store_true")

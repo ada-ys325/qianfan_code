@@ -22,7 +22,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from dumatebench_cli.adapter import compose_cmd, reset_dir, run_adapter_loop
+from dumatebench_cli.adapter import compose_cmd, compose_service, reset_dir, run_adapter_loop
 
 TASK_MARKER_FILES = ("task.yaml", "instruction.md")
 
@@ -113,7 +113,7 @@ def run_single_task(
         _run(compose_cmd(task_dir) + ["down", "--remove-orphans"], cwd=task_dir, check=False)
         if not no_build:
             _run(compose_cmd(task_dir) + ["build"], cwd=task_dir, capture=False)
-        _run(compose_cmd(task_dir) + ["up", "-d", "task"], cwd=task_dir, capture=False)
+        _run(compose_cmd(task_dir) + ["up", "-d", compose_service(task_dir)], cwd=task_dir, capture=False)
 
         result = run_adapter_loop(
             task_dir=task_dir,

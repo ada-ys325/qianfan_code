@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Any
 
 
-DEFAULT_TASK = Path(__file__).resolve().parents[1] / "datasets" / "dev" / "odyssey_2_12_smoke"
 MAX_OBS_CHARS = 6000
 AGENT_PATH = "/opt/dumate/wrappers:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
@@ -145,7 +144,7 @@ def build_state(task_dir: Path, step: int, max_steps: int, history: list[dict[st
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run a DuMateBench task with an external agent adapter.")
-    parser.add_argument("--task-dir", type=Path, default=DEFAULT_TASK)
+    parser.add_argument("--task-dir", type=Path, required=True)
     parser.add_argument("--agent-cmd", required=True, help="Command that reads adapter JSON from stdin and writes action JSON to stdout.")
     parser.add_argument("--max-steps", type=int, default=20)
     parser.add_argument("--adapter-timeout", type=int, default=180)

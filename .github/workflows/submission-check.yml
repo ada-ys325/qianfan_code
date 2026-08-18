@@ -25,7 +25,7 @@ env:
   DUMATEBENCH_HARBOR_DATASET: ${{ vars.DUMATEBENCH_HARBOR_DATASET }}
   DUMATEBENCH_HARBOR_DATASET_REF: ${{ vars.DUMATEBENCH_HARBOR_DATASET_REF }}
   DUMATEBENCH_EXPECTED_TASK_COUNT: ${{ vars.DUMATEBENCH_EXPECTED_TASK_COUNT || '200' }}
-  DUMATEBENCH_MIN_TRIALS_PER_TASK: ${{ vars.DUMATEBENCH_MIN_TRIALS_PER_TASK || '1' }}
+  DUMATEBENCH_MIN_TRIALS_PER_TASK: ${{ vars.DUMATEBENCH_MIN_TRIALS_PER_TASK || '5' }}
 
 jobs:
   verify:
@@ -90,6 +90,7 @@ jobs:
           echo "Fetched $path from PR head $PR_HEAD_SHA as data."
 
       - name: Verify the source Harbor job
+        if: steps.fetch.outputs.found == 'true'
         env:
           HARBOR_API_KEY: ${{ secrets.HARBOR_API_KEY }}
         run: |

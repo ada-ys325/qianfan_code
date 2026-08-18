@@ -19,6 +19,27 @@ from typing import Any
 
 MAX_OBS_CHARS = 6000
 AGENT_PATH = "/opt/dumate/wrappers:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+MAIN_SERVICE = "main"
+LEGACY_SERVICE = "task"
+
+# Generated fresh into environment/ on every `dumate run` (overwritten each
+# time, never checked in) since template.py no longer emits a task-authored
+# docker-compose.yaml -- see template.py's module docstring. Service name and
+# build context intentionally mirror Harbor's own base compose overlay
+# (`MAIN_SERVICE_NAME = "main"`, context hardcoded to `environment/`) so the
+# same Dockerfile works unmodified under both `dumate run` and `harbor run`.
+_COMPOSE_FILENAME = ".dumate-compose.yaml"
+_COMPOSE_TEMPLATE = """services:
+  {service}:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    init: true
+    command: ["sleep", "infinity"]
+    volumes:
+      - ../run_outputs:/outputs
+      - ../run_logs:/logs
+"""
 
 DEFAULT_SYSTEM_PROMPT = (
     "You are a command-line agent running a DuMateBench task inside Docker. "
@@ -62,8 +83,30 @@ class AdapterRunResult:
         }
 
 
+def compose_service(task_dir: Path) -> str:
+    """Return the service used by the task's Docker Compose definition."""
+    if (task_dir / "environment" / "docker-compose.yaml").is_file():
+        return LEGACY_SERVICE
+    return MAIN_SERVICE
+
+
 def compose_cmd(task_dir: Path) -> list[str]:
-    return ["docker", "compose", "-f", str(task_dir / "environment" / "docker-compose.yaml")]
+    """Return the ``docker compose`` invocation for a task's ``environment/``.
+
+    Writes (or overwrites) a minimal compose file into ``environment/``
+    defining the ``main`` service on every call, since ``template.py`` no
+    longer generates a task-authored ``docker-compose.yaml`` -- the build
+    context for that service is ``environment/`` itself, matching Harbor's
+    own hardcoded ``main``-service context (see ``template.py``'s module
+    docstring).
+    """
+    environment_dir = task_dir / "environment"
+    authored_compose = environment_dir / "docker-compose.yaml"
+    if authored_compose.is_file():
+        return ["docker", "compose", "-f", str(authored_compose)]
+    compose_path = environment_dir / _COMPOSE_FILENAME
+    compose_path.write_text(_COMPOSE_TEMPLATE.format(service=MAIN_SERVICE), encoding="utf-8")
+    return ["docker", "compose", "-f", str(compose_path)]
 
 
 def _run(cmd: list[str], cwd: Path | None = None, check: bool = True, capture: bool = True) -> subprocess.CompletedProcess[str]:
@@ -88,7 +131,7 @@ def exec_in_task(task_dir: Path, command: str) -> dict[str, Any]:
         "-T",
         "--user",
         "agent",
-        "task",
+        compose_service(task_dir),
         "env",
         "HOME=/home/agent",
         f"PATH={AGENT_PATH}",
