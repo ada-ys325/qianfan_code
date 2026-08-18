@@ -31,10 +31,16 @@ jobs:
           PYTHONPATH: dumatebench_cli
         run: python -m unittest discover -s leaderboard/ci -p 'test_*.py'
 
+      - name: Run Harbor integration tests
+        env:
+          PYTHONPATH: dumatebench_cli
+        run: python -m unittest discover -s dumatebench_cli/tests -p 'test_*.py'
+
       - name: Run stable runner and evaluator tests
         env:
           PYTHONPATH: dumatebench_cli
         run: >-
           python -m unittest
           dumatebench.tests.test_adapter_runner
+          dumatebench.tests.test_command_agent
           dumatebench.tests.test_smoke_task_evaluator

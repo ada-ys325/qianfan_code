@@ -1,0 +1,31 @@
+name: Published Leaderboard Check
+
+# leaderboard/published.json is the maintainer-curated allowlist of which
+# already-verified submissions actually appear on the public leaderboard
+# site. Anyone can open a PR touching it (it is an ordinary repo file), so
+# this workflow only checks that the list stays well-formed and every entry
+# still points at a real, Harbor-verified, merged submission manifest. It
+# preserves the repository's existing trust model. Repository branch
+# protection and required reviewers gate changes to this file.
+on:
+  pull_request:
+    paths:
+      - "leaderboard/published.json"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate leaderboard/published.json
+        run: python leaderboard/ci/validate_published.py leaderboard/published.json --repo-root .

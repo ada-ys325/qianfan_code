@@ -24,7 +24,7 @@ jobs:
       PR_NUMBER: ${{ github.event.pull_request.number }}
       PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       REPOSITORY: ${{ github.repository }}
-      CLONE_PREFIX: lb-pr-${{ github.event.pull_request.number }}
+      BOT_BRANCH: ${{ github.event.pull_request.head.ref }}
     steps:
       - name: Check out trusted base-branch code
         uses: actions/checkout@v4
@@ -71,7 +71,8 @@ jobs:
         run: |
           set -euo pipefail
           : "${HARBOR_API_KEY:?Set the HARBOR_API_KEY Actions secret}"
+          origin_pr="${BOT_BRANCH#submission/pr-}"
           python leaderboard/ci/clone_harbor_job.py \
             "$RUNNER_TEMP/promoted.json" \
             --delete \
-            --name-prefix "$CLONE_PREFIX"
+            --name-prefix "lb-pr-$origin_pr"

@@ -1,12 +1,24 @@
-"""Package a completed ``dumate run`` batch into a leaderboard-submission bundle.
+"""Package a completed run into a leaderboard-submission artifact.
 
-The bundle format mirrors what a batch already produces on disk
-(``run_outputs/reward.json``, ``run_logs/agent_status.json``,
-``run_logs/agent_adapter.jsonl``, ``run_logs/compose.log``) plus a
-``batch_summary.<run-id>.jsonl``. This module only rearranges those existing
-files under a fixed directory layout and adds ``metadata.yaml``/``config.json``
-— it does not recompute or touch any scoring output, so a submission is by
-construction identical to what the player already ran locally.
+Two independent submission formats live here, covering two different ways a
+player can produce results:
+
+- ``pack_submission``/``validate_submission``: the full, file-based bundle
+  built from a ``dumate run`` batch's own on-disk artifacts
+  (``run_outputs/reward.json``, ``run_logs/agent_status.json``,
+  ``run_logs/agent_adapter.jsonl``, ``run_logs/compose.log``) plus a
+  ``batch_summary.<run-id>.jsonl``. This format is self-contained and carries
+  its own (untrusted) reward copies as local evidence.
+- ``pack_submission_from_harbor_job``/``validate_submission_manifest``: a
+  small pointer manifest for players who ran their agent through the real
+  ``harbor run`` CLI instead. It records only the Harbor job's id and which
+  dumatebench task_ids it covers -- never a score -- because the trusted
+  GitHub workflow fetches that same Harbor job independently and recomputes
+  the official metrics from it.
+
+Neither path recomputes or trusts any scoring output produced by the player;
+the repository CI is the only source of truth for an accepted submission's
+score.
 """
 
 from __future__ import annotations
@@ -24,6 +36,7 @@ import yaml
 RUN_OUTPUT_FILES = ("reward.json",)
 RUN_LOG_FILES = ("agent_status.json", "agent_adapter.jsonl", "compose.log")
 MANIFEST_JOB_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{7,255}$")
+HARBOR_TASK_NAME_PREFIX = "dumate/"
 
 
 class SubmissionError(RuntimeError):
@@ -33,6 +46,13 @@ class SubmissionError(RuntimeError):
 @dataclass
 class PackResult:
     out_dir: Path
+    task_count: int
+    warnings: list[str] = field(default_factory=list)
+
+
+@dataclass
+class ManifestResult:
+    manifest_path: Path
     task_count: int
     warnings: list[str] = field(default_factory=list)
 
@@ -321,3 +341,107 @@ def validate_submission_manifest(manifest_path: Path) -> list[str]:
     if verification is not None and not isinstance(verification, dict):
         errors.append("Submission manifest verification must be an object")
     return errors
+
+
+def _trial_dirs(job_dir: Path) -> list[Path]:
+    return sorted(
+        p for p in job_dir.iterdir()
+        if p.is_dir() and (p / "result.json").is_file()
+    )
+
+
+def _dumate_task_id(task_name: Any) -> str | None:
+    if not isinstance(task_name, str) or not task_name.startswith(HARBOR_TASK_NAME_PREFIX):
+        return None
+    return task_name[len(HARBOR_TASK_NAME_PREFIX):]
+
+
+def pack_submission_from_harbor_job(
+    job_dir: Path,
+    out_path: Path,
+    agent_name: str,
+    agent_org: str,
+    model_name: str,
+    model_provider: str,
+    agent_repo: str | None = None,
+    agent_docs: str | None = None,
+) -> ManifestResult:
+    """Build a Harbor-job-pointer submission manifest from a real ``harbor run`` job directory.
+
+    Unlike ``pack_submission``, this never copies or re-derives reward/score
+    values from the job's trials -- it only records the job's identity
+    (``harbor_job_id``) and which dumatebench task_ids it covers, exactly the
+    manifest shape ``validate_submission_manifest`` checks. The trusted
+    GitHub workflow is expected to fetch the same Harbor job independently
+    and recompute scores from it, so this function deliberately does not
+    read any ``verifier_result``/reward field out of the trials.
+    """
+    job_dir = job_dir.resolve()
+    if not job_dir.is_dir():
+        raise SubmissionError(f"Harbor job directory does not exist: {job_dir}")
+
+    result_path = job_dir / "result.json"
+    if not result_path.is_file():
+        raise SubmissionError(f"Not a Harbor job directory (missing result.json): {job_dir}")
+    try:
+        job_result = json.loads(result_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise SubmissionError(f"{result_path}: not valid JSON: {exc}") from exc
+
+    job_id = job_result.get("id")
+    if not isinstance(job_id, str) or not job_id:
+        raise SubmissionError(f"{result_path}: missing job id")
+
+    warnings: list[str] = []
+    task_ids: list[str] = []
+    for trial_dir in _trial_dirs(job_dir):
+        try:
+            trial_result = json.loads((trial_dir / "result.json").read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            warnings.append(f"{trial_dir.name}: result.json not valid JSON: {exc}")
+            continue
+        task_id = _dumate_task_id(trial_result.get("task_name"))
+        if task_id is None:
+            warnings.append(
+                f"{trial_dir.name}: task_name {trial_result.get('task_name')!r} "
+                f"is not a dumatebench task (expected {HARBOR_TASK_NAME_PREFIX!r} prefix), skipping"
+            )
+            continue
+        if trial_result.get("exception_info") is not None:
+            warnings.append(f"{task_id}: trial {trial_dir.name} raised an exception, included anyway")
+        task_ids.append(task_id)
+
+    if not task_ids:
+        raise SubmissionError(f"No dumatebench trials found under Harbor job directory: {job_dir}")
+
+    if out_path.exists():
+        raise SubmissionError(f"Output file already exists, refusing to overwrite: {out_path}")
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    manifest = {
+        "schema_version": 1,
+        "harbor_job_id": job_id,
+        "metadata": {
+            "agent_display_name": agent_name,
+            "agent_org_display_name": agent_org,
+            "agent_repo": agent_repo,
+            "agent_docs": agent_docs,
+            "models": [
+                {
+                    "model_name": model_name,
+                    "model_provider": model_provider,
+                }
+            ],
+            "submitted_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "task_ids": sorted(set(task_ids)),
+        },
+    }
+    out_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    manifest_errors = validate_submission_manifest(out_path)
+    if manifest_errors:
+        raise SubmissionError(
+            f"Generated manifest failed self-validation (this is a bug): {manifest_errors}"
+        )
+
+    return ManifestResult(manifest_path=out_path, task_count=len(set(task_ids)), warnings=warnings)

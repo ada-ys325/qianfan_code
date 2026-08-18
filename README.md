@@ -36,6 +36,7 @@ separately and is intentionally not committed here.
 | [`dumatebench/agents/`](dumatebench/agents/) | Agent adapter contract and example agents |
 | [`.github/workflows/`](.github/workflows/) | Automated code and submission checks |
 | [`leaderboard/`](leaderboard/) | Submission intake and CI validation logic |
+| [`leaderboard/SUBMIT.md`](leaderboard/SUBMIT.md) | Harbor leaderboard submission guide |
 | [`submissions/`](submissions/) | Pull-request Harbor job manifests and local evidence bundles |
 
 The complete `final_dataset_clean/` data is raw benchmark material and is not
@@ -461,7 +462,43 @@ For lower-level environment details, including workspace initialization,
 Docker Compose mounts, tool wrappers, and fault injection, see
 [`dumatebench/docker_environment.md`](dumatebench/docker_environment.md).
 
-## Submission bundles
+## Harbor integration and submissions
+
+The full task source dataset is distributed outside this repository. You can
+convert a downloaded task package to Harbor's schema for local development:
+
+```bash
+dumate harbor export \
+  --dataset /path/to/downloaded/tasks \
+  --output /path/to/harbor_tasks
+
+harbor run \
+  --path /path/to/harbor_tasks \
+  --agent <your-agent> \
+  --model <provider/model>
+```
+
+Local `--path` runs are useful for integration checks. Formal leaderboard runs
+must use the canonical Harbor registry dataset revision announced by the
+maintainers, cover every task with at least five trials, and use
+`--upload --public`.
+
+After a formal Harbor run, create a score-free pointer manifest:
+
+```bash
+dumate submission from-harbor-job \
+  --job-dir /path/to/harbor/jobs/<job-id> \
+  --out submissions/dumatebench/<version>/<agent>__<model>.json \
+  --agent-name my-agent \
+  --agent-org my-organization \
+  --model-name my-model \
+  --model-provider openai
+```
+
+See [`leaderboard/SUBMIT.md`](leaderboard/SUBMIT.md) for the canonical dataset,
+verification, promotion, and manual publication flow.
+
+## Local evidence bundles
 
 After a batch run, package the generated rewards and logs for submission:
 
@@ -481,35 +518,9 @@ Validate the bundle before sharing it:
 dumate submission check /absolute/path/to/submission
 ```
 
-The bundle records run metadata and task results for local evidence. The formal
-PR submission is a small manifest containing the Harbor job ID:
-
-```text
-submissions/dumatebench/<version>/<agent>__<model>.json
-```
-
-```json
-{
-  "schema_version": 1,
-  "harbor_job_id": "job-12345678"
-}
-```
-
-Then create a branch in your fork and open a pull request to this repository's
-`main` branch. A pull request is a reviewable request to add this result record;
-it does not require changing the benchmark code. GitHub Actions checks the
-manifest using trusted code from the base branch, fetches the real job from
-Harbor, verifies the canonical dataset revision and task digests, and computes
-DuMateBench's `complete_pass`/`partial_pass` summary from Harbor's verifier
-results. If the run includes DuMateBench's LLM-judge fields, CI also recomputes
-and checks `final_score`. It rejects claimed scores and copied local results.
-
-When the source job passes, CI creates a leaderboard-owned Harbor snapshot and
-opens a bot PR containing that verified snapshot. Maintainers review and merge
-the bot PR; the original intake PR is closed. Configure the repository's
-`HARBOR_API_KEY` Actions secret and the canonical dataset variables described
-in [`leaderboard/README.md`](leaderboard/README.md) before accepting
-submissions.
+The bundle records run metadata and task results for local evidence. Formal
+leaderboard CI reads the public Harbor job referenced by the pointer manifest
+and independently recomputes its metrics.
 
 ## License
 

@@ -65,8 +65,12 @@ Set these repository variables before enabling formal submissions:
 DUMATEBENCH_HARBOR_DATASET
 DUMATEBENCH_HARBOR_DATASET_REF
 DUMATEBENCH_EXPECTED_TASK_COUNT       # defaults to 200
-DUMATEBENCH_MIN_TRIALS_PER_TASK       # defaults to 1
+DUMATEBENCH_MIN_TRIALS_PER_TASK       # defaults to 5
 ```
 
 Add `HARBOR_API_KEY` as an Actions secret. The workflow fails closed when the
 dataset name, fixed revision, or API key is missing.
+
+The complete task source dataset is distributed outside this repository. The
+configured Harbor dataset is the canonical packaged revision used by CI; local
+`harbor run --path ...` jobs do not carry that registry identity.
