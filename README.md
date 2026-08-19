@@ -1,136 +1,113 @@
-<p align="center">
-  <img src="docs/assets/image.png" alt="DuMateBench" />
-</p>
-
 # DuMateBench
 
-DuMateBench is a Docker-based benchmark for evaluating agents on real-world
-productivity and office-work tasks.
+![DuMateBench logo](assets/logo2.png)
 
-Given a task description and a sandboxed workspace, an agent must inspect the
-available files and tools, carry out the requested work, and produce the
-required artifact. The benchmark then runs a task-specific evaluator and
-reports whether the artifact satisfies the task's checks.
+DuMateBench evaluates agents on real-world productivity and office-work tasks.
+Each task gives an agent a sandboxed workspace and tools. The agent must create
+the requested artifact; a task-specific evaluator then checks the artifact and
+records a reward.
 
-The benchmark is designed to evaluate more than command generation. Tasks may
-require an agent to work with documents, spreadsheets, presentations, PDFs,
-OCR, calendars, web references, and unreliable tools or network conditions.
-Evaluation captures the final artifact, execution logs, step count, and reward
-details.
+This repository contains the benchmark runner, evaluators, the `dumate` CLI,
+development tasks, and Harbor integration. The complete public dataset is
+distributed separately on Hugging Face:
 
-The full task dataset is available on Hugging Face:
-[DuMateBench Dataset](https://huggingface.co/datasets/Annihi/dumate_bench).
+<https://huggingface.co/datasets/Annihi/dumate_bench>
 
-This repository contains the evaluation framework, a command-line harness, and
-development task datasets. The full benchmark dataset is distributed
-separately and is intentionally not committed here.
+## What Is Being Evaluated
 
-## Repository layout
-
-| Path | Description |
-|------|-------------|
-| [`dumatebench/`](dumatebench/) | Core benchmark framework, task runners, evaluators, agent contracts, and example tasks |
-| [`dumatebench_cli/`](dumatebench_cli/) | The `dumate` CLI for running an agent against one task or a batch of tasks |
-| [`dumatebench/datasets/dev/`](dumatebench/datasets/dev/) | Development and smoke-test task packages |
-| [`dumatebench/scripts/`](dumatebench/scripts/) | Batch runners, smoke-test scripts, and evaluation utilities |
-| [`dumatebench/agents/`](dumatebench/agents/) | Agent adapter contract and example agents |
-| [`.github/workflows/`](.github/workflows/) | Automated code and submission checks |
-| [`leaderboard/`](leaderboard/) | Submission intake and CI validation logic |
-| [`leaderboard/SUBMIT.md`](leaderboard/SUBMIT.md) | Harbor leaderboard submission guide |
-| [`submissions/`](submissions/) | Pull-request Harbor job manifests and local evidence bundles |
-
-The complete `final_dataset_clean/` data is raw benchmark material and is not
-included in this repository. It is available from the
-[DuMateBench Dataset on Hugging Face](https://huggingface.co/datasets/Annihi/dumate_bench).
-CI uses the checked-in development tasks for lightweight tests; official score
-verification will use the canonical dataset reference and uploaded Harbor
-trials.
-
-Each runnable task is self-contained. A typical task package looks like:
+There are two layers in a model run:
 
 ```text
-task/
-├── instruction.md              # Task goal and required artifact
-├── task.yaml                   # Task metadata and runner configuration
-├── workspace_seed/             # Initial files copied into /workspace
-├── environment/                # Dockerfile, Compose file, setup, and wrappers
-├── evaluator/                  # Checks and evaluator implementation
-├── network_faults.yaml         # Optional network fault configuration
-├── tool_faults.yaml            # Optional tool fault configuration
-├── run_outputs/                # Generated artifacts and reward.json
-└── run_logs/                   # Generated execution logs
+Harbor or dumate runner
+  -> agent harness
+      -> model API
+  -> commands in the task container
+  -> task evaluator
+  -> reward.json
 ```
 
-## How a run works
+The harness is the program that turns model responses into tool/command
+actions. For Harbor, `--agent openhands-sdk` is a harness and
+`--model openai/claude-opus-4-8` is a model identifier. A model name alone is
+not an agent: the harness, API endpoint, task container, and evaluator are all
+part of the run.
 
-DuMateBench separates the component being evaluated from the component that
-controls the evaluation:
+The deterministic smoke test uses a fixed local agent and does not measure
+model quality. A model score is meaningful only when the agent reaches the
+evaluator and produces a `reward.json`.
+
+## Repository Layout
 
 ```text
-agent -> one JSON action -> runner -> command in Docker
-  ^                                      |
-  |------------ observation ------------|
-
-agent finishes -> task evaluator -> reward.json
+dumatebench/                 Runner, evaluators, agents, and dev tasks
+dumatebench_cli/             dumate CLI and Harbor exporter
+dumatebench/datasets/dev/    Development tasks, including template_task
+dumatebench/scripts/         Smoke and batch scripts
+leaderboard/                 Submission validation and CI
 ```
 
-- The **agent** decides the next action. It may be backed by an LLM, a local
-  program, or a deterministic script.
-- The **runner** starts the task container, enforces step and timeout limits,
-  executes one agent command at a time, and records the trajectory.
-- **Docker** is the isolated command-execution environment. It contains the
-  seeded workspace, task tools, and fault-injection wrappers, but normally not
-  the agent's LLM.
-- The **evaluator** runs after the agent stops and checks the artifact and task
-  logs. Runner completion alone does not mean that the task passed.
+Before runtime preparation, a source task normally contains:
 
-## Quick start
+```text
+task.yaml
+instruction.md
+environment/
+evaluator/
+workspace_seed/
+```
 
-Use the following checks in order. The first check is deterministic and is the
-recommended way to establish that a new installation works before connecting
-an LLM or custom agent.
+The public `final_dataset_clean` tasks intentionally omit `environment/`.
+They must be filled from the checked-in `template_task` before they can be
+run or exported to Harbor. During this fill step, `workspace_seed/` is moved
+under `environment/workspace_seed/` to make the Docker build context
+self-contained.
 
-### Prerequisites
+## Install
 
-You need:
+Requirements:
 
-- Python 3.10 or newer; Python 3.12 is recommended
-- Docker
-- Docker Compose v2, available as `docker compose`
+- Python 3.10 or newer (Python 3.12 or 3.13 is recommended)
+- Docker Desktop with `docker compose` v2
+- Network access to PyPI and Docker Hub for the first build
 
 From the repository root:
 
 ```bash
-cd /path/to/dumate_bench
+cd /path/to/qianfan_code
 
+# Use a newer Python if the system Python is 3.9.
 python3 -m venv .venv
 source .venv/bin/activate
 
-python3 -m pip install -r dumatebench/requirements.txt
-python3 -m pip install -e dumatebench_cli/
-```
+python -m pip install --upgrade pip
+python -m pip install -r dumatebench/requirements.txt
+python -m pip install -e dumatebench_cli/
 
-Verify the CLI and Docker:
+# Harbor is a separate package; it is not in requirements.txt.
+python -m pip install harbor
 
-```bash
+# Provides the hf download command used below.
+python -m pip install huggingface_hub
+
 dumate --help
 docker compose version
+harbor --version
 ```
 
-### 1. Run the deterministic smoke test
+Do not put API keys in the repository or in task files.
 
-This test does not require an API key or call an LLM:
+## A. Deterministic Smoke Test
+
+Run this first after installation. It does not call a model or require an API
+key:
 
 ```bash
 bash dumatebench/scripts/run_template_task.sh
 ```
 
-The script builds the smoke image, runs a fixed agent script in Docker,
-exercises the OCR, calendar, network, and tool-fault paths, writes a calendar
-artifact, and runs the task evaluator. It replaces the contents of this
-task's `run_outputs/` and `run_logs/` on every run.
-
-A successful run ends with a reward containing:
+The script builds `template_task`, runs the bundled fixed smoke agent, exercises
+the injected OCR/calendar/network faults, and runs the evaluator. A successful
+run writes:
 
 ```json
 {
@@ -141,21 +118,20 @@ A successful run ends with a reward containing:
 }
 ```
 
-Inspect the generated artifact and full result:
+Inspect the result:
 
 ```bash
-ls -l dumatebench/datasets/dev/template_task/run_outputs/calendar/Alice.ics
 cat dumatebench/datasets/dev/template_task/run_outputs/reward.json
+ls -l dumatebench/datasets/dev/template_task/run_outputs/calendar/
 ```
 
-The expected messages `OCR service temporarily unavailable` and
-`Calendar backend returned a transient permission error` are injected faults,
-not installation failures. The fixed smoke agent retries them deliberately.
+The transient OCR and calendar errors printed by this test are intentional
+fault injections. The fixed smoke agent retries them.
 
-### 2. Verify the CLI agent protocol
+## B. Run One Task with the dumate CLI
 
-The example echo agent verifies the `dumate` runner and stdin/stdout adapter
-contract:
+The example echo agent verifies the stdin/stdout adapter protocol. It does not
+create the requested artifact, so a non-passing reward is expected:
 
 ```bash
 dumate run \
@@ -164,364 +140,249 @@ dumate run \
   --max-steps 3
 ```
 
-The echo agent lists the workspace once and then stops. It intentionally does
-not create the requested calendar, so the evaluator is expected to report a
-non-passing reward. Use this command to test protocol wiring, not benchmark
-quality. This run also replaces the smoke task's previous `run_outputs/` and
-`run_logs/`.
-
-### 3. Run the smoke task with an OpenAI-compatible LLM
-
-This repository also includes a command-agent integration test. It calls an
-OpenAI-compatible Chat Completions endpoint from the task container:
-
-```bash
-export OPENAI_API_KEY="..."
-export OPENAI_BASE_URL="https://your-provider.example/v1"
-export DUMATE_MODEL="your-model-id"
-
-# Required when OPENAI_BASE_URL is not already trusted by the script.
-export DUMATE_TRUSTED_BASE_URLS="$OPENAI_BASE_URL"
-
-bash dumatebench/scripts/run_template_task_agent.sh --max-steps 20
-```
-
-Do not commit API keys or place them in task files. The selected endpoint and
-model must support `temperature: 0`, OpenAI JSON-object response format, and
-the one-action-per-response contract below. API-compatible model names do not
-guarantee these behaviors; a provider may reject the request or return several
-concatenated JSON objects.
-
-After the run, inspect both agent completion and evaluator success:
-
-```bash
-cat dumatebench/datasets/dev/template_task/run_logs/agent_status.json
-cat dumatebench/datasets/dev/template_task/run_outputs/reward.json
-```
-
-A successful agent process is not sufficient. Treat the task as passed only
-when `evaluator_returncode` is `0` and `reward.json` reports
-`"complete_pass": 1`. Reaching `--max-steps`, returning `finish: true`, or
-producing a plausible artifact can still result in a partial or failed score.
-
-## Setup details
-
-### Host dependencies
-
-The Python dependencies used by the framework and evaluators are listed in
-[`dumatebench/requirements.txt`](dumatebench/requirements.txt). They include
-support for Office files, PDFs, images, calendars, YAML, and model-backed
-evaluators.
-
-Some optional evaluators require host tools in addition to Python packages:
-
-```bash
-# macOS
-brew install ffmpeg
-brew install libreoffice poppler
-```
-
-`ffmpeg` and `ffprobe` are needed by video judge workflows. LibreOffice
-(`soffice`) and Poppler (`pdftoppm`) are needed when rendering presentation or
-PDF artifacts for evaluation.
-
-### Docker task environment
-
-Tasks are built and run locally; task images are not pulled from a registry.
-The default smoke-task base image is `python:3.12-slim`. The task Dockerfile
-installs the common command-line tools needed by the sandbox, while task
-specific dependencies may intentionally need to be installed by the agent at
-runtime.
-
-The task container normally exposes:
-
-```text
-/workspace   Initial workspace and agent working directory
-/outputs     Final artifacts, mapped to task-local run_outputs/
-/logs        Execution logs, mapped to task-local run_logs/
-```
-
-The task's `environment/` directory also defines any benchmark tools, wrappers,
-and fault injection used by that task. Agents should use the command names
-exposed through `PATH` and should not modify benchmark configuration or
-evaluator files.
-
-If Docker cannot reach the default Debian mirrors, the base image and apt
-mirrors can be overridden for the smoke script:
-
-```bash
-DUMATE_BASE_IMAGE=your-mirror/python:3.12-slim \
-DUMATE_APT_DEBIAN_MIRROR=http://mirrors.aliyun.com/debian \
-DUMATE_APT_SECURITY_MIRROR=http://mirrors.aliyun.com/debian-security \
-bash dumatebench/scripts/run_template_task.sh
-```
-
-## Usage
-
-Use `dumate run` for an actual agent evaluation. A runnable task directory must
-contain at least `task.yaml`, `instruction.md`, `environment/`, and
-`evaluator/`; raw task material without an environment is not directly
-runnable by the public CLI. Validate a task package before a long run:
-
-```bash
-dumate package check /absolute/path/to/task
-```
-
-The development tasks in this repository are suitable for local integration
-tests. The canonical full dataset used for official scoring is distributed and
-verified separately; local development rewards are not leaderboard results.
-
-### Discover tasks
-
-List task directories that the CLI can run:
-
-```bash
-dumate datasets list dumatebench/datasets/dev
-```
-
-The CLI discovers directories containing the task markers `task.yaml` and
-`instruction.md`.
-
-### Run one task with your own agent
-
-Your agent can be any executable command that implements the
-[agent protocol](dumatebench/agents/agent_contract.md):
-
-```bash
-dumate run \
-  --task /absolute/path/to/task \
-  --agent 'python3 /absolute/path/to/my_agent.py' \
-  --max-steps 20 \
-  --adapter-timeout 180
-```
-
-The command named by `--agent` runs on the host and is invoked once per step.
-It receives the current state on stdin and returns one action on stdout. The
-runner, not the agent process, executes that action inside the task container.
-See the protocol section below before connecting an LLM-backed adapter.
-
-Useful options include:
-
-```text
---max-steps N               Maximum agent steps for each task (default: 20)
---adapter-timeout SECONDS   Timeout for each adapter invocation (default: 180)
---no-build                  Reuse an already-built Docker image
---keep-containers           Keep containers running for debugging
-```
-
-### Run a batch
-
-Run multiple tasks concurrently:
-
-```bash
-dumate run \
-  --dataset dumatebench/datasets/dev \
-  --agent 'python3 /absolute/path/to/my_agent.py' \
-  --task-glob '*' \
-  --limit 5 \
-  --concurrency 2
-```
-
-The batch command writes a JSON Lines summary under the dataset directory:
-
-```text
-batch_summary.<run-id>.jsonl
-```
-
-Each record contains the task status, number of steps, evaluator return code,
-duration, error information, and the path to that task's
-`run_outputs/reward.json`.
-
-Stop a batch after the first task error:
-
-```bash
-dumate run \
-  --dataset dumatebench/datasets/dev \
-  --agent 'python3 /absolute/path/to/my_agent.py' \
-  --stop-on-failure
-```
-
-Run `dumate run --help`, `dumate datasets --help`, or
-`dumate package --help` for the complete option list.
-
-## Agent protocol
-
-The adapter is invoked once per step. It reads exactly one JSON state object
-from standard input and writes exactly one JSON action object to standard
-output.
-
-Input:
+An agent command receives one JSON state on stdin and must emit one JSON action
+on stdout. To request a command in the task container:
 
 ```json
-{
-  "schema_version": "0.1",
-  "step": 1,
-  "max_steps": 20,
-  "instruction": "Task instruction text",
-  "system_prompt": "Environment and tool rules",
-  "history": [],
-  "last_observation": null
-}
-```
-
-To request a command in the task container:
-
-```json
-{
-  "command": "ls -la /workspace",
-  "reason": "Inspect the initial workspace"
-}
+{"command":"ls -la /workspace","reason":"Inspect the workspace"}
 ```
 
 To finish:
 
 ```json
-{
-  "finish": true,
-  "reason": "The required artifact has been written to /outputs"
-}
+{"finish":true,"reason":"The artifact is ready in /outputs"}
 ```
 
-The adapter decides what to do; the runner executes the command inside the
-container as the `agent` user with `/workspace` as the working directory.
-Before returning `finish: true`, the adapter should verify that the required
-artifact exists at the path specified by the task.
+See [agent_contract.md](dumatebench/agents/agent_contract.md) for the full
+protocol.
 
-See [`dumatebench/agents/agent_contract.md`](dumatebench/agents/agent_contract.md)
-for the complete contract and
-[`dumatebench/agents/examples/echo_agent.py`](dumatebench/agents/examples/echo_agent.py)
-for a minimal implementation.
-
-## Task authoring and validation
-
-Before running or sharing a task package, check its required files and Docker
-build context:
+Validate a task package before a long run:
 
 ```bash
-dumate package check /absolute/path/to/task
+dumate datasets list dumatebench/datasets/dev
+dumate package check dumatebench/datasets/dev/template_task
 ```
 
-The check verifies the presence of `task.yaml`, `instruction.md`,
-`environment/`, and `evaluator/`. It also warns when evaluator or
-`web_reference/` gold-reference files may be copied into the task image.
+## C. Download the Public Dataset
 
-When evaluating an agent, do not modify the task definition, fault
-configuration, environment, evaluator, or seeded workspace:
+The public dataset is `Annihi/dumate_bench`. It contains a compressed archive
+with 200 tasks. The archive is about 3.5 GB, so allow time and disk space for
+both the archive and the extracted files.
 
-```text
-instruction.md
-task.yaml
-network_faults.yaml
-tool_faults.yaml
-environment/*
-evaluator/*
-workspace_seed/*
+### macOS PAC proxy
+
+On networks where macOS uses a PAC proxy, the browser reads the PAC
+automatically but `curl`, `hf`, and Docker do not. Extract the HTTPS proxy for
+Hugging Face before downloading:
+
+```bash
+PAC_URL=$(networksetup -getautoproxyurl "Wi-Fi" | awk -F': ' '/URL:/{print $2}')
+curl -fsSL "$PAC_URL" -o /tmp/baidu_proxy.pac
+
+PROXY_URL=$(sed -nE "s/.*return 'HTTPS ([^;]+); DIRECT'.*/https:\/\/\1/p" \
+  /tmp/baidu_proxy.pac | head -1)
+
+export HTTPS_PROXY="$PROXY_URL"
+export HTTP_PROXY="$PROXY_URL"
+export ALL_PROXY="$PROXY_URL"
+
+curl -I https://huggingface.co
 ```
 
-## Results and evaluation
+`HTTP/2 200` confirms that the terminal proxy is working. Docker containers
+and the Docker daemon do not automatically inherit this host proxy; see the
+network note below.
 
-Task-specific evaluators write their result to:
+Download and extract the dataset:
 
-```text
-<task>/run_outputs/reward.json
+```bash
+DATA_ROOT=/absolute/path/to/dumate_bench
+
+hf download Annihi/dumate_bench \
+  --repo-type dataset \
+  --local-dir "$DATA_ROOT"
+
+tar -xzf "$DATA_ROOT/dumate_bench_data.tar.gz" -C "$DATA_ROOT"
+
+dumate datasets list "$DATA_ROOT/final_dataset_clean" --task-glob 'task_*'
 ```
 
-Depending on the task, the reward may include complete-pass and partial-pass
-scores together with the result of each check. Logs and intermediate artifacts
-are kept in `run_logs/` and `run_outputs/` for debugging and analysis.
+The raw dataset is intentionally kept separate from the runnable copy. The
+next command moves each task's `workspace_seed/` into its generated runtime,
+so work on a copy rather than modifying the raw dataset.
 
-Use the evaluator result as the source of truth:
+## D. Prepare HF Tasks for Harbor
 
-```text
-run_logs/agent_status.json       Agent stop reason, steps, and evaluator return code
-run_logs/agent_adapter.jsonl     CLI action/observation trajectory
-run_logs/compose.log             Task-container logs
-run_outputs/reward.json          Evaluator checks and task score
+The raw HF tasks do not contain `environment/`. Make a working copy and fill
+the missing runtime from the repository's `template_task`:
+
+```bash
+DATA_ROOT=/absolute/path/to/dumate_bench
+WORK_ROOT=/absolute/path/to/dumatebench_harbor_work
+TEMPLATE=$PWD/dumatebench/datasets/dev/template_task
+
+mkdir -p "$WORK_ROOT"
+cp -a "$DATA_ROOT/final_dataset_clean/." "$WORK_ROOT/"
+
+dumate template fill \
+  --dataset "$WORK_ROOT" \
+  --template "$TEMPLATE" \
+  --task-glob 'task_*'
+
+dumate datasets list "$WORK_ROOT" --task-glob 'task_*'
+dumate package check "$WORK_ROOT/task_1"
 ```
 
-`status: "completed"` in a CLI summary means that orchestration completed
-without an exception. It does not mean that the evaluator passed. Likewise,
-`agent_finished: true` only means that the agent returned `finish: true`.
-For a complete local pass, require both:
+Export the prepared tasks into Harbor's format:
 
-```text
-evaluator_returncode == 0
-reward.json: complete_pass == 1
+```bash
+HARBOR_TASKS=/absolute/path/to/harbor_tasks
+
+dumate harbor export \
+  --dataset "$WORK_ROOT" \
+  --output "$HARBOR_TASKS" \
+  --task-glob 'task_*'
 ```
 
-Common non-passing outcomes are:
-
-| Symptom | Meaning |
-|---------|---------|
-| `JSONDecodeError: Extra data` | The adapter returned multiple top-level JSON actions in one response |
-| `Unsupported value: temperature` | The selected API model does not accept the command agent's request parameters |
-| `reached max steps` | The agent never returned `finish: true` within the configured budget |
-| `partial_pass < 1.0` | The artifact or one or more required recovery behaviors failed an evaluator check |
-
-For lower-level environment details, including workspace initialization,
-Docker Compose mounts, tool wrappers, and fault injection, see
-[`dumatebench/docker_environment.md`](dumatebench/docker_environment.md).
-
-## Harbor integration and submissions
-
-The full task source dataset is distributed outside this repository. You can
-convert a downloaded task package to Harbor's schema for local development:
+For a single task, use `--task` instead of `--dataset`:
 
 ```bash
 dumate harbor export \
-  --dataset /path/to/downloaded/tasks \
-  --output /path/to/harbor_tasks
+  --task "$WORK_ROOT/task_1" \
+  --output "$HARBOR_TASKS/task_1"
+```
+
+## E. Run Harbor with a Model
+
+`openhands-sdk` is the Harbor agent harness used by the validated model
+workflow. The model endpoint must be OpenAI-compatible. Set credentials in the
+shell that launches Harbor:
+
+```bash
+export OPENAI_API_KEY="your-new-token"
+export OPENAI_BASE_URL="https://your-openai-compatible-provider.example/v1"
+
+# Use an exact model ID exposed by that provider.
+MODEL="openai/claude-opus-4-8"
+```
+
+For a compatible gateway, set `OPENAI_BASE_URL` to that gateway's `/v1`
+endpoint. Do not print or commit the token. Harbor passes the values to the
+agent container using `--ae`:
+
+```bash
+HARBOR_TASKS=/absolute/path/to/harbor_tasks
+JOBS=/absolute/path/to/harbor_jobs
 
 harbor run \
-  --path /path/to/harbor_tasks \
-  --agent <your-agent> \
-  --model <provider/model>
+  --path "$HARBOR_TASKS/task_1" \
+  --agent openhands-sdk \
+  --model "$MODEL" \
+  --ae "LLM_API_KEY=$OPENAI_API_KEY" \
+  --ae "LLM_BASE_URL=$OPENAI_BASE_URL" \
+  --agent-setup-timeout-multiplier 5 \
+  --jobs-dir "$JOBS/smoke-task-1" \
+  --n-concurrent 1 \
+  --n-attempts 1 \
+  --yes \
+  --debug
 ```
 
-Local `--path` runs are useful for integration checks. Formal leaderboard runs
-must use the canonical Harbor registry dataset revision announced by the
-maintainers, cover every task with at least five trials, and use
-`--upload --public`.
+Use the model name supported by your gateway. For example, if the gateway
+exposes GPT-4o, replace the model value with the gateway's exact GPT-4o model
+identifier. The `openai/` prefix selects the OpenAI-compatible protocol; use
+the prefix expected by the installed Harbor agent and provider.
 
-After a formal Harbor run, create a score-free pointer manifest:
+A successful *run* means `Exceptions: 0` and a verifier result. A successful
+*task* additionally requires the evaluator's `complete_pass` to be `1`:
 
 ```bash
-dumate submission from-harbor-job \
-  --job-dir /path/to/harbor/jobs/<job-id> \
-  --out submissions/dumatebench/<version>/<agent>__<model>.json \
-  --agent-name my-agent \
-  --agent-org my-organization \
-  --model-name my-model \
-  --model-provider openai
+find "$JOBS" -name result.json -print
+jq '.stats' "$JOBS"/*/result.json
 ```
 
-See [`leaderboard/SUBMIT.md`](leaderboard/SUBMIT.md) for the canonical dataset,
-verification, promotion, and manual publication flow.
-
-## Local evidence bundles
-
-After a batch run, package the generated rewards and logs for submission:
+Do not start all 200 tasks until the single-task run completes without an
+exception, calls the model, and produces a verifier result. Then run the full
+local dataset:
 
 ```bash
-dumate submission pack \
-  --summary dumatebench/datasets/dev/batch_summary.<run-id>.jsonl \
-  --out /absolute/path/to/submission \
-  --agent-name my-agent \
-  --agent-org my-organization \
-  --model-name my-model \
-  --model-provider openai
+harbor run \
+  --path "$HARBOR_TASKS" \
+  --agent openhands-sdk \
+  --model "$MODEL" \
+  --ae "LLM_API_KEY=$OPENAI_API_KEY" \
+  --ae "LLM_BASE_URL=$OPENAI_BASE_URL" \
+  --agent-setup-timeout-multiplier 5 \
+  --jobs-dir "$JOBS/full-200" \
+  --n-concurrent 1 \
+  --n-attempts 1 \
+  --yes \
+  --debug
 ```
 
-Validate the bundle before sharing it:
+## Network and Runtime Notes
+
+The OpenHands SDK agent may install its runtime in each task container:
+
+```text
+curl https://astral.sh/uv/install.sh
+uv python install 3.12
+uv pip install openhands-sdk openhands-tools fastapi
+```
+
+If this setup times out, the model has not been called yet. Typical causes are
+Docker Hub, `astral.sh`, or `releases.astral.sh` being unreachable from the
+container. A host PAC setting does not automatically configure Docker. For a
+large 200-task run, prefer a prebuilt image with the OpenHands SDK installed or
+configure the Docker daemon/container proxy. Otherwise tasks can fail during
+setup before producing any reward.
+
+Keep `--n-concurrent 1` while diagnosing setup and network failures. Increase
+concurrency only after the single-task run completes reliably.
+
+## Results
+
+For `dumate run`, inspect:
+
+```text
+run_logs/agent_status.json
+run_logs/agent_adapter.jsonl
+run_outputs/reward.json
+```
+
+For Harbor, inspect the job directory printed at the end of the run:
+
+```text
+<jobs>/<job-id>/result.json
+<jobs>/<job-id>/<task-id>/result.json
+```
+
+Interpret results separately:
+
+- `Exceptions: 0` means orchestration, agent setup, and evaluator completed.
+- `complete_pass: 1` means the task fully passed its evaluator.
+- `partial_pass < 1` means the artifact or one or more required checks were
+  incomplete.
+- `token/cost: null` usually means the model was never called, often because
+  setup or network failed first.
+
+## Formal Leaderboard Runs
+
+Formal leaderboard runs must use the fixed Harbor registry dataset revision
+specified by the maintainers, not an arbitrary local export:
 
 ```bash
-dumate submission check /absolute/path/to/submission
+harbor run \
+  --dataset <org>/<dataset>@<revision> \
+  --agent openhands-sdk \
+  --model <provider/model> \
+  --n-attempts 5 \
+  --upload \
+  --public
 ```
 
-The bundle records run metadata and task results for local evidence. Formal
-leaderboard CI reads the public Harbor job referenced by the pointer manifest
-and independently recomputes its metrics.
+Do not use `--upload --public` for local smoke jobs. It requires the registry
+revision, a configured Harbor account, and permission to publish results.
 
-## License
-
-See [`LICENSE`](LICENSE) for the license applicable to this repository.
+See [leaderboard/SUBMIT.md](leaderboard/SUBMIT.md) for the submission manifest
+and verification workflow.
