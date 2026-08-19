@@ -1,0 +1,56 @@
+{
+  "references": [
+    {
+      "path": "workspace_seed/history_agent_files/projects.json",
+      "as": "projects.json"
+    },
+    {
+      "path": "web_reference/ref_00_平台总览与字段映射.md",
+      "as": "ref_00_平台总览与字段映射.md"
+    },
+    {
+      "path": "web_reference/ref_01_beihang.md",
+      "as": "ref_01_beihang.md"
+    },
+    {
+      "path": "web_reference/ref_02_bjut_dublin.md",
+      "as": "ref_02_bjut_dublin.md"
+    },
+    {
+      "path": "web_reference/ref_03_cuc_media.md",
+      "as": "ref_03_cuc_media.md"
+    },
+    {
+      "path": "web_reference/ref_04_buct_curie.md",
+      "as": "ref_04_buct_curie.md"
+    },
+    {
+      "path": "web_reference/ref_05_buu_rut.md",
+      "as": "ref_05_buu_rut.md"
+    },
+    {
+      "path": "web_reference/ref_06_ncut_brunel.md",
+      "as": "ref_06_ncut_brunel.md"
+    },
+    {
+      "path": "web_reference/ref_07_bupt_qmul.md",
+      "as": "ref_07_bupt_qmul.md"
+    },
+    {
+      "path": "web_reference/ref_08_bistu_illinois.md",
+      "as": "ref_08_bistu_illinois.md"
+    },
+    {
+      "path": "web_reference/ref_09_cau_surrey.md",
+      "as": "ref_09_cau_surrey.md"
+    },
+    {
+      "path": "web_reference/ref_10_cup_tulsa.md",
+      "as": "ref_10_cup_tulsa.md"
+    },
+    {
+      "path": "evaluator/gold_answer_reference.json",
+      "as": "gold_answer_reference.json"
+    }
+  ]
+}

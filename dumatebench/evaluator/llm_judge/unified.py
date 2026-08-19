@@ -1193,7 +1193,32 @@ def run_llm_judge_score(
         checklist_score = normalize_unit_score(rule_result.get("partial_pass", 0.0))
 
     output_path = _task_path(testbed_dir, output_file)
-    if artifact_type in PPT_TYPES:
+    checklist_invalid = False
+    checklist_invalid_reasons: list[str] = []
+    if isinstance(rule_result, dict):
+        if rule_result.get("partial_pass") is None and "partial_pass" in rule_result:
+            checklist_invalid = True
+            checklist_invalid_reasons.append("checklist has no eligible score")
+        for item in rule_result.get("checks", []):
+            if not isinstance(item, dict):
+                continue
+            status = str(item.get("status", ""))
+            if item.get("score_eligible") is False or status in {
+                "unsupported", "evaluator_error", "runner_error", "reference_error"
+            }:
+                checklist_invalid = True
+                checklist_invalid_reasons.append(
+                    f"check {item.get('id', '<unknown>')} is {status or 'ineligible'}"
+                )
+
+    if checklist_invalid:
+        judge_report = {
+            "status": "evaluator_error",
+            "reason": "Checklist is not scoreable: " + "; ".join(checklist_invalid_reasons),
+            "judge_score": None,
+        }
+        judge_kind = "checklist_gate"
+    elif artifact_type in PPT_TYPES:
         # The PPT backend already reads output_file directly instead of scanning its parent.
         judge_report = _run_ppt_judge(testbed_dir, args)
         judge_kind = "ppt"

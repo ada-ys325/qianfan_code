@@ -55,6 +55,33 @@ class UnifiedLlmJudgeTest(unittest.TestCase):
         self.assertEqual(result["complete_pass"], 1)
         self.assertEqual(result["partial_pass"], 1.0)
 
+    def test_unscoreable_checklist_stops_llm_judge(self):
+        output = self.root / "run_outputs" / "answer.md"
+        output.write_text("Project Alpha is complete.", encoding="utf-8")
+
+        report = run_llm_judge_score(
+            self.root,
+            {
+                "output_file": "run_outputs/answer.md",
+                "checks": [
+                    {
+                        "id": "unsupported",
+                        "type": "evaluate_contain",
+                        "args": {
+                            "file": "run_outputs/answer.md",
+                            "doc_type": "unknown",
+                            "keywords": ["Project Alpha"],
+                        },
+                    }
+                ],
+            },
+        )
+
+        self.assertEqual(report["status"], "evaluator_error")
+        self.assertEqual(report["judge_kind"], "checklist_gate")
+        self.assertIsNone(report["final_score"])
+        self.assertFalse(report["pass"])
+
     def test_textual_unified_score_averages_checklist_and_judge_scores(self):
         (self.root / "run_outputs" / "answer.md").write_text("Project Alpha conclusion.", encoding="utf-8")
         rubric = {

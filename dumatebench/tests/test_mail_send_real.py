@@ -9,7 +9,7 @@ from pathlib import Path
 
 MAIL_SEND_PATH = (
     Path(__file__).resolve().parents[1]
-    / "datasets/dev/odyssey_2_12_smoke/environment/mail_send_real.py"
+    / "datasets/dev/template_task/environment/mail_send_real.py"
 )
 
 

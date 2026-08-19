@@ -1,0 +1,60 @@
+{
+  "criteria": [
+    {
+      "id": "excel_header_completeness",
+      "dimension": "requirement_completeness",
+      "description": "表格第一行为表头，必须包含如下列名：标题、标题链接、项目名称、办学地址、中外合作办学者1、中外合作办学者2、办学层次和类别、每期招生人数、招生方式、开设专业或课程、颁发证书1、颁发证书2、审批机关、批准书编号。",
+      "weight": 0.25,
+      "evidence_required": true,
+      "levels": {
+        "0": "未设置表头或缺少大部分指定表头列。",
+        "1": "包含部分表头列，但缺少一半以上的指定列。",
+        "2": "包含大部分表头列，但缺少1-3个指定列。",
+        "3": "包含所有要求的列名概念，但个别列名存在字面上的轻微差异。",
+        "4": "完全准确地包含所有指定的表头列名。"
+      }
+    },
+    {
+      "id": "min_data_row_count",
+      "dimension": "requirement_completeness",
+      "description": "表格必须至少完整采集并写入10个项目的数据（即除表头外至少有10行数据）。",
+      "weight": 0.33333333,
+      "evidence_required": true,
+      "levels": {
+        "0": "没有任何项目数据行。",
+        "1": "仅包含1-4行数据。",
+        "2": "包含5-9行数据，未达到至少10行的要求。",
+        "3": "包含至少10行数据，但部分行的数据缺失严重或存在空白行。",
+        "4": "包含至少10行数据，且每行均为完整的采集数据。"
+      }
+    },
+    {
+      "id": "alignment_with_projects_json",
+      "dimension": "factual_correctness_faithfulness",
+      "description": "Excel中的数据行（如标题或标题链接等字段）必须与 projects.json 中前10个（或更多）项目相匹配。",
+      "weight": 0.16666667,
+      "evidence_required": true,
+      "levels": {
+        "0": "Excel中的项目与 projects.json 毫无关联。",
+        "1": "匹配的项目数量少于5个。",
+        "2": "匹配的项目数量在5到9个之间。",
+        "3": "至少有10个项目匹配，但顺序或部分信息与原文件存在微小偏差。",
+        "4": "Excel中的项目准确对应了 projects.json 中的项目信息，标题和链接匹配无误。"
+      }
+    },
+    {
+      "id": "data_extraction_completeness_and_quality",
+      "dimension": "requirement_completeness",
+      "description": "项目详情字段（如办学地址、中外合作办学者、办学层次等）应被完整采集，内容合理且无明显乱码或错位。",
+      "weight": 0.25,
+      "evidence_required": true,
+      "levels": {
+        "0": "几乎所有详情字段均为空或全是乱码。",
+        "1": "大量字段提取错位或存在严重的信息缺失。",
+        "2": "部分关键字段（如办学者、地址等）提取不完整或存在明显错位。",
+        "3": "大部分字段提取正确完整，仅有个别格式未清理（如残留HTML标签）或少数次要字段缺失。",
+        "4": "所有指定的详情字段均被完整且干净地提取，数据合理对齐且无杂乱符号。"
+      }
+    }
+  ]
+}

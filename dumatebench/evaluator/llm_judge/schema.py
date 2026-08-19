@@ -130,12 +130,32 @@ def apply_rule_gate(rule_result: dict[str, Any] | None) -> GateDecision:
     checks = rule_result.get("checks")
     if not isinstance(checks, list):
         raise SchemaError("rule result checks must be a list")
+    invalid = [
+        item for item in checks
+        if isinstance(item, dict)
+        and (item.get("score_eligible") is False or str(item.get("status", "")) in {
+            "unsupported", "evaluator_error", "runner_error", "reference_error"
+        })
+    ]
+    if invalid:
+        ids = tuple(str(item.get("id", "unknown")) for item in invalid)
+        return GateDecision(
+            "evaluator_error",
+            True,
+            0.0,
+            None,
+            ids,
+            "Checklist contains evaluator errors or unsupported checks.",
+        )
     failed = [item for item in checks if isinstance(item, dict) and not bool(item.get("passed"))]
     failed_ids = tuple(str(item.get("id", "unknown")) for item in failed)
     hard_types = {"evaluate_file_exist", "evaluate_file_format_valid"}
     hard_failed = any(str(item.get("type")) in hard_types for item in failed)
     try:
-        rule_score = float(rule_result.get("partial_pass", 0.0)) * 100.0
+        raw_partial = rule_result.get("partial_pass", 0.0)
+        if raw_partial is None:
+            return GateDecision("evaluator_error", True, 0.0, None, failed_ids, "Checklist has no eligible score.")
+        rule_score = float(raw_partial) * 100.0
     except (TypeError, ValueError) as exc:
         raise SchemaError("rule result partial_pass must be numeric") from exc
     rule_score = max(0.0, min(100.0, rule_score))

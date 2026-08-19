@@ -3,7 +3,7 @@
 本文说明当前 DuMateBench smoke task 的 Docker 环境、故障注入机制、agent 交互方式、评分逻辑和日志产物。当前示例任务位于：
 
 ```text
-dumatebench/datasets/dev/odyssey_2_12_smoke/
+dumatebench/datasets/dev/template_task/
 ```
 
 该任务用 OdysseyBench 2-12 作为 smoke test。目标是让 agent 从工作区中的会议议程 PDF 提取信息，并生成 `run_outputs/calendar/Alice.ics`。
@@ -61,7 +61,7 @@ FROM ${DUMATE_BASE_IMAGE}
 Compose 会把 `DUMATE_BASE_IMAGE` 作为 build arg 传入 Dockerfile。默认使用 `python:3.12-slim`，也可以在运行时覆盖为本地镜像、内网镜像或镜像源地址：
 
 ```bash
-DUMATE_BASE_IMAGE=your-mirror/python:3.12-slim dumatebench/scripts/run_odyssey_2_12_smoke.sh
+DUMATE_BASE_IMAGE=your-mirror/python:3.12-slim dumatebench/scripts/run_template_task.sh
 ```
 
 注意，使用本地已有的 Python base image 只会跳过拉取 base image 的网络请求。Dockerfile 之后仍会执行 `apt-get update` 和 `apt-get install`，这一步会访问 Debian 软件源。若构建日志停在 `deb.debian.org/debian trixie`，可以覆盖 apt 源：
@@ -69,7 +69,7 @@ DUMATE_BASE_IMAGE=your-mirror/python:3.12-slim dumatebench/scripts/run_odyssey_2
 ```bash
 DUMATE_APT_DEBIAN_MIRROR=http://mirrors.aliyun.com/debian \
 DUMATE_APT_SECURITY_MIRROR=http://mirrors.aliyun.com/debian-security \
-dumatebench/scripts/run_odyssey_2_12_smoke.sh
+dumatebench/scripts/run_template_task.sh
 ```
 
 镜像预装一组小型 Linux 命令行工具：
@@ -155,8 +155,8 @@ services:
   task:
     build:
       context: ../../../..
-      dockerfile: datasets/dev/odyssey_2_12_smoke/environment/Dockerfile
-    image: dumatebench-odyssey-2-12-smoke:latest
+      dockerfile: datasets/dev/template_task/environment/Dockerfile
+    image: dumatebench-template-task:latest
     working_dir: /workspace
     environment:
       DUMATE_TASK_SEED: "20260706"
@@ -439,8 +439,8 @@ agent 因此需要检查文件内容和文件名，不能假设目录中只有�
 DuMateBench 当前提供两个 runner：
 
 ```text
-dumatebench/scripts/run_odyssey_2_12_smoke.sh  不调用 LLM 的确定性环境测试
-dumatebench/scripts/run_odyssey_2_12_agent.sh  使用 LLM command agent 的测试
+dumatebench/scripts/run_template_task.sh        不调用 LLM 的确定性环境测试
+dumatebench/scripts/run_template_task_agent.sh  使用 LLM command agent 的测试
 ```
 
 确定性 runner 会构建镜像、启动容器，并在容器中运行 `/opt/dumate/agent_smoke.sh`。它用于验证 Docker 环境、依赖安装、网络故障日志、工具故障日志和 evaluator 是否连通。
@@ -661,7 +661,7 @@ checks:
 
 ```json
 {
-  "task_id": "odyssey_2_12_smoke",
+  "task_id": "template_task",
   "complete_pass": 1,
   "partial_pass": 1.0,
   "environment_recovery": 1,
@@ -698,7 +698,7 @@ run_outputs/reward.json        evaluator 输出
 运行确定性 smoke test：
 
 ```bash
-dumatebench/scripts/run_odyssey_2_12_smoke.sh
+dumatebench/scripts/run_template_task.sh
 ```
 
 运行 LLM command agent：
@@ -710,15 +710,15 @@ export DUMATE_MODEL="gpt-4o"
 # 可选：指定装好 evaluator 依赖的宿主侧 Python/venv
 export DUMATE_EVALUATOR_PYTHON=".venv/bin/python"
 
-dumatebench/scripts/run_odyssey_2_12_agent.sh --max-steps 20
+dumatebench/scripts/run_template_task_agent.sh --max-steps 20
 ```
 
 查看主要日志：
 
 ```bash
-sed -n '1,160p' dumatebench/datasets/dev/odyssey_2_12_smoke/run_logs/agent_status.json
-sed -n '1,160p' dumatebench/datasets/dev/odyssey_2_12_smoke/run_logs/agent_llm.log
-sed -n '1,160p' dumatebench/datasets/dev/odyssey_2_12_smoke/run_logs/network_faults.jsonl
-sed -n '1,160p' dumatebench/datasets/dev/odyssey_2_12_smoke/run_logs/tool_faults.jsonl
-sed -n '1,160p' dumatebench/datasets/dev/odyssey_2_12_smoke/run_outputs/reward.json
+sed -n '1,160p' dumatebench/datasets/dev/template_task/run_logs/agent_status.json
+sed -n '1,160p' dumatebench/datasets/dev/template_task/run_logs/agent_llm.log
+sed -n '1,160p' dumatebench/datasets/dev/template_task/run_logs/network_faults.jsonl
+sed -n '1,160p' dumatebench/datasets/dev/template_task/run_logs/tool_faults.jsonl
+sed -n '1,160p' dumatebench/datasets/dev/template_task/run_outputs/reward.json
 ```

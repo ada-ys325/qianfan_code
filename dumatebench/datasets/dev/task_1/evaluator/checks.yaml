@@ -1,0 +1,26 @@
+checks:
+  - id: excel_file_exists
+    description: 生成的 Excel 汇总文件存在
+    type: evaluate_file_exist
+    weight: 0.2
+    args: {"file": "run_outputs/data/中外合作办学项目完整数据.xlsx"}
+  - id: excel_format_valid
+    description: Excel 文件能被正常打开且格式有效
+    type: evaluate_file_format_valid
+    weight: 0.2
+    args: {"file": "run_outputs/data/中外合作办学项目完整数据.xlsx", "doc_type": "xlsx"}
+  - id: excel_header_columns_present
+    description: Excel 中包含所有要求的表头列名
+    type: evaluate_contain
+    weight: 0.3
+    args: {"file": "run_outputs/data/中外合作办学项目完整数据.xlsx", "doc_type": "xlsx", "keywords": ["标题", "标题链接", "项目名称", "办学地址", "中外合作办学者1", "中外合作办学者2", "办学层次和类别", "每期招生人数", "招生方式", "开设专业或课程", "颁发证书1", "颁发证书2", "审批机关", "批准书编号"]}
+  - id: crawler_script_exists
+    description: 采集脚本文件存在
+    type: evaluate_file_exist
+    weight: 0.15
+    args: {"file": "run_outputs/code/crawler.py"}
+  - id: header_row_first_column
+    description: Excel 第一行第一列为表头字段“标题”
+    type: evaluate_excel_cell_value
+    weight: 0.15
+    args: {"file": "run_outputs/data/中外合作办学项目完整数据.xlsx", "matches": [{"row": 1, "col": 1, "value": "标题"}]}

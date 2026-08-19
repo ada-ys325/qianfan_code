@@ -1,9 +1,11 @@
 import json
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 
 from dumatebench.evaluator import (
+    evaluate_contain,
     evaluate_directory_structure,
     evaluate_docx_font_style,
     evaluate_docx_paragraph_format,
@@ -15,7 +17,9 @@ from dumatebench.evaluator import (
     evaluate_files_unchanged,
     evaluate_log_budget,
     evaluate_no_extra_files,
+    evaluate_not_contain,
     evaluate_no_unexpected_diff,
+    run_checklist_score,
 )
 
 
@@ -52,6 +56,65 @@ class EvaluatorTest(unittest.TestCase):
 
         (self.root / "bad.json").write_text("{bad")
         self.assertFalse(evaluate_file_format_valid(self.root, {"file": "bad.json"}))
+
+    def test_content_checks_support_markdown_json_html_svg_and_zip(self):
+        (self.root / "answer.md").write_text("# Project Alpha\nDone")
+        (self.root / "data.json").write_text(json.dumps({"project": "Project Alpha", "done": True}))
+        (self.root / "page.html").write_text("<h1>Project Alpha</h1><script>ignored()</script>")
+        (self.root / "drawing.svg").write_text('<svg><text id="title">Project Alpha</text></svg>')
+        with zipfile.ZipFile(self.root / "submission.zip", "w") as archive:
+            archive.writestr("src/main.py", "# Project Alpha")
+
+        for file_name, doc_type in (
+            ("answer.md", "md"),
+            ("data.json", "json"),
+            ("page.html", "html"),
+            ("drawing.svg", "svg"),
+            ("submission.zip", "zip"),
+        ):
+            self.assertTrue(
+                evaluate_contain(
+                    self.root,
+                    {"file": file_name, "doc_type": doc_type, "keywords": ["Project Alpha"]},
+                )
+            )
+            self.assertTrue(
+                evaluate_file_format_valid(self.root, {"file": file_name, "doc_type": doc_type})
+            )
+
+    def test_not_contain_does_not_pass_for_missing_file(self):
+        self.assertFalse(
+            evaluate_not_contain(
+                self.root,
+                {"file": "missing.md", "doc_type": "md", "keywords": ["forbidden"]},
+            )
+        )
+
+    def test_checklist_marks_unsupported_and_runtime_errors_ineligible(self):
+        (self.root / "answer.md").write_text("complete")
+        result = run_checklist_score(
+            self.root,
+            [
+                {
+                    "id": "valid",
+                    "type": "evaluate_contain",
+                    "args": {"file": "answer.md", "doc_type": "md", "keywords": ["complete"]},
+                },
+                {
+                    "id": "unsupported",
+                    "type": "evaluate_contain",
+                    "args": {"file": "answer.md", "doc_type": "unknown", "keywords": ["complete"]},
+                },
+                {"id": "unknown_function", "type": "does_not_exist", "args": {}},
+            ],
+        )
+        self.assertEqual(
+            [item["status"] for item in result["checks"]],
+            ["pass", "unsupported", "unsupported"],
+        )
+        self.assertEqual(result["partial_pass"], 1.0)
+        self.assertEqual(result["eligible_check_count"], 1)
+        self.assertEqual(result["ineligible_check_count"], 2)
 
     def test_files_unchanged_checks_reference_bytes(self):
         (self.root / "result.txt").write_text("do not change")

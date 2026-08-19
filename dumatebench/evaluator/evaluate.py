@@ -11,15 +11,21 @@ import difflib
 import fnmatch
 import glob
 import hashlib
+import html
 import json
 import logging
 import os
 import re
 import zipfile
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any, Callable
 
 logger = logging.getLogger(__name__)
+
+
+class UnsupportedArtifactType(ValueError):
+    """Raised when a checklist requests a reader that the evaluator does not provide."""
 
 
 def _is_number(string: Any) -> bool:
@@ -51,14 +57,63 @@ def _read_text(path: str | os.PathLike[str]) -> str:
     return Path(path).read_text(errors="ignore")
 
 
+def _read_json(path: str | os.PathLike[str]) -> str:
+    """Read JSON into a stable, searchable representation."""
+    data = json.loads(Path(path).read_text(encoding="utf-8"))
+    return json.dumps(data, ensure_ascii=False, sort_keys=True, indent=2)
+
+
+def _read_html(path: str | os.PathLike[str]) -> str:
+    """Extract visible-ish text from HTML without adding a parser dependency."""
+    source = Path(path).read_text(errors="ignore")
+    source = re.sub(r"(?is)<(script|style|noscript)\b[^>]*>.*?</\1\s*>", " ", source)
+    source = re.sub(r"(?s)<[^>]+>", " ", source)
+    return re.sub(r"\s+", " ", html.unescape(source)).strip()
+
+
+def _read_svg(path: str | os.PathLike[str]) -> str:
+    """Return SVG text and selected semantic attributes for content checks."""
+    try:
+        root = ET.parse(path).getroot()
+    except ET.ParseError as exc:
+        raise ValueError(f"invalid SVG: {path}") from exc
+    parts: list[str] = []
+    for element in root.iter():
+        if element.text and element.text.strip():
+            parts.append(element.text.strip())
+        for key in ("id", "title", "aria-label", "desc"):
+            value = element.attrib.get(key)
+            if value:
+                parts.append(value)
+    return "\n".join(parts)
+
+
+def _read_zip(path: str | os.PathLike[str]) -> str:
+    """Return a ZIP member inventory plus safely decodable text members."""
+    parts: list[str] = []
+    with zipfile.ZipFile(path) as archive:
+        for info in archive.infolist():
+            if info.is_dir():
+                continue
+            parts.append(info.filename)
+            if info.file_size > 1_000_000 or Path(info.filename).suffix.lower() not in {
+                ".txt", ".md", ".json", ".csv", ".yaml", ".yml", ".py", ".js", ".java",
+            }:
+                continue
+            try:
+                parts.append(archive.read(info).decode("utf-8", errors="ignore"))
+            except (OSError, zipfile.BadZipFile):
+                continue
+    return "\n".join(parts)
+
+
 def _read_xlsx(path: str | os.PathLike[str]) -> str:
     """Read an Excel file and return the position and value of each non-empty cell.
     读取 Excel 文件内容，返回每个非空单元格的位置和值。"""
     try:
         import openpyxl
-    except ImportError:
-        logger.warning("openpyxl is required to evaluate xlsx files")
-        return ""
+    except ImportError as exc:
+        raise RuntimeError("openpyxl is required to evaluate xlsx files") from exc
 
     workbook = openpyxl.load_workbook(path, data_only=True)
     parts: list[str] = []
@@ -75,12 +130,44 @@ def _read_docx(path: str | os.PathLike[str]) -> str:
     读取 Word 文档内容，返回所有段落的文本。"""
     try:
         from docx import Document
-    except ImportError:
-        logger.warning("python-docx is required to evaluate docx files")
-        return ""
+    except ImportError as exc:
+        raise RuntimeError("python-docx is required to evaluate docx files") from exc
 
     document = Document(path)
-    return "\n".join(paragraph.text for paragraph in document.paragraphs)
+    parts = [paragraph.text for paragraph in document.paragraphs if paragraph.text]
+    for table in document.tables:
+        for row in table.rows:
+            parts.append(" | ".join(cell.text for cell in row.cells))
+    for section in document.sections:
+        parts.extend(paragraph.text for paragraph in section.header.paragraphs if paragraph.text)
+        parts.extend(paragraph.text for paragraph in section.footer.paragraphs if paragraph.text)
+    return "\n".join(parts)
+
+
+def _read_pptx(path: str | os.PathLike[str]) -> str:
+    """Extract slide text, table cells and speaker notes from a PowerPoint file."""
+    try:
+        from pptx import Presentation
+    except ImportError as exc:
+        raise RuntimeError("python-pptx is required to inspect pptx files") from exc
+
+    presentation = Presentation(path)
+    parts: list[str] = []
+    for slide_number, slide in enumerate(presentation.slides, start=1):
+        parts.append(f"[SLIDE {slide_number}]")
+        for shape in slide.shapes:
+            if getattr(shape, "has_text_frame", False) and shape.text:
+                parts.append(shape.text)
+            if getattr(shape, "has_table", False):
+                for row in shape.table.rows:
+                    parts.append(" | ".join(cell.text for cell in row.cells))
+        try:
+            notes = slide.notes_slide.notes_text_frame
+        except (AttributeError, KeyError):
+            notes = None
+        if notes is not None and notes.text:
+            parts.append(f"[NOTES] {notes.text}")
+    return "\n".join(parts)
 
 
 def _read_pdf(path: str | os.PathLike[str]) -> str:
@@ -91,9 +178,8 @@ def _read_pdf(path: str | os.PathLike[str]) -> str:
     except ImportError:
         try:
             from PyPDF2 import PdfReader  # type: ignore
-        except ImportError:
-            logger.warning("pypdf or PyPDF2 is required to evaluate pdf files")
-            return ""
+        except ImportError as exc:
+            raise RuntimeError("pypdf or PyPDF2 is required to evaluate pdf files") from exc
 
     reader = PdfReader(path)
     return "\n".join(page.extract_text() or "" for page in reader.pages)
@@ -185,21 +271,35 @@ def _docx_target_paragraphs(document: Any, match: dict[str, Any]) -> list[Any]:
 def _reader_for_doc_type(doc_type: str) -> Callable[[str | os.PathLike[str]], str]:
     """Return the content reader function for the given document type.
     根据文档类型返回对应的内容读取函数。"""
+    doc_type = str(doc_type).lower().lstrip(".")
     if doc_type == "xlsx":
         return _read_xlsx
-    if doc_type in {"txt", "ics"}:
+    if doc_type in {
+        "txt", "ics", "md", "csv", "tsv", "yaml", "yml", "py", "js", "ts", "java",
+        "xml", "ini", "cfg", "log",
+    }:
         return _read_text
+    if doc_type == "json":
+        return _read_json
+    if doc_type in {"html", "htm"}:
+        return _read_html
     if doc_type in {"doc", "docx"}:
         return _read_docx
+    if doc_type in {"ppt", "pptx"}:
+        return _read_pptx
     if doc_type == "pdf":
         return _read_pdf
-    raise AssertionError(f"Not implemented doc type: {doc_type}")
+    if doc_type == "svg":
+        return _read_svg
+    if doc_type == "zip":
+        return _read_zip
+    raise UnsupportedArtifactType(f"Unsupported document type for content checks: {doc_type}")
 
 
 def evaluate_contain(testbed_dir: str | os.PathLike[str], args: dict[str, Any]) -> bool:
     """Check whether a document or email account contains all keywords.
     检查文档或邮件账户是否包含所有关键词。"""
-    doc_type = args["doc_type"]
+    doc_type = str(args.get("doc_type") or Path(str(args.get("file", ""))).suffix.lstrip("."))
     testbed_dir = str(testbed_dir)
 
     if doc_type == "email":
@@ -229,6 +329,11 @@ def evaluate_contain(testbed_dir: str | os.PathLike[str], args: dict[str, Any]) 
 def evaluate_not_contain(testbed_dir: str | os.PathLike[str], args: dict[str, Any]) -> bool:
     """Check whether a document or email account misses at least one keyword.
     检查文档或邮件账户是否缺少至少一个关键词。"""
+    if args.get("doc_type") != "email":
+        file_path = _task_path(testbed_dir, str(args.get("file", "")))
+        if not file_path.is_file():
+            logger.debug("File does not exist: %s", file_path)
+            return False
     return not evaluate_contain(testbed_dir, args)
 
 
@@ -253,9 +358,9 @@ def evaluate_file_format_valid(
     if not file_path.is_file():
         return False
 
-    doc_type = args.get("doc_type") or file_path.suffix.lower().lstrip(".")
+    doc_type = str(args.get("doc_type") or file_path.suffix.lower().lstrip(".")).lower().lstrip(".")
     try:
-        if doc_type in {"txt", "md", "csv"}:
+        if doc_type in {"txt", "md", "csv", "tsv", "yaml", "yml", "py", "js", "ts", "java", "html", "htm", "xml"}:
             file_path.read_text(errors="strict")
             return True
         if doc_type == "json":
@@ -268,16 +373,23 @@ def evaluate_file_format_valid(
         if doc_type == "xlsx":
             try:
                 import openpyxl
-            except ImportError:
-                logger.warning("openpyxl is required to validate xlsx files")
-                return False
+            except ImportError as exc:
+                raise RuntimeError("openpyxl is required to validate xlsx files") from exc
             openpyxl.load_workbook(file_path, read_only=True, data_only=False).close()
             return True
         if doc_type == "pdf":
             return file_path.read_bytes().startswith(b"%PDF")
+        if doc_type == "svg":
+            ET.parse(file_path)
+            return True
+        if doc_type == "zip":
+            with zipfile.ZipFile(file_path) as archive:
+                return archive.testzip() is None
         if doc_type == "ics":
             content = file_path.read_text(errors="ignore")
             return "BEGIN:VCALENDAR" in content and "END:VCALENDAR" in content
+    except RuntimeError:
+        raise
     except Exception as exc:
         logger.debug("Format validation failed for %s: %s", file_path, exc)
         return False
@@ -715,7 +827,12 @@ def run_checklist_score(
     testbed_dir: str | os.PathLike[str],
     checks: list[dict[str, Any]],
 ) -> dict[str, Any]:
-    """Run objective checklist checks and return an equal-weight 0-1 partial score."""
+    """Run objective checks while preserving evaluator errors distinct from failures.
+
+    Existing callers can keep consuming ``passed``. New callers should use
+    ``status`` and ``score_eligible`` so an unsupported reader, missing
+    dependency, or malformed check is never reported as an Agent failure.
+    """
     results: list[dict[str, Any]] = []
     for index, check in enumerate(checks, start=1):
         check_id = str(check.get("id") or f"check_{index}")
@@ -724,6 +841,8 @@ def run_checklist_score(
         if not callable(eval_func) or eval_name == "evaluate_llm_judge_score":
             passed = False
             detail = f"unsupported checklist function: {eval_name}"
+            status = "unsupported"
+            score_eligible = False
         else:
             check_dir = _task_path(testbed_dir, check.get("testbed_dir", "."))
             check_args = check.get("args", {})
@@ -732,10 +851,20 @@ def run_checklist_score(
             try:
                 passed = bool(eval_func(check_dir, check_args))
                 detail = eval_name
+                status = "pass" if passed else "fail"
+                score_eligible = True
+            except UnsupportedArtifactType as exc:
+                logger.warning("Checklist check %s is unsupported: %s", check_id, exc)
+                passed = False
+                detail = f"{eval_name}: {type(exc).__name__}: {exc}"
+                status = "unsupported"
+                score_eligible = False
             except Exception as exc:
                 logger.warning("Checklist check %s failed: %s", check_id, exc)
                 passed = False
                 detail = f"{eval_name}: {type(exc).__name__}: {exc}"
+                status = "evaluator_error"
+                score_eligible = False
         results.append(
             {
                 "id": check_id,
@@ -743,12 +872,17 @@ def run_checklist_score(
                 "weight": 1.0,
                 "passed": passed,
                 "detail": detail,
+                "status": status,
+                "score_eligible": score_eligible,
             }
         )
-    partial_pass = round(sum(item["passed"] for item in results) / len(results), 4) if results else 0.0
+    eligible = [item for item in results if item["score_eligible"]]
+    partial_pass = round(sum(item["passed"] for item in eligible) / len(eligible), 4) if eligible else None
     return {
-        "complete_pass": int(bool(results) and all(item["passed"] for item in results)),
+        "complete_pass": int(bool(results) and len(eligible) == len(results) and all(item["passed"] for item in eligible)),
         "partial_pass": partial_pass,
+        "eligible_check_count": len(eligible),
+        "ineligible_check_count": len(results) - len(eligible),
         "checks": results,
     }
 

@@ -8,7 +8,7 @@ from pathlib import Path
 
 WRAPPER_PATH = (
     Path(__file__).resolve().parents[1]
-    / "datasets/dev/odyssey_2_12_smoke/environment/tool_wrapper.py"
+    / "datasets/dev/template_task/environment/tool_wrapper.py"
 )
 
 
