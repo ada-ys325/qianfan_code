@@ -1,0 +1,40 @@
+schema_version: "0.1"
+task_id: "template_task"
+task_name: "Add converted handwritten meeting notes to calendar"
+split: "dev"
+difficulty: "L1"
+tags:
+  - pdf
+  - ocr
+  - calendar
+  - shell
+  - network-instability
+  - api-instability
+
+agent:
+  timeout_sec: 900
+  user: "agent"
+  workdir: "/workspace"
+  direct_shell: true
+  runner: "dumatebench/agents/command_agent.py"
+  runtime: "in_container"
+
+environment:
+  backend: "docker-compose"
+  dockerfile: "environment/Dockerfile"
+  compose_file: "environment/docker-compose.yaml"
+  cpus: 2
+  memory_mb: 4096
+  storage_mb: 12000
+  allow_internet: true
+  allow_package_install: true
+
+evaluation:
+  entrypoint: "evaluator/evaluator.py"
+  checks_file: "evaluator/checks.yaml"
+  hidden_tests: false
+  metrics:
+    - complete_pass
+    - partial_pass
+    - environment_recovery
+    - network_recovery

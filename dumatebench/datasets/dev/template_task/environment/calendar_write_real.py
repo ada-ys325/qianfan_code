@@ -18,11 +18,11 @@ def main():
         text = "Meeting agenda text could not be reliably extracted by OCR in this smoke run."
 
     cal = Calendar()
-    cal.add("prodid", "-//DuMateBench smoke//odyssey_2_12//EN")
+    cal.add("prodid", "-//DuMateBench template_task//EN")
     cal.add("version", "2.0")
 
     event = Event()
-    event.add("uid", "odyssey-2-12-smoke@dumatebench")
+    event.add("uid", "template-task@dumatebench")
     event.add("summary", args.summary)
     event.add("description", text[:1200])
     event.add("dtstart", datetime(2020, 5, 1, 10, 0, 0))

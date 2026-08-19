@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""OfficeBench/OdysseyBench-style evaluator functions.
+"""Benchmark-style evaluator functions.
 
-This module copies the evaluator surface used by OfficeBench and OdysseyBench
-into DuMateBench while keeping the implementation independent from the
-OdysseyBench ``apps.*`` helper modules.
+This module provides the evaluator surface used by DuMateBench while keeping
+the implementation independent from external application helper modules.
 """
 
 from __future__ import annotations
@@ -984,7 +983,7 @@ def evaluate_task(task_dir):
         })
     partial = earned / total if total else 0.0
     return {
-        "task_id": "odyssey_2_12_smoke",
+        "task_id": "template_task",
         "complete_pass": 1 if all(r["passed"] for r in results) else 0,
         "partial_pass": round(partial, 4),
         "environment_recovery": 1 if any(r["id"] == "calendar_exists" and r["passed"] for r in results) else 0,

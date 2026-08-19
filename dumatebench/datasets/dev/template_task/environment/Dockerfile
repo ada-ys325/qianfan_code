@@ -73,19 +73,19 @@ RUN useradd -ms /bin/bash agent && \
 
 COPY agents/command_agent.py /opt/dumate/command_agent.py
 COPY agents/native_agent.py /opt/dumate/native_agent.py
-COPY datasets/dev/odyssey_2_12_smoke/workspace_seed/ /workspace_seed/
-COPY datasets/dev/odyssey_2_12_smoke/instruction.md /opt/dumate/task/instruction.md
-COPY datasets/dev/odyssey_2_12_smoke/task.yaml /opt/dumate/task/task.yaml
-COPY datasets/dev/odyssey_2_12_smoke/network_faults.yaml /opt/dumate/network_faults.yaml
-COPY datasets/dev/odyssey_2_12_smoke/tool_faults.yaml /opt/dumate/tool_faults.yaml
-COPY datasets/dev/odyssey_2_12_smoke/environment/setup.sh /opt/dumate/setup.sh
-COPY datasets/dev/odyssey_2_12_smoke/environment/entrypoint.sh /opt/dumate/entrypoint.sh
-COPY datasets/dev/odyssey_2_12_smoke/environment/agent_smoke.sh /opt/dumate/agent_smoke.sh
-COPY datasets/dev/odyssey_2_12_smoke/environment/network_fault_daemon.py /opt/dumate/network_fault_daemon.py
-COPY datasets/dev/odyssey_2_12_smoke/environment/tool_wrapper.py /opt/dumate/tool_wrapper.py
-COPY datasets/dev/odyssey_2_12_smoke/environment/calendar_write_real.py /opt/dumate/bin/calendar_write_real.py
-COPY datasets/dev/odyssey_2_12_smoke/environment/mail_send_real.py /opt/dumate/bin/mail_send_real.py
-COPY datasets/dev/odyssey_2_12_smoke/environment/ocr_extract_real.py /opt/dumate/bin/ocr_extract_real.py
+COPY datasets/dev/template_task/workspace_seed/ /workspace_seed/
+COPY datasets/dev/template_task/instruction.md /opt/dumate/task/instruction.md
+COPY datasets/dev/template_task/task.yaml /opt/dumate/task/task.yaml
+COPY datasets/dev/template_task/network_faults.yaml /opt/dumate/network_faults.yaml
+COPY datasets/dev/template_task/tool_faults.yaml /opt/dumate/tool_faults.yaml
+COPY datasets/dev/template_task/environment/setup.sh /opt/dumate/setup.sh
+COPY datasets/dev/template_task/environment/entrypoint.sh /opt/dumate/entrypoint.sh
+COPY datasets/dev/template_task/environment/agent_smoke.sh /opt/dumate/agent_smoke.sh
+COPY datasets/dev/template_task/environment/network_fault_daemon.py /opt/dumate/network_fault_daemon.py
+COPY datasets/dev/template_task/environment/tool_wrapper.py /opt/dumate/tool_wrapper.py
+COPY datasets/dev/template_task/environment/calendar_write_real.py /opt/dumate/bin/calendar_write_real.py
+COPY datasets/dev/template_task/environment/mail_send_real.py /opt/dumate/bin/mail_send_real.py
+COPY datasets/dev/template_task/environment/ocr_extract_real.py /opt/dumate/bin/ocr_extract_real.py
 
 RUN chmod +x \
       /opt/dumate/command_agent.py \
