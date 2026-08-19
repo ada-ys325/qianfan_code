@@ -54,7 +54,7 @@ export DUMATE_LLM_JUDGE_MODEL="gpt-4o"
 
 nohup python3 dumatebench/scripts/run_task_batch.py \
   --tasks-dir dumatebench/datasets/claude-opus-4-8-group6 \
-  --template-task dumatebench/datasets/dev/odyssey_2_12_smoke \
+  --template-task dumatebench/datasets/dev/template_task \
   --task-glob '*' \
   --agent-backend codex \
   --agent-model gpt-5.5 \
@@ -76,7 +76,7 @@ export DUMATE_LLM_JUDGE_MODEL="gpt-4o"
 
 nohup python3 dumatebench/scripts/run_task_batch.py \
   --tasks-dir dumatebench/datasets/claude-opus-4-8-group6 \
-  --template-task dumatebench/datasets/dev/odyssey_2_12_smoke \
+  --template-task dumatebench/datasets/dev/template_task \
   --task-glob '*' \
   --agent-backend claude-code \
   --agent-model claude-opus-4-8 \

@@ -20,7 +20,7 @@ Run a single task with the bundled echo agent (for a smoke test):
 
 ```bash
 dumate run \
-  --task dumatebench/datasets/dev/odyssey_2_12_smoke \
+  --task dumatebench/datasets/dev/template_task \
   --agent 'python3 dumatebench/agents/examples/echo_agent.py' \
   --max-steps 3
 ```

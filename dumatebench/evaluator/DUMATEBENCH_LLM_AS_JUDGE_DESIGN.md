@@ -293,7 +293,7 @@ LLM-as-Judge 失败不会阻断最终分数产出。系统会写结构化失败�
 ```bash
 python3 dumatebench/scripts/run_task_batch.py \
   --tasks-dir dumatebench/datasets/dev \
-  --template-task dumatebench/datasets/dev/odyssey_2_12_smoke \
+  --template-task dumatebench/datasets/dev/template_task \
   --task-glob '*' \
   --max-steps 20
 ```

@@ -1,1 +1,0 @@
-/tmp/dumate-reasoning-probe-s_0ao5fv/reasoning_probe_quick_task/instruction.md

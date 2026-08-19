@@ -122,7 +122,7 @@ docker compose version
 This test does not require an API key or call an LLM:
 
 ```bash
-bash dumatebench/scripts/run_odyssey_2_12_smoke.sh
+bash dumatebench/scripts/run_template_task.sh
 ```
 
 The script builds the smoke image, runs a fixed agent script in Docker,
@@ -144,8 +144,8 @@ A successful run ends with a reward containing:
 Inspect the generated artifact and full result:
 
 ```bash
-ls -l dumatebench/datasets/dev/odyssey_2_12_smoke/run_outputs/calendar/Alice.ics
-cat dumatebench/datasets/dev/odyssey_2_12_smoke/run_outputs/reward.json
+ls -l dumatebench/datasets/dev/template_task/run_outputs/calendar/Alice.ics
+cat dumatebench/datasets/dev/template_task/run_outputs/reward.json
 ```
 
 The expected messages `OCR service temporarily unavailable` and
@@ -159,7 +159,7 @@ contract:
 
 ```bash
 dumate run \
-  --task dumatebench/datasets/dev/odyssey_2_12_smoke \
+  --task dumatebench/datasets/dev/template_task \
   --agent 'python3 dumatebench/agents/examples/echo_agent.py' \
   --max-steps 3
 ```
@@ -183,7 +183,7 @@ export DUMATE_MODEL="your-model-id"
 # Required when OPENAI_BASE_URL is not already trusted by the script.
 export DUMATE_TRUSTED_BASE_URLS="$OPENAI_BASE_URL"
 
-bash dumatebench/scripts/run_odyssey_2_12_agent.sh --max-steps 20
+bash dumatebench/scripts/run_template_task_agent.sh --max-steps 20
 ```
 
 Do not commit API keys or place them in task files. The selected endpoint and
@@ -195,8 +195,8 @@ concatenated JSON objects.
 After the run, inspect both agent completion and evaluator success:
 
 ```bash
-cat dumatebench/datasets/dev/odyssey_2_12_smoke/run_logs/agent_status.json
-cat dumatebench/datasets/dev/odyssey_2_12_smoke/run_outputs/reward.json
+cat dumatebench/datasets/dev/template_task/run_logs/agent_status.json
+cat dumatebench/datasets/dev/template_task/run_outputs/reward.json
 ```
 
 A successful agent process is not sufficient. Treat the task as passed only
@@ -253,7 +253,7 @@ mirrors can be overridden for the smoke script:
 DUMATE_BASE_IMAGE=your-mirror/python:3.12-slim \
 DUMATE_APT_DEBIAN_MIRROR=http://mirrors.aliyun.com/debian \
 DUMATE_APT_SECURITY_MIRROR=http://mirrors.aliyun.com/debian-security \
-bash dumatebench/scripts/run_odyssey_2_12_smoke.sh
+bash dumatebench/scripts/run_template_task.sh
 ```
 
 ## Usage

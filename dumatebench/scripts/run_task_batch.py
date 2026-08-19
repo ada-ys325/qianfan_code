@@ -20,7 +20,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = ROOT.parent
-DEFAULT_TEMPLATE_TASK = ROOT / "datasets/dev/odyssey_2_12_smoke"
+DEFAULT_TEMPLATE_TASK = ROOT / "datasets/dev/template_task"
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 

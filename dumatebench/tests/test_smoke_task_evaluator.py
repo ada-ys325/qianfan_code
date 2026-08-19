@@ -6,7 +6,7 @@ from pathlib import Path
 
 EVALUATOR_PATH = (
     Path(__file__).resolve().parents[1]
-    / "datasets/dev/odyssey_2_12_smoke/evaluator/evaluator.py"
+    / "datasets/dev/template_task/evaluator/evaluator.py"
 )
 
 

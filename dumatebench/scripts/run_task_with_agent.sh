@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-TASK_DIR="${DUMATE_TASK_DIR:-${ROOT}/datasets/dev/odyssey_2_12_smoke}"
+TASK_DIR="${DUMATE_TASK_DIR:-${ROOT}/datasets/dev/template_task}"
 
 if [ "$#" -lt 1 ]; then
   echo "usage: $0 '<agent command>' [adapter_runner args...]" >&2

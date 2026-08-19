@@ -1,0 +1,182 @@
+{
+  "kept_files": [
+    "ref_00_平台总览与字段映射.md",
+    "ref_01_beihang.md",
+    "ref_02_bjut_dublin.md",
+    "ref_03_cuc_media.md",
+    "ref_04_buct_curie.md",
+    "ref_05_buu_rut.md",
+    "ref_06_ncut_brunel.md",
+    "ref_07_bupt_qmul.md",
+    "ref_08_bistu_illinois.md",
+    "ref_09_cau_surrey.md",
+    "ref_10_cup_tulsa.md",
+    "ref_11_bda_trinity.md",
+    "ref_12_ustb_leeds.md",
+    "ref_13_cufe_vu.md",
+    "ref_14_官方项目名单Excel.md"
+  ],
+  "rejected_files": [],
+  "kept_assets": [
+    "assets/asset_01_beihang_105.html",
+    "assets/asset_02_bjut_dublin_838.html",
+    "assets/asset_03_cuc_media_1120.html",
+    "assets/asset_04_buct_curie_2314.html",
+    "assets/asset_05_buu_rut_2671.html",
+    "assets/asset_06_ncut_brunel_2782.html",
+    "assets/asset_07_bupt_qmul_2956.html",
+    "assets/asset_08_bistu_illinois_3647.html",
+    "assets/asset_09_cau_surrey_3727.html",
+    "assets/asset_10_cup_tulsa_3959.html",
+    "assets/asset_11_bda_trinity_3960.html",
+    "assets/asset_12_ustb_leeds_4157.html",
+    "assets/asset_13_cufe_vu_384.html"
+  ],
+  "rejected_assets": [],
+  "validator": {
+    "files": [
+      {
+        "file": "ref_00_平台总览与字段映射.md",
+        "keep": true,
+        "reason": "官方数据源总览与机构/项目两类字段→14列表头映射，是编写crawler.py和Excel表头的直接依据"
+      },
+      {
+        "file": "ref_01_beihang.md",
+        "keep": true,
+        "reason": "projects.json第1项官方详情页(detail/105)逐字段摘要，URL可核验，含全部目标列"
+      },
+      {
+        "file": "ref_02_bjut_dublin.md",
+        "keep": true,
+        "reason": "第2项官方详情页(detail/838)逐字段摘要，权威可核验"
+      },
+      {
+        "file": "ref_03_cuc_media.md",
+        "keep": true,
+        "reason": "第3项官方详情页(detail/1120)逐字段摘要，权威可核验"
+      },
+      {
+        "file": "ref_04_buct_curie.md",
+        "keep": true,
+        "reason": "第4项官方详情页(detail/2314)逐字段摘要，权威可核验"
+      },
+      {
+        "file": "ref_05_buu_rut.md",
+        "keep": true,
+        "reason": "第5项官方详情页(detail/2671)逐字段摘要，权威可核验"
+      },
+      {
+        "file": "ref_06_ncut_brunel.md",
+        "keep": true,
+        "reason": "第6项官方详情页(detail/2782)逐字段摘要，批准书编号与HTML一致"
+      },
+      {
+        "file": "ref_07_bupt_qmul.md",
+        "keep": true,
+        "reason": "第7项官方详情页(detail/2956)逐字段摘要，权威可核验"
+      },
+      {
+        "file": "ref_08_bistu_illinois.md",
+        "keep": true,
+        "reason": "第8项官方详情页(detail/3647)逐字段摘要，批准书编号与HTML一致"
+      },
+      {
+        "file": "ref_09_cau_surrey.md",
+        "keep": true,
+        "reason": "第9项官方详情页(detail/3727)逐字段摘要，权威可核验"
+      },
+      {
+        "file": "ref_10_cup_tulsa.md",
+        "keep": true,
+        "reason": "第10项官方详情页(detail/3959)逐字段摘要，权威可核验"
+      },
+      {
+        "file": "ref_11_bda_trinity.md",
+        "keep": true,
+        "reason": "第11项官方详情页(detail/3960)逐字段摘要，权威可核验(可采集更多)"
+      },
+      {
+        "file": "ref_12_ustb_leeds.md",
+        "keep": true,
+        "reason": "第12项官方详情页(detail/4157)逐字段摘要，权威可核验"
+      },
+      {
+        "file": "ref_13_cufe_vu.md",
+        "keep": true,
+        "reason": "项目类页面样例(detail/384)，字段名与目标列一致，验证机构/项目两类字段差异"
+      },
+      {
+        "file": "ref_14_官方项目名单Excel.md",
+        "keep": true,
+        "reason": "登记官方名单Excel(与projects.json同源)来源用途，用于断点续传全集核对；为预置件未重复下载，合规"
+      }
+    ],
+    "assets": [
+      {
+        "file": "assets/asset_01_beihang_105.html",
+        "keep": true,
+        "reason": "detail/105真实存档HTML，含MOE11FRA02DNR20060008N，被ref_01引用并注明来源用途"
+      },
+      {
+        "file": "assets/asset_02_bjut_dublin_838.html",
+        "keep": true,
+        "reason": "detail/838真实存档HTML，被ref_02引用，可离线核验全部字段"
+      },
+      {
+        "file": "assets/asset_03_cuc_media_1120.html",
+        "keep": true,
+        "reason": "detail/1120真实存档HTML，被ref_03引用，来源用途明确"
+      },
+      {
+        "file": "assets/asset_04_buct_curie_2314.html",
+        "keep": true,
+        "reason": "detail/2314真实存档HTML，被ref_04引用，来源用途明确"
+      },
+      {
+        "file": "assets/asset_05_buu_rut_2671.html",
+        "keep": true,
+        "reason": "detail/2671真实存档HTML，被ref_05引用，来源用途明确"
+      },
+      {
+        "file": "assets/asset_06_ncut_brunel_2782.html",
+        "keep": true,
+        "reason": "detail/2782真实存档HTML，含MOE11UKA02DNR20202062N，被ref_06引用"
+      },
+      {
+        "file": "assets/asset_07_bupt_qmul_2956.html",
+        "keep": true,
+        "reason": "detail/2956真实存档HTML，被ref_07引用，来源用途明确"
+      },
+      {
+        "file": "assets/asset_08_bistu_illinois_3647.html",
+        "keep": true,
+        "reason": "detail/3647真实存档HTML，含MOE11USA02DNR20252467N，被ref_08引用"
+      },
+      {
+        "file": "assets/asset_09_cau_surrey_3727.html",
+        "keep": true,
+        "reason": "detail/3727真实存档HTML，被ref_09引用，来源用途明确"
+      },
+      {
+        "file": "assets/asset_10_cup_tulsa_3959.html",
+        "keep": true,
+        "reason": "detail/3959真实存档HTML，被ref_10引用，来源用途明确"
+      },
+      {
+        "file": "assets/asset_11_bda_trinity_3960.html",
+        "keep": true,
+        "reason": "detail/3960真实存档HTML，被ref_11引用，来源用途明确"
+      },
+      {
+        "file": "assets/asset_12_ustb_leeds_4157.html",
+        "keep": true,
+        "reason": "detail/4157真实存档HTML，被ref_12引用，来源用途明确"
+      },
+      {
+        "file": "assets/asset_13_cufe_vu_384.html",
+        "keep": true,
+        "reason": "detail/384真实存档HTML，含MOE11AU2A20040440O，项目类样例，被ref_13引用"
+      }
+    ]
+  }
+}

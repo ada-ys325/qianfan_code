@@ -1,6 +1,7 @@
 """Reusable evaluator functions for DuMateBench tasks."""
 
 from .evaluate import (
+    UnsupportedArtifactType,
     evaluate,
     evaluate_calendar_no_overlap,
     evaluate_contain,
@@ -31,6 +32,7 @@ from .evaluate import (
 )
 
 __all__ = [
+    "UnsupportedArtifactType",
     "evaluate",
     "evaluate_calendar_no_overlap",
     "evaluate_contain",
