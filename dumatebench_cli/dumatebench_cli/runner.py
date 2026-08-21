@@ -11,12 +11,14 @@ reproduced here.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import shutil
 import subprocess
 import sys
 import time
+import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import datetime
@@ -24,6 +26,7 @@ from pathlib import Path
 from typing import Any
 
 from dumatebench_cli.adapter import compose_cmd, compose_service, reset_dir, run_adapter_loop
+from dumatebench_cli.task_metadata import TaskMetadataError, load_task_metadata, shared_evaluate_path
 
 TASK_MARKER_FILES = ("task.yaml", "instruction.md")
 
@@ -78,7 +81,7 @@ def _shared_evaluate_path() -> Path | None:
     checkout.
     """
     candidates = [
-        Path(__file__).resolve().parents[2] / "dumatebench" / "evaluator" / "evaluate.py",
+        shared_evaluate_path(),
         Path.cwd() / "dumatebench" / "evaluator" / "evaluate.py",
     ]
     for candidate in candidates:
@@ -97,19 +100,41 @@ def _evaluator_env() -> dict[str, str]:
     return env
 
 
-def _valid_reward(path: Path) -> bool:
-    """Check that the evaluator produced the minimum reward contract."""
+def _reward_error(path: Path, expected_task_id: str) -> str | None:
+    """Return a reason when reward.json violates the evaluator contract."""
     try:
         value = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
-        return False
+        return "reward.json is missing or invalid JSON"
     if not isinstance(value, dict):
-        return False
+        return "reward.json must contain an object"
+    if value.get("task_id") != expected_task_id:
+        return (
+            f"reward.json task_id {value.get('task_id')!r} does not match "
+            f"task.yaml task_id {expected_task_id!r}"
+        )
     for key in ("complete_pass", "partial_pass"):
         score = value.get(key)
         if isinstance(score, bool) or not isinstance(score, (int, float)) or not 0 <= float(score) <= 1:
+            return f"reward.json has invalid {key}"
+    return None
+
+
+def _valid_reward(path: Path, expected_task_id: str | None = None) -> bool:
+    """Check that the evaluator produced the minimum reward contract."""
+    if expected_task_id is None:
+        try:
+            value = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
             return False
-    return True
+        if not isinstance(value, dict):
+            return False
+        for key in ("complete_pass", "partial_pass"):
+            score = value.get(key)
+            if isinstance(score, bool) or not isinstance(score, (int, float)) or not 0 <= float(score) <= 1:
+                return False
+        return True
+    return _reward_error(path, expected_task_id) is None
 
 
 def is_task_dir(path: Path) -> bool:
@@ -131,6 +156,22 @@ def default_run_id(agent_label: str) -> str:
     return f"{safe_label}-{timestamp}"
 
 
+def _execution_id(run_id: str | None, prefix: str) -> str:
+    base = run_id or prefix
+    return f"{base}-{uuid.uuid4().hex[:10]}"
+
+
+def compose_project_name(run_id: str, task_dir: Path) -> str:
+    """Build a unique, stable Compose project name for one task execution."""
+    digest = hashlib.sha1(f"{run_id}\0{task_dir.resolve()}".encode("utf-8")).hexdigest()[:12]
+    safe_run = "".join(
+        c.lower() if c.isascii() and (c.isalnum() or c in "-_") else "-"
+        for c in run_id
+    )
+    safe_run = safe_run.strip("-_")[:28] or "run"
+    return f"dumatebench-{safe_run}-{digest}"
+
+
 def write_jsonl(path: Path, record: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a") as handle:
@@ -144,9 +185,25 @@ def run_single_task(
     adapter_timeout: int,
     no_build: bool,
     keep_containers: bool,
+    run_id: str | None = None,
 ) -> TaskResult:
     task_dir = task_dir.resolve()
     task_id = task_dir.name
+    try:
+        _task_yaml, task_id = load_task_metadata(task_dir)
+    except TaskMetadataError as exc:
+        return TaskResult(
+            task_id=task_id,
+            task_dir=str(task_dir),
+            status="error",
+            steps_taken=None,
+            evaluator_returncode=None,
+            elapsed_seconds=0.0,
+            reward_path=None,
+            error=str(exc),
+        )
+    execution_id = _execution_id(run_id, "single")
+    project_name = compose_project_name(execution_id, task_dir)
     run_outputs = task_dir / "run_outputs"
     run_logs = task_dir / "run_logs"
     status_log = run_logs / "agent_status.json"
@@ -156,16 +213,21 @@ def run_single_task(
     reset_dir(run_logs)
 
     start = time.time()
-    status: dict[str, Any] = {"adapter_command": agent_cmd}
+    status: dict[str, Any] = {"adapter_command": agent_cmd, "compose_project_name": project_name}
     evaluator_returncode: int | None = None
     error: str | None = None
     reward_path = run_outputs / "reward.json"
+    (run_logs / "compose_project_name.txt").write_text(project_name + "\n", encoding="utf-8")
 
     try:
-        _run(compose_cmd(task_dir) + ["down", "--remove-orphans"], cwd=task_dir, check=False)
+        _run(compose_cmd(task_dir, project_name) + ["down", "--remove-orphans"], cwd=task_dir, check=False)
         if not no_build:
-            _run(compose_cmd(task_dir) + ["build"], cwd=task_dir, capture=False)
-        _run(compose_cmd(task_dir) + ["up", "-d", compose_service(task_dir)], cwd=task_dir, capture=False)
+            _run(compose_cmd(task_dir, project_name) + ["build"], cwd=task_dir, capture=False)
+        _run(
+            compose_cmd(task_dir, project_name) + ["up", "-d", compose_service(task_dir)],
+            cwd=task_dir,
+            capture=False,
+        )
 
         result = run_adapter_loop(
             task_dir=task_dir,
@@ -173,6 +235,7 @@ def run_single_task(
             max_steps=max_steps,
             adapter_timeout=adapter_timeout,
             step_log_cb=lambda record: write_jsonl(adapter_log, record),
+            project_name=project_name,
         )
         status.update(result.as_status_dict())
 
@@ -185,8 +248,12 @@ def run_single_task(
         status["evaluator_returncode"] = evaluator_returncode
         if evaluator_proc.stderr:
             status["evaluator_stderr"] = evaluator_proc.stderr[-4000:]
-        if not _valid_reward(reward_path):
-            detail = f"Evaluator did not produce a valid reward.json (returncode={evaluator_returncode})."
+        reward_error = _reward_error(reward_path, task_id)
+        if reward_error:
+            detail = (
+                "Evaluator did not produce a valid reward.json "
+                f"(returncode={evaluator_returncode}): {reward_error}."
+            )
             stderr = evaluator_proc.stderr.strip()
             if stderr:
                 detail += f"\n{stderr[-2000:]}"
@@ -197,10 +264,10 @@ def run_single_task(
         status["error"] = error
     finally:
         status_log.write_text(json.dumps(status, indent=2, ensure_ascii=False))
-        logs = _run(compose_cmd(task_dir) + ["logs", "--no-color"], cwd=task_dir, check=False).stdout
+        logs = _run(compose_cmd(task_dir, project_name) + ["logs", "--no-color"], cwd=task_dir, check=False).stdout
         (run_logs / "compose.log").write_text(logs or "")
         if not keep_containers:
-            _run(compose_cmd(task_dir) + ["down", "--remove-orphans"], cwd=task_dir, check=False)
+            _run(compose_cmd(task_dir, project_name) + ["down", "--remove-orphans"], cwd=task_dir, check=False)
 
     return TaskResult(
         task_id=task_id,
@@ -227,6 +294,7 @@ def run_batch(
     concurrency: int = 1,
     summary_path: Path | None = None,
     stop_on_failure: bool = False,
+    run_id: str | None = None,
 ) -> list[TaskResult]:
     tasks = discover_tasks(tasks_root, task_glob=task_glob, recursive=recursive)
     if limit > 0:
@@ -240,6 +308,7 @@ def run_batch(
         summary_path.unlink()
 
     results: list[TaskResult] = []
+    execution_id = _execution_id(run_id, "batch")
 
     def _execute(task_dir: Path) -> TaskResult:
         return run_single_task(
@@ -249,6 +318,7 @@ def run_batch(
             adapter_timeout=adapter_timeout,
             no_build=no_build,
             keep_containers=keep_containers,
+            run_id=execution_id,
         )
 
     if concurrency <= 1:

@@ -31,6 +31,15 @@ class AdapterComposeTests(unittest.TestCase):
             self.assertTrue(generated.is_file())
             self.assertIn("main:", generated.read_text(encoding="utf-8"))
 
+    def test_compose_project_is_explicit(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            task = Path(temp_dir)
+            (task / "environment").mkdir()
+
+            command = compose_cmd(task, "dumatebench-test-123")
+
+            self.assertEqual(command[:4], ["docker", "compose", "-p", "dumatebench-test-123"])
+
 
 if __name__ == "__main__":
     unittest.main()

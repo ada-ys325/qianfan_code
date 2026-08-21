@@ -90,7 +90,7 @@ def compose_service(task_dir: Path) -> str:
     return MAIN_SERVICE
 
 
-def compose_cmd(task_dir: Path) -> list[str]:
+def compose_cmd(task_dir: Path, project_name: str | None = None) -> list[str]:
     """Return the ``docker compose`` invocation for a task's ``environment/``.
 
     Writes (or overwrites) a minimal compose file into ``environment/``
@@ -101,12 +101,17 @@ def compose_cmd(task_dir: Path) -> list[str]:
     docstring).
     """
     environment_dir = task_dir / "environment"
+    command = ["docker", "compose"]
+    if project_name:
+        command.extend(["-p", project_name])
     authored_compose = environment_dir / "docker-compose.yaml"
     if authored_compose.is_file():
-        return ["docker", "compose", "-f", str(authored_compose)]
+        command.extend(["-f", str(authored_compose)])
+        return command
     compose_path = environment_dir / _COMPOSE_FILENAME
     compose_path.write_text(_COMPOSE_TEMPLATE.format(service=MAIN_SERVICE), encoding="utf-8")
-    return ["docker", "compose", "-f", str(compose_path)]
+    command.extend(["-f", str(compose_path)])
+    return command
 
 
 def _run(cmd: list[str], cwd: Path | None = None, check: bool = True, capture: bool = True) -> subprocess.CompletedProcess[str]:
@@ -125,8 +130,8 @@ def _truncate(text: str, limit: int = MAX_OBS_CHARS) -> str:
     return text[:limit] + f"\n...[truncated {len(text) - limit} chars]"
 
 
-def exec_in_task(task_dir: Path, command: str) -> dict[str, Any]:
-    cmd = compose_cmd(task_dir) + [
+def exec_in_task(task_dir: Path, command: str, project_name: str | None = None) -> dict[str, Any]:
+    cmd = compose_cmd(task_dir, project_name) + [
         "exec",
         "-T",
         "--user",
@@ -211,6 +216,7 @@ def run_adapter_loop(
     adapter_timeout: int,
     step_log_cb: Any = None,
     system_prompt: str = DEFAULT_SYSTEM_PROMPT,
+    project_name: str | None = None,
 ) -> AdapterRunResult:
     """Drive one task container against an agent adapter until finish or max_steps.
 
@@ -236,7 +242,7 @@ def run_adapter_loop(
             finish_reason = action.get("reason", "")
             break
 
-        observation = exec_in_task(task_dir, action["command"])
+        observation = exec_in_task(task_dir, action["command"], project_name=project_name)
         record = StepRecord(action=action, observation=observation)
         history.append(record)
         if step_log_cb:

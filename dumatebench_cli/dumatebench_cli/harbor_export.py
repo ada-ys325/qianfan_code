@@ -54,9 +54,15 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-import yaml
+from dumatebench_cli.packager import check_task_dir
+from dumatebench_cli.task_metadata import (
+    TaskMetadataError,
+    load_task_metadata,
+    shared_evaluate_path,
+    task_id_from_yaml,
+)
 
-_SHARED_EVALUATE_PY = Path(__file__).resolve().parents[2] / "dumatebench" / "evaluator" / "evaluate.py"
+_SHARED_EVALUATE_PY = shared_evaluate_path()
 
 TASK_TOML_TEMPLATE = """schema_version = "1.4"
 artifacts = [{{ source = "/outputs", destination = "outputs" }}]
@@ -107,8 +113,14 @@ json.dump(numeric, open('/logs/verifier/reward.json', 'w'))
 "
 """
 
-REQUIRED_TASK_YAML_KEYS = ("task_id",)
-_EXPORT_IGNORE_NAMES = {"run_outputs", "run_logs", ".batch_runtime", "__pycache__", ".pytest_cache"}
+_EXPORT_IGNORE_NAMES = {
+    "run_outputs",
+    "run_logs",
+    ".batch_runtime",
+    ".dumate-compose.yaml",
+    "__pycache__",
+    ".pytest_cache",
+}
 
 
 class HarborExportError(RuntimeError):
@@ -158,15 +170,10 @@ def _environment_resource_settings(
 
 
 def load_task_yaml(task_dir: Path) -> dict[str, Any]:
-    path = task_dir / "task.yaml"
-    if not path.is_file():
-        raise HarborExportError(f"{task_dir}: missing task.yaml")
-    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    if not isinstance(data, dict):
-        raise HarborExportError(f"{task_dir}: task.yaml must contain a mapping")
-    missing = [key for key in REQUIRED_TASK_YAML_KEYS if key not in data]
-    if missing:
-        raise HarborExportError(f"{task_dir}: task.yaml missing required keys: {missing}")
+    try:
+        data, _task_id = load_task_metadata(task_dir)
+    except TaskMetadataError as exc:
+        raise HarborExportError(str(exc)) from exc
     return data
 
 
@@ -179,9 +186,16 @@ def render_task_toml(task_yaml: dict[str, Any], warnings: list[str]) -> str:
     which ships alongside task.toml in the exported directory.
     """
     agent_cfg = task_yaml.get("agent") or {}
-    env_cfg = task_yaml.get("environment") or {}
+    env_cfg = task_yaml.get("environment")
+    if not isinstance(agent_cfg, dict):
+        raise HarborExportError("task.yaml agent must be a mapping")
+    if not isinstance(env_cfg, dict):
+        raise HarborExportError("task.yaml environment must be a mapping")
 
-    task_id = str(task_yaml["task_id"])
+    try:
+        task_id = task_id_from_yaml(task_yaml, Path("task.yaml"))
+    except TaskMetadataError as exc:
+        raise HarborExportError(str(exc)) from exc
     task_name = str(task_yaml.get("task_name") or task_id)
     tags = task_yaml.get("tags") or []
     if not isinstance(tags, list):
@@ -195,10 +209,15 @@ def render_task_toml(task_yaml: dict[str, Any], warnings: list[str]) -> str:
     agent_user = agent_cfg.get("user") or "agent"
 
     workdir = agent_cfg.get("workdir") or "/workspace"
-    allow_internet = env_cfg.get("allow_internet", True)
-    network_mode = "public" if allow_internet else "none"
     if "allow_internet" not in env_cfg:
-        warnings.append(f"{task_id}: environment.allow_internet missing, defaulting network_mode to public")
+        raise HarborExportError(f"{task_id}: environment.allow_internet must be explicitly set to true or false")
+    allow_internet = env_cfg["allow_internet"]
+    if not isinstance(allow_internet, bool):
+        raise HarborExportError(
+            f"{task_id}: environment.allow_internet must be a YAML boolean, "
+            f"not {type(allow_internet).__name__}"
+        )
+    network_mode = "public" if allow_internet else "none"
 
     verifier_timeout = agent_timeout + 300
 
@@ -226,7 +245,12 @@ def export_task(task_dir: Path, output_dir: Path, *, overwrite: bool = False) ->
     task_dir = task_dir.resolve()
     warnings: list[str] = []
     task_yaml = load_task_yaml(task_dir)
-    task_id = str(task_yaml["task_id"])
+    task_id = task_id_from_yaml(task_yaml, task_dir)
+
+    package_result = check_task_dir(task_dir, harbor_compatible=True)
+    if not package_result.passed:
+        failures = [check.message for check in package_result.checks if not check.ok]
+        raise HarborExportError(f"{task_id}: package check failed: {'; '.join(failures)}")
 
     if output_dir.exists():
         if not overwrite:
@@ -241,32 +265,29 @@ def export_task(task_dir: Path, output_dir: Path, *, overwrite: bool = False) ->
     tests_dir.mkdir(exist_ok=True)
 
     evaluator_dir = output_dir / "evaluator"
-    if evaluator_dir.is_dir():
-        for item in evaluator_dir.iterdir():
-            dest = tests_dir / item.name
-            if item.is_dir():
-                shutil.copytree(item, dest)
-            else:
-                shutil.copy2(item, dest)
-    else:
-        warnings.append(f"{task_id}: evaluator/ not found; tests/test.sh will fail at run time")
+    for item in evaluator_dir.iterdir():
+        dest = tests_dir / item.name
+        if item.is_dir():
+            shutil.copytree(item, dest)
+        else:
+            shutil.copy2(item, dest)
 
     test_sh = tests_dir / "test.sh"
     test_sh.write_text(TEST_SH_TEMPLATE, encoding="utf-8")
     test_sh.chmod(0o755)
 
-    if not (tests_dir / "evaluator.py").exists():
-        warnings.append(f"{task_id}: evaluator/evaluator.py not found; tests/test.sh will fail at run time")
-
-    if _SHARED_EVALUATE_PY.is_file():
-        shutil.copy2(_SHARED_EVALUATE_PY, tests_dir / "evaluate.py")
-    else:
-        warnings.append(f"{task_id}: shared evaluate.py not found at {_SHARED_EVALUATE_PY}; tests/test.sh will fail at run time")
+    shutil.copy2(_SHARED_EVALUATE_PY, tests_dir / "evaluate.py")
 
     return ExportResult(task_id=task_id, output_dir=output_dir, warnings=warnings)
 
 
-def export_batch(tasks_root: Path, output_root: Path, *, task_glob: str = "*", overwrite: bool = False) -> list[ExportResult]:
+def export_batch(
+    tasks_root: Path,
+    output_root: Path,
+    *,
+    task_glob: str = "*",
+    overwrite: bool = False,
+) -> list[ExportResult]:
     from dumatebench_cli.runner import discover_tasks
 
     task_dirs = discover_tasks(tasks_root, task_glob=task_glob, recursive=True)
@@ -275,5 +296,7 @@ def export_batch(tasks_root: Path, output_root: Path, *, task_glob: str = "*", o
 
     results: list[ExportResult] = []
     for task_dir in task_dirs:
-        results.append(export_task(task_dir, output_root / task_dir.name, overwrite=overwrite))
+        task_yaml = load_task_yaml(task_dir)
+        task_id = task_id_from_yaml(task_yaml, task_dir)
+        results.append(export_task(task_dir, output_root / task_id, overwrite=overwrite))
     return results

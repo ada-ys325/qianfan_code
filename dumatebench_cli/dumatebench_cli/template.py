@@ -30,6 +30,8 @@ import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from dumatebench_cli.task_metadata import TaskMetadataError, load_task_metadata
+
 _IGNORE_NAMES = {".DS_Store", "__pycache__", ".pytest_cache", "run_outputs", "run_logs"}
 FAULT_CONFIG_FILES = ("network_faults.yaml", "tool_faults.yaml")
 TASK_ROOT_DIRNAME = "task_root"
@@ -188,11 +190,14 @@ def fill_task(
     """
     task_dir = task_dir.resolve()
     template_dir = template_dir.resolve()
-    task_id = task_dir.name
     warnings: list[str] = []
 
     if not task_dir.is_dir():
         raise TemplateFillError(f"Task directory does not exist: {task_dir}")
+    try:
+        _task_yaml, task_id = load_task_metadata(task_dir)
+    except TaskMetadataError as exc:
+        raise TemplateFillError(str(exc)) from exc
     template_env = template_dir / "environment"
     if not template_env.is_dir():
         raise TemplateFillError(f"Template has no environment/: {template_env}")

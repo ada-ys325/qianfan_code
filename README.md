@@ -68,6 +68,11 @@ run or exported to Harbor. During this fill step, `workspace_seed/` is moved
 under `environment/workspace_seed/` to make the Docker build context
 self-contained.
 
+Every runnable task must set `environment.allow_internet` explicitly to the
+YAML boolean `true` or `false`. Quoted values such as `"false"` are rejected;
+they are strings rather than booleans and must not silently enable a public
+network.
+
 ## Install
 
 This project is currently released and supported as a source checkout, not as
@@ -193,8 +198,15 @@ Validate a task package before a long run:
 
 ```bash
 dumate datasets list dumatebench/datasets/dev
-dumate package check dumatebench/datasets/dev/template_task
+dumate package check path/to/prepared/task
 ```
+
+The package check also covers the Harbor export contract: `evaluator/evaluator.py`,
+`evaluator/checks.yaml`, the shared `dumatebench/evaluator/evaluate.py`, and
+every local `COPY`/`ADD` source used by `environment/Dockerfile` must be
+present. A task-authored `environment/docker-compose.yaml` remains supported by
+the local runner, but must be removed by `template fill` before this release
+check or Harbor export can pass.
 
 There are three common ways to run an agent:
 

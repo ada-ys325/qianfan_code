@@ -33,6 +33,8 @@ from typing import Any
 
 import yaml
 
+from dumatebench_cli.task_metadata import TaskMetadataError, load_task_metadata
+
 RUN_OUTPUT_FILES = ("reward.json",)
 RUN_LOG_FILES = ("agent_status.json", "agent_adapter.jsonl", "compose.log")
 MANIFEST_JOB_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{7,255}$")
@@ -121,15 +123,37 @@ def pack_submission(
     out_dir.mkdir(parents=True)
 
     warnings: list[str] = []
+    normalized_records: list[dict[str, Any]] = []
     for record in records:
-        task_id = record.get("task_id")
-        task_dir = record.get("task_dir")
-        if not task_id or not task_dir:
+        if not isinstance(record, dict):
             warnings.append(f"Skipping malformed summary record: {record}")
             continue
-        warnings.extend(_copy_task_artifacts(Path(task_dir), out_dir / task_id, task_id))
+        task_dir_value = record.get("task_dir")
+        if not task_dir_value:
+            warnings.append(f"Skipping summary record without task_dir: {record}")
+            continue
+        task_dir = Path(task_dir_value).resolve()
+        try:
+            _task_yaml, canonical_task_id = load_task_metadata(task_dir)
+        except TaskMetadataError as exc:
+            warnings.append(f"Skipping {task_dir}: {exc}")
+            continue
+        recorded_task_id = record.get("task_id")
+        if recorded_task_id != canonical_task_id:
+            warnings.append(
+                f"{task_dir}: replacing summary task_id {recorded_task_id!r} "
+                f"with task.yaml task_id {canonical_task_id!r}"
+            )
+        normalized_record = dict(record)
+        normalized_record["task_id"] = canonical_task_id
+        normalized_record["task_dir"] = str(task_dir)
+        normalized_records.append(normalized_record)
+        warnings.extend(_copy_task_artifacts(task_dir, out_dir / canonical_task_id, canonical_task_id))
 
-    shutil.copy2(summary_path, out_dir / "batch_summary.jsonl")
+    (out_dir / "batch_summary.jsonl").write_text(
+        "".join(json.dumps(record, ensure_ascii=False) + "\n" for record in normalized_records),
+        encoding="utf-8",
+    )
 
     metadata = {
         "agent_display_name": agent_name,
@@ -151,7 +175,7 @@ def pack_submission(
     config = dumate_run_args or {}
     (out_dir / "config.json").write_text(json.dumps(config, indent=2, ensure_ascii=False))
 
-    return PackResult(out_dir=out_dir, task_count=len(records), warnings=warnings)
+    return PackResult(out_dir=out_dir, task_count=len(normalized_records), warnings=warnings)
 
 
 def validate_submission(bundle_dir: Path) -> list[str]:
