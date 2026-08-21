@@ -98,12 +98,17 @@ dumate package check path/to/task
 ```
 
 Verifies a task directory has the files a runnable task needs
-(`task.yaml`, `instruction.md`, `environment/`, `evaluator/`) and flags
-whether `environment/Dockerfile` bakes `evaluator/` or `web_reference/`
-(gold-reference material) into the built image. A task-authored
-`environment/docker-compose.yaml` is optional: filled tasks omit this legacy
-file because `dumate run` generates its compose definition and Harbor supplies
-its own overlay. Existing task-authored compose files remain supported.
+(`task.yaml`, `instruction.md`, `environment/`, `evaluator/`), requires
+`evaluator/evaluator.py` and `evaluator/checks.yaml`, validates the shared
+source-checkout evaluator and every local `COPY`/`ADD` source in the
+Dockerfile, and flags whether `environment/Dockerfile` bakes `evaluator/` or
+`web_reference/` (gold-reference material) into the built image. The task YAML
+must explicitly set `environment.allow_internet` to the boolean `true` or
+`false`; quoted strings are invalid. A task-authored
+`environment/docker-compose.yaml` is not accepted by this release check:
+filled tasks omit this legacy file because `dumate run` generates its compose
+definition and Harbor supplies its own overlay. The local runner still
+supports existing authored compose files for backwards compatibility.
 
 ## Useful flags
 

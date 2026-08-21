@@ -26,11 +26,11 @@ class RunnerEvaluatorTests(unittest.TestCase):
 
         self.assertEqual(env["DUMATE_EVALUATE_PY"], "/tmp/custom-evaluate.py")
 
-    def _make_task(self, root: Path) -> Path:
+    def _make_task(self, root: Path, task_id: str = "task") -> Path:
         task = root / "task"
         (task / "environment").mkdir(parents=True)
         (task / "evaluator").mkdir()
-        (task / "task.yaml").write_text("task_id: task\n", encoding="utf-8")
+        (task / "task.yaml").write_text(f"task_id: {task_id}\n", encoding="utf-8")
         (task / "instruction.md").write_text("Do the task\n", encoding="utf-8")
         (task / "evaluator" / "evaluator.py").write_text("print('ok')\n", encoding="utf-8")
         return task
@@ -77,7 +77,7 @@ class RunnerEvaluatorTests(unittest.TestCase):
                 if any(str(part).endswith("evaluator.py") for part in cmd):
                     (task / "run_outputs").mkdir(parents=True, exist_ok=True)
                     (task / "run_outputs" / "reward.json").write_text(
-                        json.dumps({"complete_pass": 0, "partial_pass": 0.5}), encoding="utf-8"
+                        json.dumps({"task_id": "task", "complete_pass": 0, "partial_pass": 0.5}), encoding="utf-8"
                     )
                     return subprocess.CompletedProcess(cmd, 1, "", "")
                 return subprocess.CompletedProcess(cmd, 0, "", "")
@@ -100,6 +100,72 @@ class RunnerEvaluatorTests(unittest.TestCase):
             self.assertEqual(result.evaluator_returncode, 1)
             self.assertIsNotNone(result.reward_path)
             self.assertIsNone(result.error)
+
+    def test_uses_yaml_task_id_and_unique_compose_project(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            task = self._make_task(Path(temp_dir), task_id="canonical-task")
+            commands: list[list[str]] = []
+
+            def fake_run(cmd, cwd=None, check=True, capture=True, env=None):
+                commands.append(cmd)
+                if any(str(part).endswith("evaluator.py") for part in cmd):
+                    (task / "run_outputs" / "reward.json").write_text(
+                        json.dumps({"task_id": "canonical-task", "complete_pass": 1, "partial_pass": 1}),
+                        encoding="utf-8",
+                    )
+                return subprocess.CompletedProcess(cmd, 0, "", "")
+
+            with patch.object(runner, "_run", side_effect=fake_run), patch.object(
+                runner,
+                "run_adapter_loop",
+                return_value=AdapterRunResult(True, "done", False, 1),
+            ):
+                result = runner.run_single_task(
+                    task,
+                    "python3 agent.py",
+                    max_steps=1,
+                    adapter_timeout=10,
+                    no_build=True,
+                    keep_containers=False,
+                    run_id="test-run",
+                )
+
+            self.assertEqual(result.task_id, "canonical-task")
+            self.assertEqual(result.status, "completed")
+            project_file = task / "run_logs" / "compose_project_name.txt"
+            project_name = project_file.read_text(encoding="utf-8").strip()
+            self.assertTrue(project_name.startswith("dumatebench-"))
+            self.assertTrue(any("-p" in command and project_name in command for command in commands))
+
+    def test_invalid_yaml_task_id_fails_before_compose(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            task = self._make_task(Path(temp_dir), task_id="bad/id")
+
+            result = runner.run_single_task(
+                task,
+                "python3 agent.py",
+                max_steps=1,
+                adapter_timeout=10,
+                no_build=True,
+                keep_containers=False,
+            )
+
+            self.assertEqual(result.status, "error")
+            self.assertIn("task.yaml.task_id", result.error or "")
+
+    def test_compose_project_names_differ_by_run_and_task(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            first = root / "first"
+            second = root / "second"
+            self.assertNotEqual(
+                runner.compose_project_name("run-a", first),
+                runner.compose_project_name("run-b", first),
+            )
+            self.assertNotEqual(
+                runner.compose_project_name("run-a", first),
+                runner.compose_project_name("run-a", second),
+            )
 
 
 if __name__ == "__main__":

@@ -29,12 +29,18 @@ class TemplateFillTests(unittest.TestCase):
             (task / "workspace_seed" / "input.txt").write_text("input", encoding="utf-8")
             (task / "evaluator").mkdir()
             (task / "evaluator" / "evaluator.py").write_text("print('ok')\n", encoding="utf-8")
-            (task / "task.yaml").write_text("task_id: task\n", encoding="utf-8")
+            (task / "evaluator" / "checks.yaml").write_text(
+                "checks:\n  - id: smoke\n    type: evaluate_file_exist\n", encoding="utf-8"
+            )
+            (task / "task.yaml").write_text(
+                "task_id: canonical-task\nenvironment:\n  allow_internet: false\n", encoding="utf-8"
+            )
             (task / "instruction.md").write_text("Complete the task.\n", encoding="utf-8")
 
             result = fill_task(task, template)
 
             self.assertTrue(result.filled)
+            self.assertEqual(result.task_id, "canonical-task")
             self.assertFalse((task / "environment" / "docker-compose.yaml").exists())
             self.assertTrue((task / "environment" / "workspace_seed" / "input.txt").is_file())
             self.assertTrue((task / "environment" / "task_root" / "task.yaml").is_file())
