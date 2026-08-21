@@ -9,6 +9,7 @@ test on runners that provide Docker and Harbor.
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import sys
@@ -51,6 +52,10 @@ def _dump_container_logs(output: str) -> None:
 
 
 def _write_fixture(root: Path) -> tuple[Path, Path, Path]:
+    # The host-side dumate runner writes the bind-mounted logs after the
+    # container exits. Match the fixture user to the runner uid so chown does
+    # not make those files inaccessible on Linux CI hosts.
+    agent_uid = os.getuid() or 1000
     raw = root / "raw"
     task = raw / "task_1"
     template = root / "template"
@@ -102,8 +107,8 @@ raise SystemExit(1)
     environment = template / "environment"
     environment.mkdir(parents=True)
     (environment / "Dockerfile").write_text(
-        """FROM python:3.12-slim
-RUN useradd -ms /bin/bash agent && mkdir -p /workspace /outputs /logs /opt/dumate/task
+        f"""FROM python:3.12-slim
+RUN useradd --uid {agent_uid} -ms /bin/bash agent && mkdir -p /workspace /outputs /logs /opt/dumate/task
 COPY workspace_seed/ /workspace_seed/
 COPY task.yaml /opt/dumate/task/task.yaml
 COPY setup.sh /opt/dumate/setup.sh
