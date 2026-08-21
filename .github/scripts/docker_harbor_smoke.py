@@ -121,6 +121,9 @@ set -euo pipefail
 mkdir -p /workspace /outputs /logs
 cp -a /workspace_seed/. /workspace/
 chown -R agent:agent /workspace /outputs /logs
+# The same bind mounts are written by the host-side dumate runner after the
+# container exits. Keep them writable when the host uid differs from agent.
+chmod -R a+rwX /outputs /logs
 """,
         encoding="utf-8",
     )
