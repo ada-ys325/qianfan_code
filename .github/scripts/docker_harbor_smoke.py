@@ -9,6 +9,7 @@ test on runners that provide Docker and Harbor.
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -18,7 +19,13 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
-def _run(command: list[str], *, cwd: Path | None = None, timeout: int = 600) -> subprocess.CompletedProcess[str]:
+def _run(
+    command: list[str],
+    *,
+    cwd: Path | None = None,
+    timeout: int = 600,
+    check: bool = True,
+) -> subprocess.CompletedProcess[str]:
     cwd = cwd or REPO_ROOT
     print("+", " ".join(str(part) for part in command), flush=True)
     result = subprocess.run(command, cwd=cwd, capture_output=True, text=True, timeout=timeout)
@@ -26,9 +33,21 @@ def _run(command: list[str], *, cwd: Path | None = None, timeout: int = 600) -> 
         print(result.stdout, end="")
     if result.stderr:
         print(result.stderr, end="", file=sys.stderr)
-    if result.returncode:
+    if check and result.returncode:
         raise RuntimeError(f"command exited with {result.returncode}: {' '.join(command)}")
     return result
+
+
+def _dump_container_logs(output: str) -> None:
+    """Print logs for containers named by Harbor before it cleans them up."""
+    names = list(dict.fromkeys(re.findall(r"(?:Container|container)\s+([A-Za-z0-9_.-]+)", output)))
+    for name in names:
+        result = subprocess.run(["docker", "logs", name], capture_output=True, text=True, check=False)
+        print(f"--- docker logs {name} (exit {result.returncode}) ---", flush=True)
+        if result.stdout:
+            print(result.stdout, end="")
+        if result.stderr:
+            print(result.stderr, end="", file=sys.stderr)
 
 
 def _write_fixture(root: Path) -> tuple[Path, Path, Path]:
@@ -91,7 +110,6 @@ COPY setup.sh /opt/dumate/setup.sh
 COPY entrypoint.sh /opt/dumate/entrypoint.sh
 RUN chmod +x /opt/dumate/setup.sh /opt/dumate/entrypoint.sh && \
     chown -R agent:agent /workspace /outputs /logs /workspace_seed /opt/dumate
-USER agent
 WORKDIR /workspace
 ENTRYPOINT ["/opt/dumate/entrypoint.sh"]
 """,
@@ -102,6 +120,7 @@ ENTRYPOINT ["/opt/dumate/entrypoint.sh"]
 set -euo pipefail
 mkdir -p /workspace /outputs /logs
 cp -a /workspace_seed/. /workspace/
+chown -R agent:agent /workspace /outputs /logs
 """,
         encoding="utf-8",
     )
@@ -189,8 +208,16 @@ def main() -> int:
         harbor_result = _run([
             "harbor", "run", "--path", str(harbor_tasks), "--agent", "nop",
             "--jobs-dir", str(jobs), "--n-concurrent", "1", "--n-attempts", "1", "--yes", "--debug",
-        ], timeout=900)
-        _assert_harbor_results(jobs, harbor_result.stdout + harbor_result.stderr)
+        ], timeout=900, check=False)
+        harbor_output = harbor_result.stdout + harbor_result.stderr
+        if harbor_result.returncode:
+            _dump_container_logs(harbor_output)
+            try:
+                _assert_harbor_results(jobs, harbor_output)
+            except RuntimeError as exc:
+                raise RuntimeError(f"harbor run exited with {harbor_result.returncode}: {exc}") from exc
+            raise RuntimeError(f"harbor run exited with {harbor_result.returncode}")
+        _assert_harbor_results(jobs, harbor_output)
     print("Docker/Harbor smoke E2E passed")
     return 0
 
