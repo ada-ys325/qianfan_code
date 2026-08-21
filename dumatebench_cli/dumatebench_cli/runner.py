@@ -12,6 +12,7 @@ reproduced here.
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -51,14 +52,64 @@ class TaskResult:
         }
 
 
-def _run(cmd: list[str], cwd: Path | None = None, check: bool = True, capture: bool = True) -> subprocess.CompletedProcess[str]:
-    result = subprocess.run(cmd, cwd=cwd, text=True, capture_output=capture)
+def _run(
+    cmd: list[str],
+    cwd: Path | None = None,
+    check: bool = True,
+    capture: bool = True,
+    env: dict[str, str] | None = None,
+) -> subprocess.CompletedProcess[str]:
+    result = subprocess.run(cmd, cwd=cwd, text=True, capture_output=capture, env=env)
     if check and result.returncode != 0:
         raise RuntimeError(
             f"Command failed ({result.returncode}): {' '.join(cmd)}\n"
             f"STDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
         )
     return result
+
+
+def _shared_evaluate_path() -> Path | None:
+    """Find the shared evaluator shipped with a source checkout.
+
+    Task evaluators are intentionally kept outside the task container and import
+    this file at evaluation time. The CLI is normally installed editable from
+    the repository, so the path next to this module is the stable default. The
+    current working directory fallback also supports running from a copied CLI
+    checkout.
+    """
+    candidates = [
+        Path(__file__).resolve().parents[2] / "dumatebench" / "evaluator" / "evaluate.py",
+        Path.cwd() / "dumatebench" / "evaluator" / "evaluate.py",
+    ]
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate.resolve()
+    return None
+
+
+def _evaluator_env() -> dict[str, str]:
+    """Return the evaluator environment without changing agent/container env."""
+    env = os.environ.copy()
+    if not env.get("DUMATE_EVALUATE_PY"):
+        shared_path = _shared_evaluate_path()
+        if shared_path is not None:
+            env["DUMATE_EVALUATE_PY"] = str(shared_path)
+    return env
+
+
+def _valid_reward(path: Path) -> bool:
+    """Check that the evaluator produced the minimum reward contract."""
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    if not isinstance(value, dict):
+        return False
+    for key in ("complete_pass", "partial_pass"):
+        score = value.get(key)
+        if isinstance(score, bool) or not isinstance(score, (int, float)) or not 0 <= float(score) <= 1:
+            return False
+    return True
 
 
 def is_task_dir(path: Path) -> bool:
@@ -108,6 +159,7 @@ def run_single_task(
     status: dict[str, Any] = {"adapter_command": agent_cmd}
     evaluator_returncode: int | None = None
     error: str | None = None
+    reward_path = run_outputs / "reward.json"
 
     try:
         _run(compose_cmd(task_dir) + ["down", "--remove-orphans"], cwd=task_dir, check=False)
@@ -127,9 +179,19 @@ def run_single_task(
         evaluator_proc = _run(
             [sys.executable, str(task_dir / "evaluator" / "evaluator.py"), "--task-dir", str(task_dir)],
             check=False,
+            env=_evaluator_env(),
         )
         evaluator_returncode = evaluator_proc.returncode
         status["evaluator_returncode"] = evaluator_returncode
+        if evaluator_proc.stderr:
+            status["evaluator_stderr"] = evaluator_proc.stderr[-4000:]
+        if not _valid_reward(reward_path):
+            detail = f"Evaluator did not produce a valid reward.json (returncode={evaluator_returncode})."
+            stderr = evaluator_proc.stderr.strip()
+            if stderr:
+                detail += f"\n{stderr[-2000:]}"
+            error = detail
+            status["error"] = error
     except Exception as exc:  # noqa: BLE001 - surfaced in summary, not swallowed silently
         error = str(exc)
         status["error"] = error
@@ -140,7 +202,6 @@ def run_single_task(
         if not keep_containers:
             _run(compose_cmd(task_dir) + ["down", "--remove-orphans"], cwd=task_dir, check=False)
 
-    reward_path = run_outputs / "reward.json"
     return TaskResult(
         task_id=task_id,
         task_dir=str(task_dir),

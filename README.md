@@ -46,6 +46,12 @@ dumatebench/scripts/         Smoke and batch scripts
 leaderboard/                 Submission validation and CI
 ```
 
+The checked-in dataset is for development and smoke testing. It includes
+`template_task` and a small number of development tasks; the complete 200-task
+dataset is downloaded separately in [C. Download the Public Dataset](#c-download-the-public-dataset).
+The legacy `dumatebench_old/` directory, when present in a workspace, is not the
+recommended runner entry point.
+
 Before runtime preparation, a source task normally contains:
 
 ```text
@@ -64,11 +70,34 @@ self-contained.
 
 ## Install
 
+This project is currently released and supported as a source checkout, not as
+a self-contained PyPI or wheel package. Keep the `dumatebench/` and
+`dumatebench_cli/` directories together and install the CLI in editable mode
+from the repository root. The shared evaluator used by local runs and Harbor
+exports lives in `dumatebench/evaluator/evaluate.py` next to the CLI source.
+Do not install a standalone wheel or use `pip install .` for the CLI; those
+artifacts do not include that shared evaluator.
+
 Requirements:
 
 - Python 3.10 or newer (Python 3.12 or 3.13 is recommended)
 - Docker Desktop with `docker compose` v2
 - Network access to PyPI and Docker Hub for the first build
+
+Keep Docker Desktop/the Docker daemon running while you build or run tasks. If
+you will run the full dataset or LLM-judge evaluators, also install the host
+tools required by those evaluators. They cannot be installed with pip:
+
+```bash
+# macOS example
+brew install ffmpeg libreoffice poppler
+
+# Verify the optional evaluator tools
+ffmpeg -version
+ffprobe -version
+soffice --version
+pdftoppm -v
+```
 
 From the repository root:
 
@@ -83,16 +112,20 @@ python -m pip install --upgrade pip
 python -m pip install -r dumatebench/requirements.txt
 python -m pip install -e dumatebench_cli/
 
-# Harbor is a separate package; it is not in requirements.txt.
+# Required for the Harbor export/run paths; not needed for the local smoke test
+# or a dumate adapter run.
 python -m pip install harbor
 
-# Provides the hf download command used below.
+# Required only when downloading the public Hugging Face dataset.
 python -m pip install huggingface_hub
 
 dumate --help
 docker compose version
 harbor --version
 ```
+
+The commands below assume that the shell is still in the repository root
+(`qianfan_code/`) and that the virtual environment is activated.
 
 Do not put API keys in the repository or in task files.
 
@@ -163,6 +196,16 @@ dumate datasets list dumatebench/datasets/dev
 dumate package check dumatebench/datasets/dev/template_task
 ```
 
+There are three common ways to run an agent:
+
+1. `dumate run` for an adapter that reads one JSON state from stdin and emits
+   one JSON action on stdout.
+2. `harbor run --path ...` for a Harbor-compatible harness against a local
+   exported task or dataset.
+3. `harbor run --dataset ... --upload --public` for a formal leaderboard run
+   against the maintainer-pinned Harbor dataset revision. Local exports are
+   not valid leaderboard evidence.
+
 ## C. Download the Public Dataset
 
 The public dataset is `Annihi/dumate_bench`. It contains a compressed archive
@@ -211,10 +254,11 @@ The raw dataset is intentionally kept separate from the runnable copy. The
 next command moves each task's `workspace_seed/` into its generated runtime,
 so work on a copy rather than modifying the raw dataset.
 
-## D. Prepare HF Tasks for Harbor
+## D. Prepare the Public Tasks for Local or Harbor Runs
 
 The raw HF tasks do not contain `environment/`. Make a working copy and fill
-the missing runtime from the repository's `template_task`:
+the missing runtime from the repository's `template_task`. This prepared copy
+can be used with either `dumate run` or Harbor:
 
 ```bash
 DATA_ROOT=/absolute/path/to/dumate_bench
@@ -232,6 +276,12 @@ dumate template fill \
 dumate datasets list "$WORK_ROOT" --task-glob 'task_*'
 dumate package check "$WORK_ROOT/task_1"
 ```
+
+The check should pass after `template fill` even though the prepared task has
+no `environment/docker-compose.yaml`. That file is a legacy task-authored
+override; `dumate run` creates a temporary compose definition and Harbor
+provides its own base overlay. Existing task-authored compose files remain
+supported for backwards compatibility.
 
 Export the prepared tasks into Harbor's format:
 
@@ -251,6 +301,31 @@ dumate harbor export \
   --task "$WORK_ROOT/task_1" \
   --output "$HARBOR_TASKS/task_1"
 ```
+
+If your agent implements the `dumate` adapter protocol, you can run the
+prepared dataset directly without exporting it to Harbor:
+
+```bash
+dumate run \
+  --dataset "$WORK_ROOT" \
+  --task-glob 'task_*' \
+  --agent 'python3 /absolute/path/to/my_agent.py' \
+  --max-steps 20 \
+  --limit 1 \
+  --concurrency 1
+```
+
+The source-installed CLI automatically supplies the shared evaluator module
+from `dumatebench/evaluator/evaluate.py`; no `DUMATE_EVALUATE_PY` setup is
+required. A task that produces a valid `reward.json` is recorded as
+`completed` even when `complete_pass` is `0`. An evaluator crash or a missing
+or invalid `reward.json` is recorded as an error and makes the CLI exit
+nonzero.
+
+Start with `--limit 1` and `--concurrency 1` while validating a new agent;
+remove `--limit 1` only after the first task passes. The batch runner writes
+`batch_summary.<run-id>.jsonl` under `$WORK_ROOT` and each task writes its own
+`run_outputs/reward.json` and `run_logs/`.
 
 ## E. Run Harbor with a Model
 
@@ -298,7 +373,13 @@ A successful *run* means `Exceptions: 0` and a verifier result. A successful
 
 ```bash
 find "$JOBS" -name result.json -print
-jq '.stats' "$JOBS"/*/result.json
+python - <<'PY' "$JOBS"/*/result.json
+import json
+import sys
+for path in sys.argv[1:]:
+    data = json.load(open(path, encoding="utf-8"))
+    print(path, data.get("stats"))
+PY
 ```
 
 Do not start all 200 tasks until the single-task run completes without an
