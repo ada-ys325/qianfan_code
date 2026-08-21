@@ -39,6 +39,7 @@ RUN_OUTPUT_FILES = ("reward.json",)
 RUN_LOG_FILES = ("agent_status.json", "agent_adapter.jsonl", "compose.log")
 MANIFEST_JOB_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{7,255}$")
 HARBOR_TASK_NAME_PREFIX = "dumate/"
+HARBOR_MANIFEST_SCHEMA_VERSION = 2
 
 
 class SubmissionError(RuntimeError):
@@ -349,18 +350,34 @@ def validate_submission_manifest(manifest_path: Path) -> list[str]:
     unknown = set(value) - allowed
     if unknown:
         errors.append(f"Submission manifest has unknown fields: {sorted(unknown)}")
-    if value.get("schema_version") != 1:
-        errors.append("Submission manifest schema_version must be 1")
+    if value.get("schema_version") != HARBOR_MANIFEST_SCHEMA_VERSION:
+        errors.append(
+            "Submission manifest schema_version must be "
+            f"{HARBOR_MANIFEST_SCHEMA_VERSION}"
+        )
     job_id = value.get("harbor_job_id")
     if not isinstance(job_id, str) or not MANIFEST_JOB_ID.fullmatch(job_id):
         errors.append("Submission manifest harbor_job_id must be a non-empty Harbor job ID or URL")
-    metadata = value.get("metadata", {})
+    metadata = value.get("metadata")
     if not isinstance(metadata, dict):
         errors.append("Submission manifest metadata must be an object")
     else:
         forbidden = {"score", "accuracy", "metrics", "final_score"} & set(metadata)
         if forbidden:
             errors.append(f"Submission manifest metadata must not claim results: {sorted(forbidden)}")
+        for field_name in ("agent_display_name", "agent_org_display_name"):
+            if not isinstance(metadata.get(field_name), str) or not metadata[field_name].strip():
+                errors.append(f"Submission manifest metadata.{field_name} must be a non-empty string")
+        models = metadata.get("models")
+        if not isinstance(models, list) or len(models) != 1 or not isinstance(models[0], dict):
+            errors.append("Submission manifest metadata.models must contain exactly one model")
+        else:
+            for field_name in ("model_name", "model_provider"):
+                if not isinstance(models[0].get(field_name), str) or not models[0][field_name].strip():
+                    errors.append(
+                        f"Submission manifest metadata.models[0].{field_name} "
+                        "must be a non-empty string"
+                    )
     verification = value.get("verification")
     if verification is not None and not isinstance(verification, dict):
         errors.append("Submission manifest verification must be an object")
@@ -443,7 +460,7 @@ def pack_submission_from_harbor_job(
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     manifest = {
-        "schema_version": 1,
+        "schema_version": HARBOR_MANIFEST_SCHEMA_VERSION,
         "harbor_job_id": job_id,
         "metadata": {
             "agent_display_name": agent_name,

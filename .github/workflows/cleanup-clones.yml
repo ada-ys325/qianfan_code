@@ -17,6 +17,9 @@ jobs:
   cleanup:
     if: >
       github.event.pull_request.merged == false &&
+      github.event.pull_request.base.ref == github.event.repository.default_branch &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.user.login == 'github-actions[bot]' &&
       startsWith(github.event.pull_request.head.ref, 'submission/pr-')
     runs-on: ubuntu-latest
     env:
@@ -48,6 +51,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          if [[ ! "$BOT_BRANCH" =~ ^submission/pr-[1-9][0-9]*$ ]]; then
+            echo "Not a canonical promoted bot branch: $BOT_BRANCH"
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           mapfile -t paths < <(
             gh api --paginate "repos/$REPOSITORY/pulls/$PR_NUMBER/files" \
               --jq '.[] | select(.filename | startswith("submissions/")) | .filename'

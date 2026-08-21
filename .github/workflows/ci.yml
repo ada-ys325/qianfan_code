@@ -21,7 +21,10 @@ jobs:
           python-version: "3.12"
 
       - name: Install CI dependencies
-        run: python -m pip install --disable-pip-version-check PyYAML
+        run: |
+          python -m pip install --disable-pip-version-check PyYAML pytest
+          python -m pip install --disable-pip-version-check -r dumatebench/requirements.txt
+          python -m pip install --disable-pip-version-check -e dumatebench_cli
 
       - name: Compile Python sources
         run: python -m compileall -q dumatebench dumatebench_cli leaderboard
@@ -36,11 +39,16 @@ jobs:
           PYTHONPATH: dumatebench_cli
         run: python -m unittest discover -s dumatebench_cli/tests -p 'test_*.py'
 
-      - name: Run stable runner and evaluator tests
+      # Discovery rather than a hand-picked module list: a green run here means
+      # the whole dumatebench suite passed, not a curated subset of it.
+      - name: Run runner and evaluator tests
         env:
           PYTHONPATH: dumatebench_cli
-        run: >-
-          python -m unittest
-          dumatebench.tests.test_adapter_runner
-          dumatebench.tests.test_command_agent
-          dumatebench.tests.test_smoke_task_evaluator
+        run: python -m unittest discover -s dumatebench/tests -p 'test_*.py'
+
+      # The Excel judge ships its own pytest suite and imports ``excel_judge`` as
+      # a top-level package, so it needs its own root on PYTHONPATH.
+      - name: Run Excel judge tests
+        env:
+          PYTHONPATH: dumatebench/evaluator/excel_llm_judge
+        run: python -m pytest dumatebench/evaluator/excel_llm_judge/tests -q

@@ -133,7 +133,8 @@ class BatchRunnerTest(unittest.TestCase):
         data = json.loads(final.read_text(encoding="utf-8"))
         self.assertEqual(data["base_partial_pass"], 0.2)
         self.assertEqual(data["llm_judge_score"], 0.0)
-        self.assertEqual(data["final_score"], 0.1)
+        # scoring.final_score: 30% complete + 30% partial + 40% judge.
+        self.assertEqual(data["final_score"], 0.06)
         self.assertEqual(data["llm_judge"]["status"], "missing_artifact")
 
     def test_write_final_reward_creates_score_when_checklist_reward_is_missing(self):
@@ -174,7 +175,7 @@ class BatchRunnerTest(unittest.TestCase):
 
         data = json.loads(Path(final_path).read_text(encoding="utf-8"))
         self.assertEqual(data["llm_judge_score"], 0.8)
-        self.assertEqual(data["final_score"], 0.6)
+        self.assertEqual(data["final_score"], 0.44)
         self.assertEqual(data["llm_judge"]["status"], "ok")
 
     def test_run_unified_llm_judge_is_called_when_artifact_exists(self):
@@ -204,7 +205,7 @@ class BatchRunnerTest(unittest.TestCase):
         final_path = write_final_reward(self.task, "run_outputs/reward_with_llm_judge.json")
         data = json.loads(Path(final_path).read_text(encoding="utf-8"))
         self.assertEqual(data["llm_judge_score"], 0.9)
-        self.assertEqual(data["final_score"], 0.65)
+        self.assertEqual(data["final_score"], 0.48)
 
     def test_run_unified_llm_judge_averages_multiple_artifacts(self):
         first = self.task / "run_outputs" / "reports" / "a.docx"
@@ -241,7 +242,7 @@ class BatchRunnerTest(unittest.TestCase):
         final_path = write_final_reward(self.task, "run_outputs/reward_with_llm_judge.json")
         data = json.loads(Path(final_path).read_text(encoding="utf-8"))
         self.assertEqual(data["llm_judge_score"], 0.5)
-        self.assertEqual(data["final_score"], 0.55)
+        self.assertEqual(data["final_score"], 0.38)
         self.assertEqual(data["llm_judge"]["output_files"], ["run_outputs/reports/a.docx", "run_outputs/reports/b.pdf"])
 
     def test_infer_output_files_reads_instruction_targets(self):
