@@ -79,32 +79,26 @@ def discover_reward_files(tasks_dir: Path, reward_file: str = DEFAULT_REWARD_FIL
     if reward_path.is_absolute():
         raise ValueError("--reward-file must be relative to each task directory")
 
-    rewards: list[Path] = []
-    for task_dir in sorted(tasks_dir.iterdir()):
-        if not task_dir.is_dir():
-            continue
-        rel = task_dir.relative_to(tasks_dir)
-        if _is_ignored_path(rel):
-            continue
-        path = task_dir / reward_path
+    rewards = []
+    for path in sorted(tasks_dir.rglob(str(reward_path))):
         if not path.is_file():
+            continue
+        rel = path.relative_to(tasks_dir)
+        if _is_ignored_path(rel):
             continue
         rewards.append(path)
     return rewards
 
 
 def discover_task_dirs(tasks_dir: Path) -> list[Path]:
-    tasks: list[Path] = []
-    for path in sorted(tasks_dir.iterdir()):
-        if not path.is_dir():
+    tasks: set[Path] = set()
+    for metadata_path in tasks_dir.rglob("task.yaml"):
+        if not metadata_path.is_file() or not (metadata_path.parent / "instruction.md").is_file():
             continue
-        try:
-            rel = path.relative_to(tasks_dir)
-        except ValueError:
-            rel = path
+        rel = metadata_path.relative_to(tasks_dir)
         if _is_ignored_path(rel):
             continue
-        tasks.append(path)
+        tasks.add(metadata_path.parent)
     return sorted(tasks)
 
 
@@ -203,7 +197,7 @@ def _number(value: Any) -> float | None:
 def true_checklist_partial_pass(data: dict[str, Any]) -> float:
     checks = data.get("checks")
     if not isinstance(checks, list) or not checks:
-        return 0.0
+        return _number(data.get("base_partial_pass")) or 0.0
     passed = 0
     for item in checks:
         if isinstance(item, dict) and bool(item.get("passed")):

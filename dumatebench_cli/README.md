@@ -62,7 +62,12 @@ to that task's `run_outputs/reward.json`.
 When installed from the DuMateBench source repository, the CLI automatically
 passes `dumatebench/evaluator/evaluate.py` to task evaluators. A non-passing
 task is still a completed run when it produces a valid `reward.json`; an
-evaluator crash or missing/invalid reward is reported as a run error.
+evaluator failure that does not produce a valid reward is reported as a run
+error.
+Evaluator return codes are retained for diagnostics: the standard evaluators
+return `1` when evaluation completed but `complete_pass` is `0`. That result is
+still valid for submission; only a missing or invalid reward makes the run
+unusable.
 
 List discoverable tasks under a directory without running anything:
 

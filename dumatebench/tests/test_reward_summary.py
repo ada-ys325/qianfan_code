@@ -42,7 +42,7 @@ class RewardSummaryTest(unittest.TestCase):
         self.assertEqual(summaries[0].base_complete_pass, 1)
         self.assertEqual(summaries[0].base_partial_pass, 0.75)
         self.assertEqual(summaries[0].llm_judge_score, 0.6)
-        self.assertEqual(summaries[0].final_score, 0.675)
+        self.assertEqual(summaries[0].final_score, 0.765)
 
     def test_include_missing_lists_tasks_without_final_reward(self):
         task = self.root / "group" / "task_ses_missing"
@@ -90,7 +90,7 @@ class RewardSummaryTest(unittest.TestCase):
         self.assertEqual(stats["avg_base_complete_pass"], 0.5)
         self.assertEqual(stats["avg_base_partial_pass"], 0.5)
         self.assertEqual(stats["avg_llm_judge_score"], 0.6)
-        self.assertEqual(stats["avg_final_score"], 0.5)
+        self.assertEqual(stats["avg_final_score"], 0.54)
 
     def test_dir_glob_limits_scan_to_matching_directories(self):
         wanted = self.root / "group_1" / "task_a"
@@ -115,7 +115,7 @@ class RewardSummaryTest(unittest.TestCase):
         summaries = collect_summaries(self.root, dir_glob="group_*")
 
         self.assertEqual([Path(summary.task_dir).name for summary in summaries], ["task_a"])
-        self.assertEqual(summaries[0].final_score, 0.8)
+        self.assertEqual(summaries[0].final_score, 0.86)
 
     def test_dir_glob_uses_direct_child_directories_only(self):
         direct = self.root / "group_1"

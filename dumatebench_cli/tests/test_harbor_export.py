@@ -4,6 +4,7 @@ import tempfile
 import tomllib
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from dumatebench_cli.harbor_export import HarborExportError, export_task, render_task_toml
 from dumatebench_cli.packager import check_task_dir
@@ -30,7 +31,7 @@ class HarborExportTests(unittest.TestCase):
 
         config = tomllib.loads(text)
         self.assertEqual(config["artifacts"], [{"source": "/outputs", "destination": "outputs"}])
-        self.assertEqual(config["environment"]["network_mode"], "none")
+        self.assertEqual(config["environment"]["network_mode"], "no-network")
         self.assertEqual(config["environment"]["cpus"], 2)
         self.assertEqual(config["environment"]["memory_mb"], 4096)
         self.assertEqual(config["environment"]["storage_mb"], 12000)
@@ -117,6 +118,29 @@ class HarborExportTests(unittest.TestCase):
 
             with self.assertRaises(HarborExportError):
                 export_task(task, root / "exported")
+
+    def test_export_fails_before_creating_output_when_shared_evaluator_is_missing(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            task = root / "task"
+            output = root / "exported"
+            (task / "environment").mkdir(parents=True)
+            (task / "environment" / "Dockerfile").write_text("FROM python:3.12-slim\n", encoding="utf-8")
+            (task / "evaluator").mkdir()
+            (task / "evaluator" / "evaluator.py").write_text("print('ok')\n", encoding="utf-8")
+            (task / "evaluator" / "checks.yaml").write_text(
+                "checks:\n  - id: smoke\n    type: evaluate_file_exist\n", encoding="utf-8"
+            )
+            (task / "task.yaml").write_text(
+                "task_id: sample-task\nenvironment:\n  allow_internet: false\n", encoding="utf-8"
+            )
+            (task / "instruction.md").write_text("Do the task\n", encoding="utf-8")
+
+            with patch("dumatebench_cli.packager.shared_evaluate_path", return_value=root / "missing-evaluate.py"):
+                with self.assertRaisesRegex(HarborExportError, "shared dumatebench/evaluator/evaluate.py exists"):
+                    export_task(task, output)
+
+            self.assertFalse(output.exists())
 
 
 if __name__ == "__main__":

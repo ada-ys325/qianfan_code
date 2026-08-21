@@ -34,6 +34,7 @@ from typing import Any
 import yaml
 
 from dumatebench_cli.task_metadata import TaskMetadataError, load_task_metadata
+from dumatebench_cli.reward import reward_error
 
 RUN_OUTPUT_FILES = ("reward.json",)
 RUN_LOG_FILES = ("agent_status.json", "agent_adapter.jsonl", "compose.log")
@@ -249,8 +250,6 @@ def validate_submission(bundle_dir: Path) -> list[str]:
         task_ids.append(task_id)
         if record.get("status") not in {"completed", "ok"}:
             errors.append(f"{task_id}: run status must be completed, got {record.get('status')!r}")
-        if record.get("evaluator_returncode") not in {None, 0}:
-            errors.append(f"{task_id}: evaluator_returncode must be 0")
 
     if len(task_ids) != len(set(task_ids)):
         errors.append("batch_summary.jsonl contains duplicate task_id values")
@@ -276,20 +275,9 @@ def validate_submission(bundle_dir: Path) -> list[str]:
         if not reward_path.exists():
             errors.append(f"{task_id}: missing reward.json")
         else:
-            try:
-                reward = json.loads(reward_path.read_text(encoding="utf-8"))
-            except (OSError, json.JSONDecodeError) as exc:
-                errors.append(f"{task_id}: reward.json is not valid JSON: {exc}")
-            else:
-                if not isinstance(reward, dict):
-                    errors.append(f"{task_id}: reward.json must contain an object")
-                elif reward.get("task_id") != task_id:
-                    errors.append(f"{task_id}: reward.json task_id does not match directory")
-                else:
-                    for score_field in ("complete_pass", "partial_pass"):
-                        value = reward.get(score_field)
-                        if not isinstance(value, (int, float)) or not 0 <= float(value) <= 1:
-                            errors.append(f"{task_id}: reward.json has invalid {score_field}")
+            reward_issue = reward_error(reward_path, expected_task_id=task_id)
+            if reward_issue:
+                errors.append(f"{task_id}: {reward_issue}")
         adapter_log = task_dir / "agent_adapter.jsonl"
         if not adapter_log.exists():
             errors.append(f"{task_id}: missing agent_adapter.jsonl (trajectory evidence)")
