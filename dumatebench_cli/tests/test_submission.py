@@ -55,6 +55,30 @@ class SubmissionCanonicalTaskIdTests(unittest.TestCase):
             self.assertEqual(normalized["task_id"], task_id)
             self.assertEqual(validate_submission(bundle), [])
 
+    def test_pack_reports_malformed_summary_rows_as_warnings(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            summary = root / "batch_summary.jsonl"
+            # A row that is an array or a bare string must not crash on .get().
+            summary.write_text(
+                '["task_1", "completed"]\n"task_2"\n',
+                encoding="utf-8",
+            )
+            bundle = root / "bundle"
+
+            result = pack_submission(
+                summary_path=summary,
+                out_dir=bundle,
+                agent_name="Agent",
+                agent_org="Org",
+                model_name="Model",
+                model_provider="Provider",
+            )
+
+            self.assertEqual(result.task_count, 0)
+            self.assertEqual(len(result.warnings), 2)
+            self.assertTrue(all("malformed summary record" in item for item in result.warnings))
+
 
 if __name__ == "__main__":
     unittest.main()

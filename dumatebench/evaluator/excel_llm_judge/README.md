@@ -72,7 +72,7 @@ python3 excel_llm_judge.py \
     --checklist ./checklist.md \
     --artifact-dir ./agent_outputs \
     --out-dir ./excel_judge_out \
-    --base-url https://cn.huayanapi.com:27502/v1 \
+    --base-url https://your-openai-compatible-endpoint/v1 \
     --model claude-opus-4-8
 ```
 

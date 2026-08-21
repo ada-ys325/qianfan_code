@@ -49,7 +49,7 @@ For Claude Code, the runner accepts either `https://gateway.example` or
 ```bash
 export DUMATE_AGENT_API_KEY="..."
 export OPENAI_API_KEY="..."
-export OPENAI_BASE_URL="https://cn.huayanapi.com:27502/v1"
+export OPENAI_BASE_URL="https://your-openai-compatible-endpoint/v1"
 export DUMATE_LLM_JUDGE_MODEL="gpt-4o"
 
 nohup python3 dumatebench/scripts/run_task_batch.py \
@@ -58,7 +58,7 @@ nohup python3 dumatebench/scripts/run_task_batch.py \
   --task-glob '*' \
   --agent-backend codex \
   --agent-model gpt-5.5 \
-  --agent-base-url https://cn.huayanapi.com:27502/v1 \
+  --agent-base-url https://your-openai-compatible-endpoint/v1 \
   --codex-version latest \
   > codex-gpt-5.5-group6.out 2>&1 &
 ```
@@ -71,7 +71,7 @@ with the exact model ID returned by the gateway.
 ```bash
 export DUMATE_AGENT_API_KEY="..."
 export OPENAI_API_KEY="..."
-export OPENAI_BASE_URL="https://cn.huayanapi.com:27502/v1"
+export OPENAI_BASE_URL="https://your-openai-compatible-endpoint/v1"
 export DUMATE_LLM_JUDGE_MODEL="gpt-4o"
 
 nohup python3 dumatebench/scripts/run_task_batch.py \

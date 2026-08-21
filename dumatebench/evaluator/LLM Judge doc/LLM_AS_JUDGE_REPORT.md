@@ -118,7 +118,7 @@ uncapped = 0.4 × rule_score + 0.6 × judge_score_conservative
 先安装项目依赖并配置 OpenAI-compatible API：
 
 ```bash
-export OPENAI_BASE_URL="https://cn.huayanapi.com:27502/v1"
+export OPENAI_BASE_URL="https://your-openai-compatible-endpoint/v1"
 export OPENAI_API_KEY="..."
 ```
 

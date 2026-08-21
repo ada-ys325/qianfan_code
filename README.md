@@ -118,8 +118,9 @@ python -m pip install -r dumatebench/requirements.txt
 python -m pip install -e dumatebench_cli/
 
 # Required for the Harbor export/run paths; not needed for the local smoke test
-# or a dumate adapter run.
-python -m pip install harbor
+# or a dumate adapter run. Pinned to the version CI verifies against, because
+# Harbor's Hub API and compose behaviour are version-sensitive.
+python -m pip install harbor==0.20.0
 
 # Required only when downloading the public Hugging Face dataset.
 python -m pip install huggingface_hub
@@ -479,3 +480,11 @@ revision, a configured Harbor account, and permission to publish results.
 
 See [leaderboard/SUBMIT.md](leaderboard/SUBMIT.md) for the submission manifest
 and verification workflow.
+
+## Licensing
+
+This project's code is Apache-2.0 ([LICENSE](LICENSE)). The development task
+fixtures under `dumatebench/datasets/dev/task_1/` include third-party material
+whose redistribution terms are not covered by that licence — see
+[THIRD_PARTY_DATA_NOTICES.md](THIRD_PARTY_DATA_NOTICES.md) before redistributing
+the dataset.

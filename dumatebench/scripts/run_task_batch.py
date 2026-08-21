@@ -131,7 +131,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Previous batch_summary.jsonl whose rows with agent_returncode not in {0, 1} should be rerun.",
     )
     parser.add_argument("--evaluator-python", default=os.environ.get("DUMATE_EVALUATOR_PYTHON", sys.executable))
-    parser.add_argument("--trusted-base-url", default=os.environ.get("DUMATE_TRUSTED_BASE_URLS", "https://cn.huayanapi.com:27502/v1"))
+    parser.add_argument("--trusted-base-url", default=os.environ.get("DUMATE_TRUSTED_BASE_URLS", ""))
     parser.add_argument("--image-prefix", default="dumatebench-batch", help="Docker image name prefix.")
     parser.add_argument("--max-steps", type=int, default=20, help="Maximum ReAct command-agent steps for each task.")
     parser.add_argument(

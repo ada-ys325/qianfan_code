@@ -32,12 +32,11 @@ docker compose -f "${COMPOSE_FILE}" run --rm \
   -e OPENAI_API_KEY \
   -e OPENAI_BASE_URL \
   -e DUMATE_MODEL \
-  -e DUMATE_TRUSTED_BASE_URLS="${DUMATE_TRUSTED_BASE_URLS:-https://cn.huayanapi.com:27502/v1}" \
+  -e DUMATE_TRUSTED_BASE_URLS="${DUMATE_TRUSTED_BASE_URLS:-}" \
   task \
   /opt/dumate/command_agent.py \
     --in-container \
     --task-dir /opt/dumate/task \
-    --trusted-base-url "https://cn.huayanapi.com:27502/v1" \
     "$@"
 agent_rc=$?
 "${DUMATE_EVALUATOR_PYTHON:-python3}" evaluator/evaluator.py --task-dir "${TASK_DIR}"
