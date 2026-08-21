@@ -7,9 +7,18 @@ run the task's evaluator, and collect a `reward.json` / `batch_summary.jsonl`.
 
 ## Install
 
+The supported installation mode is an editable install from a complete
+DuMateBench source checkout, run from its repository root:
+
 ```bash
 pip install -e dumatebench_cli/
 ```
+
+The CLI is not currently distributed as a self-contained PyPI or wheel
+package. Keep the sibling `dumatebench/` directory in the checkout because
+`dumate run` and `dumate harbor export` use its shared evaluator at
+`dumatebench/evaluator/evaluate.py`. Do not use `pip install .` or install a
+standalone wheel for these workflows.
 
 Requires Docker (with the `docker compose` plugin) on your machine — tasks
 build and run as local containers, images are never pulled from a registry.
@@ -50,6 +59,11 @@ This writes `batch_summary.<run-id>.jsonl` under the dataset directory, one
 line per task with status, step count, evaluator return code, and the path
 to that task's `run_outputs/reward.json`.
 
+When installed from the DuMateBench source repository, the CLI automatically
+passes `dumatebench/evaluator/evaluate.py` to task evaluators. A non-passing
+task is still a completed run when it produces a valid `reward.json`; an
+evaluator crash or missing/invalid reward is reported as a run error.
+
 List discoverable tasks under a directory without running anything:
 
 ```bash
@@ -86,7 +100,10 @@ dumate package check path/to/task
 Verifies a task directory has the files a runnable task needs
 (`task.yaml`, `instruction.md`, `environment/`, `evaluator/`) and flags
 whether `environment/Dockerfile` bakes `evaluator/` or `web_reference/`
-(gold-reference material) into the built image.
+(gold-reference material) into the built image. A task-authored
+`environment/docker-compose.yaml` is optional: filled tasks omit this legacy
+file because `dumate run` generates its compose definition and Harbor supplies
+its own overlay. Existing task-authored compose files remain supported.
 
 ## Useful flags
 

@@ -4,6 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from dumatebench_cli.packager import check_task_dir
 from dumatebench_cli.template import fill_task
 
 
@@ -29,6 +30,7 @@ class TemplateFillTests(unittest.TestCase):
             (task / "evaluator").mkdir()
             (task / "evaluator" / "evaluator.py").write_text("print('ok')\n", encoding="utf-8")
             (task / "task.yaml").write_text("task_id: task\n", encoding="utf-8")
+            (task / "instruction.md").write_text("Complete the task.\n", encoding="utf-8")
 
             result = fill_task(task, template)
 
@@ -40,6 +42,29 @@ class TemplateFillTests(unittest.TestCase):
             self.assertIn("COPY setup.sh /setup.sh", dockerfile)
             self.assertIn("COPY workspace_seed/ /workspace_seed/", dockerfile)
             self.assertIn("COPY task_root/task.yaml /opt/dumate/task/task.yaml", dockerfile)
+
+            package_result = check_task_dir(task)
+            self.assertTrue(package_result.passed)
+            compose_check = next(
+                check for check in package_result.checks
+                if "docker-compose.yaml" in check.message
+            )
+            self.assertTrue(compose_check.ok)
+            self.assertIn("optional", compose_check.message)
+
+            # Older task packages may still provide an authored compose file;
+            # package check must continue to accept those packages.
+            (task / "environment" / "docker-compose.yaml").write_text(
+                "services:\n  task: {}\n", encoding="utf-8"
+            )
+            legacy_result = check_task_dir(task)
+            self.assertTrue(legacy_result.passed)
+            legacy_check = next(
+                check for check in legacy_result.checks
+                if "docker-compose.yaml" in check.message
+            )
+            self.assertTrue(legacy_check.advisory)
+            self.assertIn("legacy", legacy_check.message)
 
 
 if __name__ == "__main__":
