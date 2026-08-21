@@ -501,6 +501,8 @@ class UnifiedLlmJudgeTest(unittest.TestCase):
         # program never zeroes the criterion on its own.
         self.assertEqual(aggregate["criteria"][0]["status"], "assessed")
         self.assertEqual(aggregate["criteria"][0]["score"], 3)
+        # The judge's own confidence is reported as-is, not downgraded.
+        self.assertEqual(aggregate["criteria"][0]["confidence"], 0.9)
         self.assertEqual(aggregate["criteria"][0]["evidence"], [])
 
     def test_pdf_judgment_accepts_prefixed_evidence_paths(self):

@@ -130,6 +130,22 @@ docker compose version
 harbor --version
 ```
 
+For the complete repository test suite, install the development/CI dependency
+set and run pytest from the repository root:
+
+```bash
+python -m pip install -r requirements-dev.txt
+python -m pytest -q
+```
+
+This entry point includes the Excel judge and calendar dependencies that are
+not needed by the basic CLI smoke test. The Docker/Harbor end-to-end check used
+by CI can also be run locally when Docker is available:
+
+```bash
+python .github/scripts/docker_harbor_smoke.py
+```
+
 The commands below assume that the shell is still in the repository root
 (`qianfan_code/`) and that the virtual environment is activated.
 
@@ -207,7 +223,9 @@ The package check also covers the Harbor export contract: `evaluator/evaluator.p
 every local `COPY`/`ADD` source used by `environment/Dockerfile` must be
 present. A task-authored `environment/docker-compose.yaml` remains supported by
 the local runner, but must be removed by `template fill` before this release
-check or Harbor export can pass.
+check or Harbor export can pass. Harbor export fails before creating its output
+directory when the shared evaluator is missing, so a successful export is a
+usable Harbor package rather than a deferred runtime warning.
 
 There are three common ways to run an agent:
 
@@ -331,9 +349,15 @@ dumate run \
 The source-installed CLI automatically supplies the shared evaluator module
 from `dumatebench/evaluator/evaluate.py`; no `DUMATE_EVALUATE_PY` setup is
 required. A task that produces a valid `reward.json` is recorded as
-`completed` even when `complete_pass` is `0`. An evaluator crash or a missing
-or invalid `reward.json` is recorded as an error and makes the CLI exit
-nonzero.
+`completed` even when `complete_pass` is `0`. An evaluator failure that does
+not produce a valid `reward.json` is recorded as an error and makes the CLI
+exit nonzero.
+
+Evaluator exit codes are diagnostic: the repository's evaluators commonly use
+`0` for a fully passing task and `1` for a completed evaluation whose task did
+not fully pass. A valid reward with `evaluator_returncode: 1` remains a
+completed, score-bearing run and is accepted by submission validation; only a
+missing or invalid reward makes the run unusable.
 
 Start with `--limit 1` and `--concurrency 1` while validating a new agent;
 remove `--limit 1` only after the first task passes. The batch runner writes

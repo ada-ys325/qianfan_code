@@ -26,6 +26,7 @@ from pathlib import Path
 from typing import Any
 
 from dumatebench_cli.adapter import compose_cmd, compose_service, reset_dir, run_adapter_loop
+from dumatebench_cli.reward import reward_error
 from dumatebench_cli.task_metadata import TaskMetadataError, load_task_metadata, shared_evaluate_path
 
 TASK_MARKER_FILES = ("task.yaml", "instruction.md")
@@ -102,39 +103,12 @@ def _evaluator_env() -> dict[str, str]:
 
 def _reward_error(path: Path, expected_task_id: str) -> str | None:
     """Return a reason when reward.json violates the evaluator contract."""
-    try:
-        value = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return "reward.json is missing or invalid JSON"
-    if not isinstance(value, dict):
-        return "reward.json must contain an object"
-    if value.get("task_id") != expected_task_id:
-        return (
-            f"reward.json task_id {value.get('task_id')!r} does not match "
-            f"task.yaml task_id {expected_task_id!r}"
-        )
-    for key in ("complete_pass", "partial_pass"):
-        score = value.get(key)
-        if isinstance(score, bool) or not isinstance(score, (int, float)) or not 0 <= float(score) <= 1:
-            return f"reward.json has invalid {key}"
-    return None
+    return reward_error(path, expected_task_id)
 
 
 def _valid_reward(path: Path, expected_task_id: str | None = None) -> bool:
     """Check that the evaluator produced the minimum reward contract."""
-    if expected_task_id is None:
-        try:
-            value = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            return False
-        if not isinstance(value, dict):
-            return False
-        for key in ("complete_pass", "partial_pass"):
-            score = value.get(key)
-            if isinstance(score, bool) or not isinstance(score, (int, float)) or not 0 <= float(score) <= 1:
-                return False
-        return True
-    return _reward_error(path, expected_task_id) is None
+    return reward_error(path, expected_task_id) is None
 
 
 def is_task_dir(path: Path) -> bool:

@@ -105,16 +105,22 @@ def discover_reward_files(tasks_dir: Path, reward_file: str = DEFAULT_REWARD_FIL
 
 
 def discover_task_dirs(tasks_dir: Path) -> list[Path]:
-    """Find task directories at any depth, identified by their marker files."""
-    tasks: list[Path] = []
-    for path in sorted(tasks_dir.rglob("*")):
-        if not path.is_dir():
+    """Find task directories at any depth, identified by their marker files.
+
+    A directory only counts as a task when every marker is present, which is the
+    same rule ``dumatebench_cli.runner.is_task_dir`` applies.
+    """
+    tasks: set[Path] = set()
+    for metadata_path in tasks_dir.rglob(TASK_MARKER_FILES[0]):
+        if not metadata_path.is_file():
             continue
-        rel = path.relative_to(tasks_dir)
+        task_dir = metadata_path.parent
+        if not all((task_dir / marker).is_file() for marker in TASK_MARKER_FILES):
+            continue
+        rel = metadata_path.relative_to(tasks_dir)
         if _is_ignored_path(rel):
             continue
-        if any((path / marker).is_file() for marker in TASK_MARKER_FILES):
-            tasks.append(path)
+        tasks.add(task_dir)
     return sorted(tasks)
 
 
@@ -139,22 +145,14 @@ def read_summary(reward_path: Path, reward_file: str) -> RewardSummary:
     if llm_judge_score is None and isinstance(data.get("llm_judge"), dict):
         llm_judge_score = _number(data["llm_judge"].get("score"))
     complete_pass = _number(data.get("base_complete_pass"))
-    checks_partial_pass = true_checklist_partial_pass(data)
+    partial_pass = true_checklist_partial_pass(data)
 
-    # Only a checks list proves what the evaluator actually scored. Without it
-    # the recorded aggregates are the best evidence available, so they are kept
-    # instead of being silently rewritten to zero or recomputed from a partial
-    # picture.
-    if checks_partial_pass is None:
-        partial_pass = _number(data.get("base_partial_pass"))
+    # The recorded final_score is only a fallback: it can predate the current
+    # weights, so it is used just when the judge score is missing and the score
+    # cannot be re-derived.
+    final_score = true_llm_final_score(partial_pass, llm_judge_score, complete_pass or 0.0)
+    if final_score is None:
         final_score = _number(data.get("final_score"))
-    else:
-        partial_pass = checks_partial_pass
-        final_score = true_llm_final_score(
-            checks_partial_pass, llm_judge_score, complete_pass or 0.0
-        )
-        if final_score is None:
-            final_score = _number(data.get("final_score"))
 
     return RewardSummary(
         task_id=str(data.get("task_id") or task_dir.name),
@@ -224,11 +222,17 @@ def _number(value: Any) -> float | None:
         return None
 
 
-def true_checklist_partial_pass(data: dict[str, Any]) -> float | None:
-    """Weighted checklist pass rate, or None when the file records no checks."""
+def true_checklist_partial_pass(data: dict[str, Any]) -> float:
+    """Weighted checklist pass rate, falling back to the recorded partial pass.
+
+    A reward file without a ``checks`` list carries no proof of what the
+    evaluator scored, so the recorded ``base_partial_pass`` is reused and the
+    final score is still re-derived from the canonical weights. That way a stale
+    ``final_score`` written by an older scoring formula is not propagated.
+    """
     checks = data.get("checks")
     if not isinstance(checks, list) or not checks:
-        return None
+        return _number(data.get("base_partial_pass")) or 0.0
     passed = 0
     for item in checks:
         if isinstance(item, dict) and bool(item.get("passed")):

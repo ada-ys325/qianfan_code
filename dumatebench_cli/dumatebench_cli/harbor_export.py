@@ -217,7 +217,7 @@ def render_task_toml(task_yaml: dict[str, Any], warnings: list[str]) -> str:
             f"{task_id}: environment.allow_internet must be a YAML boolean, "
             f"not {type(allow_internet).__name__}"
         )
-    network_mode = "public" if allow_internet else "none"
+    network_mode = "public" if allow_internet else "no-network"
 
     verifier_timeout = agent_timeout + 300
 
