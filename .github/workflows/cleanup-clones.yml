@@ -1,0 +1,86 @@
+name: Cleanup Unmerged Submission Snapshot
+
+# A promoted bot PR owns a Harbor snapshot. If that PR is closed without
+# merging, remove only the clone carrying its submission/pr-N prefix. Merged
+# bot PRs keep their snapshots as the immutable leaderboard record.
+on:
+  pull_request_target:
+    types: [closed]
+    paths:
+      - "submissions/**"
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  cleanup:
+    if: >
+      github.event.pull_request.merged == false &&
+      github.event.pull_request.base.ref == github.event.repository.default_branch &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.user.login == 'github-actions[bot]' &&
+      startsWith(github.event.pull_request.head.ref, 'submission/pr-')
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      REPOSITORY: ${{ github.repository }}
+      BOT_BRANCH: ${{ github.event.pull_request.head.ref }}
+    steps:
+      - name: Check out trusted base-branch code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install cleanup dependencies
+        run: |
+          python -m pip install --disable-pip-version-check -e dumatebench_cli
+          python -m pip install --disable-pip-version-check PyYAML
+          python -m pip install --disable-pip-version-check -r leaderboard/ci/requirements.txt
+
+      - name: Fetch the promoted manifest as data
+        id: fetch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$BOT_BRANCH" =~ ^submission/pr-[1-9][0-9]*$ ]]; then
+            echo "Not a canonical promoted bot branch: $BOT_BRANCH"
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          mapfile -t paths < <(
+            gh api --paginate "repos/$REPOSITORY/pulls/$PR_NUMBER/files" \
+              --jq '.[] | select(.filename | startswith("submissions/")) | .filename'
+          )
+          if [[ "${#paths[@]}" -ne 1 ]]; then
+            echo "Expected exactly one promoted submission manifest; nothing to clean."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          path="${paths[0]}"
+          [[ "$path" =~ ^submissions/dumatebench/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+__[A-Za-z0-9._-]+\.json$ ]] || {
+            echo "Unexpected submission path: $path"; exit 1; }
+          gh api "repos/$REPOSITORY/contents/$path?ref=$PR_HEAD_SHA" \
+            -H 'Accept: application/vnd.github.raw' > "$RUNNER_TEMP/promoted.json"
+          echo "found=true" >> "$GITHUB_OUTPUT"
+
+      - name: Delete the unmerged Harbor clone
+        if: steps.fetch.outputs.found == 'true'
+        env:
+          HARBOR_API_KEY: ${{ secrets.HARBOR_API_KEY }}
+        run: |
+          set -euo pipefail
+          : "${HARBOR_API_KEY:?Set the HARBOR_API_KEY Actions secret}"
+          origin_pr="${BOT_BRANCH#submission/pr-}"
+          python leaderboard/ci/clone_harbor_job.py \
+            "$RUNNER_TEMP/promoted.json" \
+            --delete \
+            --name-prefix "lb-pr-$origin_pr"

@@ -1,0 +1,17 @@
+{
+  "reference_file": "evaluator/llm_judge_references.json",
+  "artifacts": [
+    {
+      "id": "artifact_xlsx",
+      "output_file": "run_outputs/data/中外合作办学项目完整数据.xlsx",
+      "artifact_type": "xlsx",
+      "criteria_file": "evaluator/criteria/中外合作办学项目完整数据.xlsx.json"
+    },
+    {
+      "id": "crawler_py",
+      "output_file": "run_outputs/code/crawler.py",
+      "artifact_type": "py",
+      "criteria_file": "evaluator/criteria/crawler.py.json"
+    }
+  ]
+}

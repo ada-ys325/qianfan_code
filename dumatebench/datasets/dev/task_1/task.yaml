@@ -1,0 +1,34 @@
+schema_version: 0.1
+task_id: 002d3f2774494b26a2914166ae2610e7_ses_18db732e9ffe1Vu6ooXeJhOxVF
+task_name: 中外合作办学项目数据采集与Excel汇总
+split: dev
+difficulty: unreviewed
+tags:
+  - edit_excel
+  - code_writing
+  - web_retrieval
+  - cross_app_count
+  - resource_limited
+  - network_or_api_errors
+agent:
+  timeout_sec: 1800
+  user: agent
+  workdir: /workspace
+  direct_shell: true
+  runtime: in_container
+environment:
+  backend: docker-compose
+  dockerfile: environment/Dockerfile
+  compose_file: environment/docker-compose.yaml
+  cpus: 2
+  memory_mb: 4096
+  storage_mb: 12000
+  allow_internet: true
+  allow_package_install: true
+evaluation:
+  entrypoint: evaluator/evaluator.py
+  checks_file: evaluator/checks.yaml
+  hidden_tests: false
+  metrics:
+    - complete_pass
+    - partial_pass

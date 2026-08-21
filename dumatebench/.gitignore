@@ -1,0 +1,17 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+
+# Runtime outputs and logs
+run_logs/
+run_outputs/
+outputs/
+*.log
+
+# Local virtual environments
+.venv/
+venv/
+
+# Editor and OS metadata
+.idea/
+.vscode/

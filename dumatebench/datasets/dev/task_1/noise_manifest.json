@@ -1,0 +1,18 @@
+{
+  "seed": 20260706,
+  "target_files": [
+    "files/data/meeting_agenda.pdf"
+  ],
+  "distractor_files": [
+    "files/data/meeting_agenda_old.pdf",
+    "files/data/notes_tmp.txt"
+  ],
+  "protected_files": [
+    "workspace_seed/**"
+  ],
+  "noise_types": [
+    "similar_filename",
+    "temporary_file"
+  ]
+}
+
