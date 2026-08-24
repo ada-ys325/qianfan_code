@@ -13,6 +13,10 @@ distributed separately on Hugging Face:
 
 <https://huggingface.co/datasets/Annihi/dumate_bench>
 
+The public leaderboard with model results is at:
+
+<https://dumatebench.com/leaderboard>
+
 ## What Is Being Evaluated
 
 There are two layers in a model run:
