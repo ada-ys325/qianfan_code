@@ -442,17 +442,24 @@ def evaluate_no_unexpected_diff(
 def evaluate_directory_structure(
     testbed_dir: str | os.PathLike[str], args: dict[str, Any]
 ) -> bool:
-    """Check required and forbidden files/directories under the testbed.
-    检查测试目录下必需的（和禁止的）文件与目录结构。"""
-    root = _task_path(testbed_dir, args.get("root", "."))
+    """Check required and forbidden paths directly under the testbed.
+
+    ``required_files`` and the other path lists already contain paths relative
+    to the evaluator testbed (commonly ``run_outputs/...``).  The historical
+    implementation prepended ``args['root']`` to every entry, which made a
+    valid check such as ``root: /`` or ``required_files: [run_outputs/a]``
+    resolve outside the task.  Match ``evaluate_file_exist`` semantics and
+    resolve each listed path directly against ``testbed_dir``; ``root`` is
+    intentionally ignored for backwards-compatible checklist arguments.
+    """
     for file_name in args.get("required_files", []):
-        if not (root / file_name).is_file():
+        if not (_task_path(testbed_dir, file_name)).is_file():
             return False
     for dir_name in args.get("required_dirs", []):
-        if not (root / dir_name).is_dir():
+        if not (_task_path(testbed_dir, dir_name)).is_dir():
             return False
     for path_name in args.get("forbidden_paths", []):
-        if (root / path_name).exists():
+        if _task_path(testbed_dir, path_name).exists():
             return False
     return True
 
