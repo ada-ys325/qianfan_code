@@ -68,6 +68,7 @@ class EvaluateAllFunctionsTest(unittest.TestCase):
         (self.root / "before.txt").write_text("Name: Alice\nStatus: Draft\n")
         (self.root / "after.txt").write_text("Name: Alice\nStatus: Final\n")
         (self.root / "data.json").write_text(json.dumps({"ok": True}))
+        (self.root / "data.csv").write_text("name,value\nProject Alpha,1\n")
         (self.root / "brief.pdf").write_bytes(b"%PDF-1.4\n%minimal\n")
         (self.root / "run.json").write_text(json.dumps({"total_tokens": 1200, "elapsed_seconds": 33.5}))
         (self.root / "run.log").write_text("total_tokens: 88\nelapsed_seconds: 9.5\n")
@@ -176,6 +177,24 @@ class EvaluateAllFunctionsTest(unittest.TestCase):
             )
         )
         self.assertTrue(
+            evaluate_contain(
+                self.root,
+                {"doc_type": "json", "file": "data.json", "keywords": ["ok"]},
+            )
+        )
+        self.assertTrue(
+            evaluate_contain(
+                self.root,
+                {"doc_type": "csv", "file": "data.csv", "keywords": ["Project Alpha"]},
+            )
+        )
+        self.assertTrue(
+            evaluate_contain(
+                self.root,
+                {"doc_type": "pptx", "file": "styled.pptx", "keywords": ["Styled slide"]},
+            )
+        )
+        self.assertTrue(
             evaluate_not_contain(
                 self.root,
                 {"doc_type": "txt", "file": "answer.txt", "keywords": ["Beta"]},
@@ -240,10 +259,11 @@ class EvaluateAllFunctionsTest(unittest.TestCase):
             evaluate_directory_structure(
                 self.root,
                 {
-                    "root": "deliverables",
-                    "required_files": ["report.txt"],
+                    # ``required_files`` are testbed-relative; ignore root.
+                    "root": "/",
+                    "required_files": ["deliverables/report.txt"],
                     "required_dirs": [],
-                    "forbidden_paths": ["old.txt"],
+                    "forbidden_paths": ["deliverables/old.txt"],
                 },
             )
         )

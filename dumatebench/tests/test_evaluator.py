@@ -148,10 +148,12 @@ class EvaluatorTest(unittest.TestCase):
             evaluate_directory_structure(
                 self.root,
                 {
-                    "root": "deliverables",
-                    "required_files": ["report.txt"],
+                    # Checklist paths are already relative to the evaluator
+                    # testbed; ``root`` is retained only for compatibility.
+                    "root": "/",
+                    "required_files": ["deliverables/report.txt"],
                     "required_dirs": [],
-                    "forbidden_paths": ["old.txt"],
+                    "forbidden_paths": ["deliverables/old.txt"],
                 },
             )
         )
