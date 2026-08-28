@@ -13,6 +13,10 @@ distributed separately on Hugging Face:
 
 <https://huggingface.co/datasets/Annihi/dumate_bench>
 
+The DuMateBench paper is available on arXiv:
+
+<https://arxiv.org/abs/2608.26546>
+
 The public leaderboard with model results is at:
 
 <https://dumatebench.com/leaderboard>
