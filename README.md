@@ -513,6 +513,21 @@ revision, a configured Harbor account, and permission to publish results.
 See [leaderboard/SUBMIT.md](leaderboard/SUBMIT.md) for the submission manifest
 and verification workflow.
 
+## Citation
+
+If you use DuMateBench in your research, please cite:
+
+```bibtex
+@article{niu2026dumatebench,
+  title={DuMateBench: Evaluating Autonomous Agents in Complex Real-World Workflows},
+  author={Niu, Zechun and Zhao, Yukun and Zhang, Jiaxin and Shen, Xu and Si, Jinhua and Tian, Han and Xu, Can and Song, Yunfan and Mao, Jiaxin and Gao, Yansong and Li, Yuchen and Wu, Jianmin and Yan, Lingyong and Wang, Shuaiqiang and Yin, Dawei},
+  journal={arXiv preprint arXiv:2608.26546},
+  year={2026},
+  doi={10.48550/arXiv.2608.26546},
+  url={https://arxiv.org/abs/2608.26546}
+}
+```
+
 ## Licensing
 
 This project's code is Apache-2.0 ([LICENSE](LICENSE)). The development task
