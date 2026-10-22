@@ -217,10 +217,8 @@ enabled: true
 seed: 42
 affected_user: "agent"
 apply_tc_to_all_traffic: false
-exempt_base_urls:
-  - "https://cn.huayanapi.com:27502/v1"
-exempt_domains:
-  - "cn.huayanapi.com"
+exempt_base_urls: []
+exempt_domains: []
 startup_faults:
   - kind: dns_fail
     probability: 1.0
@@ -267,11 +265,11 @@ periodic_faults:
 
 因此，`agent` 用户执行的任务命令会遇到 `latency_loss`，容器内 root 进程发起的 LLM API 调用不会被该 `tc` class 命中。`apply_tc_to_all_traffic: false` 表示不使用全网卡 `netem`；只要配置了 `affected_user`，daemon 仍会使用 fwmark scoped 模式应用 `latency_loss`。若以后确实需要测试全容器网络抖动，可以清空 `affected_user` 并显式设置 `apply_tc_to_all_traffic: true`。
 
-`exempt_base_urls` 和 `exempt_domains` 记录受信任 LLM endpoint。当前默认豁免：
+`exempt_base_urls` 和 `exempt_domains` 记录受信任 LLM endpoint。仓库默认两个字段都为空列表，需要由运行方填入自己的 OpenAI-compatible endpoint，例如：
 
 ```text
-https://cn.huayanapi.com:27502/v1
-cn.huayanapi.com
+https://your-openai-compatible-endpoint/v1
+your-openai-compatible-endpoint
 ```
 
 这两个字段用于防止未来新增按域名或 endpoint 的网络规则时误伤 LLM 调用。当前 `iptables -m owner` 规则已经把网络故障限制在 `agent` 用户任务命令上；容器内 `command_agent.py` 的 LLM 请求由 root 进程发起，不会被这些按用户注入的规则命中。
@@ -451,7 +449,7 @@ LLM runner 会构建镜像并运行容器内 agent：
 /opt/dumate/command_agent.py \
   --in-container \
   --task-dir /opt/dumate/task \
-  --trusted-base-url "https://cn.huayanapi.com:27502/v1" \
+  --trusted-base-url "https://your-openai-compatible-endpoint/v1" \
   "$@"
 ```
 
@@ -551,7 +549,7 @@ Docker 环境、故障注入、/workspace、/outputs、/logs、evaluator 保持�
 
 更自由的方式是实现自己的宿主侧 runner。此时 runner 需要负责：
 
-1. 使用任务目录中的 `environment/docker-compose.yaml` 启动容器。
+1. 启动容器。填充后的任务目录不再自带 `environment/docker-compose.yaml`：`dumate run` 会生成 `.dumate-compose.yaml`，`harbor run` 使用 Harbor 自己的 base overlay。自定义 runner 应复用其中之一,或按同样的服务契约自行生成 compose 文件。
 2. 等待环境初始化完成。
 3. 将 agent 的命令以 `agent` 用户身份在容器内执行，工作目录为 `/workspace`。
 4. 保留 `PATH=/opt/dumate/wrappers:...`，否则会绕过工具故障注入。
@@ -575,11 +573,10 @@ workspace_seed/*
 
 当前设计对自定义 agent 基本友好：任务说明已经压缩为最小目标，环境规则和工具说明集中在 system prompt/runner 层，Docker 通过 `/workspace`、`/outputs`、`/logs` 提供清晰的 I/O 边界，evaluator 独立于 agent。新增的 adapter runner 已经提供了最小 CLI 接口；后续如果要发布成更完整的公共 SDK，可以继续补任务发现、批量运行、结果汇总和更严格的 adapter schema 校验。
 
-`command_agent.py` 默认信任两个 endpoint：
+`command_agent.py` 默认只信任公开的 OpenAI endpoint:
 
 ```text
 https://api.openai.com/v1
-https://cn.huayanapi.com:27502/v1
 ```
 
 也可以通过 `--trusted-base-url` 或 `DUMATE_TRUSTED_BASE_URLS` 增加可信 base URL。未受信任或非 HTTPS 的 `OPENAI_BASE_URL` 会被拒绝。
@@ -705,7 +702,9 @@ dumatebench/scripts/run_template_task.sh
 
 ```bash
 export OPENAI_API_KEY="..."
-export OPENAI_BASE_URL="https://cn.huayanapi.com:27502/v1"
+export OPENAI_BASE_URL="https://your-openai-compatible-endpoint/v1"
+# 只有 https://api.openai.com/v1 是默认可信的；其他 endpoint 必须在这里显式声明。
+export DUMATE_TRUSTED_BASE_URLS="https://your-openai-compatible-endpoint/v1"
 export DUMATE_MODEL="gpt-4o"
 # 可选：指定装好 evaluator 依赖的宿主侧 Python/venv
 export DUMATE_EVALUATOR_PYTHON=".venv/bin/python"

@@ -14,9 +14,11 @@ from pathlib import Path
 
 
 MAX_OBS_CHARS = 6000
+# Only the public OpenAI endpoint is trusted by default. Add your own
+# OpenAI-compatible gateway with --trusted-base-url or DUMATE_TRUSTED_BASE_URLS
+# so a checkout never sends task data to somebody else's endpoint.
 DEFAULT_TRUSTED_BASE_URLS = {
     "https://api.openai.com/v1",
-    "https://cn.huayanapi.com:27502/v1",
 }
 RETRIABLE_LLM_HTTP_STATUS = {408, 409, 425, 429, 500, 502, 503, 504}
 DEFAULT_COMMAND_TIMEOUT_SECONDS = 300

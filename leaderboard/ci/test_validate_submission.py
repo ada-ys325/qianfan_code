@@ -49,7 +49,15 @@ class SubmissionValidationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             manifest = Path(tmp) / "submission.json"
             manifest.write_text(
-                json.dumps({"schema_version": 1, "harbor_job_id": "job-12345678"}),
+                json.dumps({
+                    "schema_version": 2,
+                    "harbor_job_id": "job-12345678",
+                    "metadata": {
+                        "agent_display_name": "agent",
+                        "agent_org_display_name": "org",
+                        "models": [{"model_name": "model", "model_provider": "provider"}],
+                    },
+                }),
                 encoding="utf-8",
             )
             self.assertEqual(validate_submission_manifest(manifest), [])
@@ -59,8 +67,13 @@ class SubmissionValidationTests(unittest.TestCase):
             manifest = Path(tmp) / "submission.json"
             manifest.write_text(
                 json.dumps({
-                    "schema_version": 1,
+                    "schema_version": 2,
                     "harbor_job_id": "job-12345678",
+                    "metadata": {
+                        "agent_display_name": "agent",
+                        "agent_org_display_name": "org",
+                        "models": [{"model_name": "model", "model_provider": "provider"}],
+                    },
                     "score": 0.99,
                 }),
                 encoding="utf-8",

@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import hashlib
+import importlib
 import json
 import re
 import subprocess
@@ -54,8 +56,17 @@ def _validate_manifest(path: Path) -> list[str]:
     """Load the CLI validator only for the command path that needs YAML."""
     try:
         from dumatebench_cli.submission import validate_submission_manifest
-    except ModuleNotFoundError:
-        sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "dumatebench_cli"))
+    except ModuleNotFoundError as exc:
+        if exc.name not in {"dumatebench_cli", "dumatebench_cli.submission"}:
+            raise
+        cli_root = Path(__file__).resolve().parents[2] / "dumatebench_cli"
+        sys.path.insert(0, str(cli_root))
+        importlib.invalidate_caches()
+        # A globally installed package with the same top-level name may have
+        # been imported during the failed attempt. Remove that stale package
+        # so the trusted checkout path above is used on retry.
+        sys.modules.pop("dumatebench_cli.submission", None)
+        sys.modules.pop("dumatebench_cli", None)
         from dumatebench_cli.submission import validate_submission_manifest
     return validate_submission_manifest(path)
 
@@ -63,6 +74,94 @@ def _validate_manifest(path: Path) -> list[str]:
 def job_uuid(value: str) -> str:
     """Extract a Harbor job UUID from a URL or a bare ID."""
     return value.rstrip("/").rsplit("/", 1)[-1]
+
+
+def _manifest_job_ids(manifest: dict[str, Any]) -> set[str]:
+    ids: set[str] = set()
+    value = manifest.get("harbor_job_id")
+    if isinstance(value, str) and value:
+        ids.add(job_uuid(value))
+    verification = manifest.get("verification")
+    if isinstance(verification, dict):
+        source = verification.get("source_harbor_job_id")
+        if isinstance(source, str) and source:
+            ids.add(job_uuid(source))
+    return {value for value in ids if value}
+
+
+def _manifest_fingerprint(manifest: dict[str, Any]) -> str | None:
+    verification = manifest.get("verification")
+    if not isinstance(verification, dict):
+        return None
+    value = verification.get("run_fingerprint")
+    return value if isinstance(value, str) and value else None
+
+
+def run_fingerprint(trial_results: list[tuple[str, dict[str, Any]]]) -> str:
+    """Fingerprint a run from its per-trial task names and DuMateBench scores.
+
+    ``harbor hub job copy`` produces a new job ID owned by the copier while
+    preserving the original trial results, so a job ID alone cannot detect a
+    re-submitted run. This digest is stable across such a copy because it is
+    built only from the scored outcome of every trial.
+    """
+    rows = sorted(
+        "|".join(
+            [
+                task_name,
+                _fingerprint_number(scores.get("complete_pass")),
+                _fingerprint_number(scores.get("partial_pass")),
+                _fingerprint_number(scores.get("llm_judge_score")),
+                _fingerprint_number(scores.get("final_score")),
+            ]
+        )
+        for task_name, scores in trial_results
+    )
+    digest = hashlib.sha256("\n".join(rows).encode("utf-8")).hexdigest()
+    return f"sha256:{digest}"
+
+
+def _fingerprint_number(value: Any) -> str:
+    number = _numeric(value)
+    return "none" if number is None else f"{number:.4f}"
+
+
+def duplicate_submission_paths(
+    manifest: dict[str, Any],
+    repo_root: Path,
+) -> list[Path]:
+    """Find tracked submission manifests that reference the same Harbor run.
+
+    Both the Harbor job ID and the run fingerprint are compared, so copying a
+    public job into a new account does not hide an already-submitted run.
+    """
+    candidate_ids = _manifest_job_ids(manifest)
+    candidate_fingerprint = _manifest_fingerprint(manifest)
+    if not candidate_ids and not candidate_fingerprint:
+        return []
+    submissions_root = repo_root / "submissions"
+    if not submissions_root.is_dir():
+        return []
+
+    duplicates: list[Path] = []
+    for path in sorted(submissions_root.rglob("*.json")):
+        if not path.is_file():
+            continue
+        try:
+            existing = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise HarborVerificationError(
+                f"Existing submission manifest is unreadable: {path}: {exc}"
+            ) from exc
+        if not isinstance(existing, dict):
+            continue
+        if candidate_ids & _manifest_job_ids(existing):
+            duplicates.append(path)
+            continue
+        existing_fingerprint = _manifest_fingerprint(existing)
+        if candidate_fingerprint and existing_fingerprint == candidate_fingerprint:
+            duplicates.append(path)
+    return duplicates
 
 
 def harbor_json(args: list[str]) -> dict[str, Any]:
@@ -259,6 +358,40 @@ def _trial_identity(trial: dict[str, Any]) -> tuple[tuple[str, str], ...] | None
             f"{', '.join(missing)}."
         )
     return tuple((key, str(trial[key])) for key in keys)
+
+
+def _assert_manifest_identity(
+    manifest: dict[str, Any],
+    identity: tuple[tuple[str, str], ...],
+) -> None:
+    """Require the untrusted manifest labels to match Harbor's identity."""
+    metadata = manifest.get("metadata")
+    if not isinstance(metadata, dict):
+        raise HarborVerificationError(
+            "Submission manifest must declare agent/model metadata."
+        )
+    models = metadata.get("models")
+    if not isinstance(models, list) or len(models) != 1 or not isinstance(models[0], dict):
+        raise HarborVerificationError(
+            "Submission manifest must declare exactly one model."
+        )
+
+    actual = dict(identity)
+    declared = {
+        "agent_name": metadata.get("agent_display_name"),
+        "model_provider": models[0].get("model_provider"),
+        "model_name": models[0].get("model_name"),
+    }
+    mismatches = [
+        f"{key}: manifest={declared[key]!r}, Harbor={actual[key]!r}"
+        for key in declared
+        if str(declared[key]) != actual[key]
+    ]
+    if mismatches:
+        raise HarborVerificationError(
+            "Submission manifest agent/model identity does not match Harbor: "
+            + "; ".join(mismatches)
+        )
 
 
 def _score_sources(trial: dict[str, Any], detail: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
@@ -538,6 +671,7 @@ def verify_job(
     task_counts: dict[str, int] = {}
     trial_identities: set[tuple[tuple[str, str], ...]] = set()
     dumate_scores: list[dict[str, float | int | None]] = []
+    trial_results: list[tuple[str, dict[str, Any]]] = []
     for trial, trial_id in zip(trials, trial_ids):
         detail = details[trial_id]
         identity = _trial_identity(trial)
@@ -575,6 +709,7 @@ def verify_job(
                 f"Trial {trial_id} has a passing DuMateBench result but no trajectory_path."
             )
         dumate_scores.append(scores)
+        trial_results.append((name, scores))
 
     if len(task_counts) != expected_task_count:
         raise HarborVerificationError(
@@ -587,11 +722,16 @@ def verify_job(
         raise HarborVerificationError(
             f"Tasks below {min_trials_per_task} trial(s): {underfilled[:10]}"
         )
+    if not trial_identities:
+        raise HarborVerificationError(
+            f"Harbor job {job_id} exposes no agent/model identity."
+        )
     if len(trial_identities) > 1:
         identities = [dict(identity) for identity in sorted(trial_identities)]
         raise HarborVerificationError(
             f"Harbor job {job_id} mixes multiple agent/model identities: {identities}."
         )
+    _assert_manifest_identity(manifest, next(iter(trial_identities)))
 
     final_scores = [score["final_score"] for score in dumate_scores]
     has_final_score = any(value is not None for value in final_scores)
@@ -613,6 +753,7 @@ def verify_job(
         "trials_by_task": dict(sorted(task_counts.items())),
         "trial_ids": sorted(trial_ids),
         "trial_identity": dict(next(iter(trial_identities))) if trial_identities else None,
+        "run_fingerprint": run_fingerprint(trial_results),
         "dumatebench_score_mode": "with_llm_judge" if has_final_score else "checklist",
         "complete_pass_mean": mean("complete_pass"),
         "partial_pass_mean": mean("partial_pass"),
@@ -633,11 +774,27 @@ def verify_manifest(
     clone_prefix: str | None = None,
     write_verification: bool = False,
     report_path: Path | None = None,
+    reject_duplicate_repo: Path | None = None,
 ) -> dict[str, Any]:
     errors = _validate_manifest(path)
     if errors:
         raise HarborVerificationError("Manifest validation failed: " + "; ".join(errors))
     manifest = json.loads(path.read_text(encoding="utf-8"))
+
+    def _reject_duplicates(candidate: dict[str, Any]) -> None:
+        if reject_duplicate_repo is None:
+            return
+        repo_root = reject_duplicate_repo.resolve()
+        duplicates = duplicate_submission_paths(candidate, repo_root)
+        if duplicates:
+            rendered = ", ".join(str(item.relative_to(repo_root)) for item in duplicates)
+            raise HarborVerificationError(
+                "Harbor run is already referenced by submission manifest(s): "
+                f"{rendered}"
+            )
+
+    # Job-ID duplicates are cheap to detect before spending Harbor calls.
+    _reject_duplicates(manifest)
     report = verify_job(
         manifest,
         dataset=dataset,
@@ -646,6 +803,9 @@ def verify_manifest(
         min_trials_per_task=min_trials_per_task,
         clone_prefix=clone_prefix,
     )
+    # The fingerprint only exists once Harbor data has been scored, so a run
+    # re-submitted through ``harbor hub job copy`` is caught here.
+    _reject_duplicates({**manifest, "verification": report})
     if write_verification:
         previous = manifest.get("verification")
         if isinstance(previous, dict):
@@ -669,6 +829,11 @@ def main() -> int:
     parser.add_argument("--clone-prefix")
     parser.add_argument("--write-verification", action="store_true")
     parser.add_argument("--report", type=Path)
+    parser.add_argument(
+        "--reject-duplicate-repo",
+        type=Path,
+        help="Reject a Harbor job already referenced under this repository's submissions/ directory.",
+    )
     args = parser.parse_args()
     try:
         report = verify_manifest(
@@ -680,6 +845,7 @@ def main() -> int:
             clone_prefix=args.clone_prefix,
             write_verification=args.write_verification,
             report_path=args.report,
+            reject_duplicate_repo=args.reject_duplicate_repo,
         )
     except (HarborVerificationError, OSError, json.JSONDecodeError) as exc:
         print(f"Harbor verification failed: {exc}", file=sys.stderr)

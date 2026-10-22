@@ -89,6 +89,42 @@ jobs:
           echo "SUBMISSION_PATH=$RUNNER_TEMP/dumatebench-submission/submission.json" >> "$GITHUB_ENV"
           echo "Fetched $path from PR head $PR_HEAD_SHA as data."
 
+      - name: Reject a Harbor job claimed by another open submission PR
+        if: steps.fetch.outputs.found == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          job_id=$(jq -r '.harbor_job_id' "$SUBMISSION_PATH")
+          job_uuid="${job_id%/}"
+          job_uuid="${job_uuid##*/}"
+          conflicts=""
+          for number in $(gh pr list --state open --json number --jq '.[].number'); do
+            if [[ "$number" == "$PR_NUMBER" ]]; then
+              continue
+            fi
+            for other in $(
+              gh api --paginate "repos/$REPOSITORY/pulls/$number/files" \
+                --jq '.[] | select(.status == "added") | .filename | select(startswith("submissions/"))'
+            ); do
+              other_id=$(
+                gh api "repos/$REPOSITORY/contents/$other?ref=refs/pull/$number/head" \
+                  -H 'Accept: application/vnd.github.raw' 2>/dev/null \
+                  | jq -r '.harbor_job_id // empty' 2>/dev/null || true
+              )
+              other_uuid="${other_id%/}"
+              other_uuid="${other_uuid##*/}"
+              if [[ -n "$other_uuid" && "$other_uuid" == "$job_uuid" ]]; then
+                conflicts="$conflicts #$number"
+              fi
+            done
+          done
+          if [[ -n "$conflicts" ]]; then
+            echo "Harbor job $job_uuid is already claimed by open PR(s):$conflicts"
+            exit 1
+          fi
+          echo "No other open PR claims Harbor job $job_uuid."
+
       - name: Verify the source Harbor job
         if: steps.fetch.outputs.found == 'true'
         env:
@@ -103,6 +139,7 @@ jobs:
             --dataset-ref "$DUMATEBENCH_HARBOR_DATASET_REF" \
             --expected-task-count "$DUMATEBENCH_EXPECTED_TASK_COUNT" \
             --min-trials-per-task "$DUMATEBENCH_MIN_TRIALS_PER_TASK" \
+            --reject-duplicate-repo "$GITHUB_WORKSPACE" \
             --report "$RUNNER_TEMP/source-verification.json"
 
   promote:

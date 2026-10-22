@@ -9,8 +9,18 @@ submissions/dumatebench/<version>/<agent>__<model>.json
 
 ```json
 {
-  "schema_version": 1,
-  "harbor_job_id": "job-12345678"
+  "schema_version": 2,
+  "harbor_job_id": "job-12345678",
+  "metadata": {
+    "agent_display_name": "my-agent",
+    "agent_org_display_name": "my-organization",
+    "models": [
+      {
+        "model_name": "my-model",
+        "model_provider": "openai"
+      }
+    ]
+  }
 }
 ```
 
@@ -27,6 +37,19 @@ When LLM-judge fields are present, CI recomputes and checks DuMateBench's
 never the official source. It also rejects fairness-sensitive timeout/resource
 overrides and requires a Harbor `trajectory_path` for trials with a positive
 DuMateBench result so successful runs remain auditable.
+
+CI also binds credit to the run: the manifest's declared agent/model must equal
+the agent/model identity Harbor recorded on the trials, and a job that exposes
+no identity is rejected rather than trusted on the submitter's word. Each run
+may be submitted only once — CI rejects a job ID already claimed by another
+submission or another open PR, and compares a `run_fingerprint` computed from
+every trial's scored outcome so a `harbor hub job copy` of an already-submitted
+run is caught despite its new job ID.
+
+Known gap: Harbor's read APIs do not expose a job's `created_by`, so CI cannot
+prove that the submitter personally produced a public job that has never been
+submitted before. Requiring submitters to share jobs with the leaderboard
+account instead of publishing them publicly is the mitigation under discussion.
 
 After verification, CI copies the source job into a leaderboard-owned Harbor
 snapshot, verifies the copy again, and opens a bot PR. The bot PR is the final
@@ -48,8 +71,18 @@ Its minimum contents are:
 
 ```json
 {
-  "schema_version": 1,
-  "harbor_job_id": "job-12345678"
+  "schema_version": 2,
+  "harbor_job_id": "job-12345678",
+  "metadata": {
+    "agent_display_name": "my-agent",
+    "agent_org_display_name": "my-organization",
+    "models": [
+      {
+        "model_name": "my-model",
+        "model_provider": "openai"
+      }
+    ]
+  }
 }
 ```
 

@@ -2,10 +2,11 @@ enabled: true
 seed: 42
 affected_user: "agent"
 apply_tc_to_all_traffic: false
-exempt_base_urls:
-  - "https://cn.huayanapi.com:27502/v1"
-exempt_domains:
-  - "cn.huayanapi.com"
+# List your own OpenAI-compatible LLM endpoint here. These fields are recorded
+# for future host/endpoint-scoped rules; today's faults are scoped to
+# affected_user, so leaving them empty does not expose LLM calls to faults.
+exempt_base_urls: []
+exempt_domains: []
 startup_faults:
   - kind: dns_fail
     probability: 1.0

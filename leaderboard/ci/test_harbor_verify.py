@@ -1,21 +1,50 @@
 from __future__ import annotations
 
+import json
+import tempfile
 import unittest
+from pathlib import Path
 
 from leaderboard.ci import harbor_verify
 
 
 class HarborVerificationTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.manifest = {"schema_version": 1, "harbor_job_id": "job-12345678"}
+        self.manifest = {
+            "schema_version": 2,
+            "harbor_job_id": "job-12345678",
+            "metadata": {
+                "agent_display_name": "agent",
+                "agent_org_display_name": "org",
+                "models": [{"model_name": "model-a", "model_provider": "provider"}],
+            },
+        }
         self.job = {
             "name": "source/job-12345678",
             "finished_at": "2026-08-14T00:00:00Z",
             "config": {"datasets": [{"name": "dumatebench/dataset"}]},
         }
         self.trials = [
-            {"id": "trial-1", "source": "dumatebench/dataset", "task_name": "task-1", "reward": 0.99},
-            {"id": "trial-2", "source": "dumatebench/dataset", "task_name": "task-2", "reward": 0.01},
+            {
+                "id": "trial-1",
+                "source": "dumatebench/dataset",
+                "task_name": "task-1",
+                "reward": 0.99,
+                "agent_name": "agent",
+                "agent_version": "1.0.0",
+                "model_provider": "provider",
+                "model_name": "model-a",
+            },
+            {
+                "id": "trial-2",
+                "source": "dumatebench/dataset",
+                "task_name": "task-2",
+                "reward": 0.01,
+                "agent_name": "agent",
+                "agent_version": "1.0.0",
+                "model_provider": "provider",
+                "model_name": "model-a",
+            },
         ]
         self.details = {
             "trial-1": {
@@ -140,6 +169,100 @@ class HarborVerificationTests(unittest.TestCase):
 
         with self.assertRaisesRegex(harbor_verify.HarborVerificationError, "mixes multiple"):
             self.verify()
+
+    def test_rejects_manifest_identity_that_does_not_match_harbor(self):
+        self.manifest["metadata"]["models"][0]["model_name"] = "model-b"
+
+        with self.assertRaisesRegex(harbor_verify.HarborVerificationError, "does not match Harbor"):
+            self.verify()
+
+    def test_requires_harbor_agent_and_model_identity(self):
+        for trial in self.trials:
+            for key in ("agent_name", "agent_version", "model_provider", "model_name"):
+                trial.pop(key)
+
+        with self.assertRaisesRegex(harbor_verify.HarborVerificationError, "no agent/model identity"):
+            self.verify()
+
+    def test_detects_duplicate_source_job_in_repository(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            existing = root / "submissions" / "dumatebench" / "v1" / "existing.json"
+            existing.parent.mkdir(parents=True)
+            existing.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 2,
+                        "harbor_job_id": "job-87654321",
+                        "verification": {
+                            "source_harbor_job_id": "job-12345678",
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            duplicates = harbor_verify.duplicate_submission_paths(
+                {"harbor_job_id": "https://harbor.example/jobs/job-12345678"},
+                root,
+            )
+
+            self.assertEqual(duplicates, [existing])
+
+    def test_report_carries_a_run_fingerprint(self):
+        report = self.verify()
+
+        self.assertTrue(report["run_fingerprint"].startswith("sha256:"))
+
+    def test_run_fingerprint_ignores_job_and_trial_ids(self):
+        original = self.verify()["run_fingerprint"]
+
+        # A `harbor hub job copy` keeps the scored results but gets fresh IDs.
+        self.manifest["harbor_job_id"] = "job-99999999"
+        self.job["name"] = "copier/job-99999999"
+        for index, trial in enumerate(self.trials, start=1):
+            trial["id"] = f"copied-trial-{index}"
+        self.details = {
+            f"copied-trial-{index}": detail
+            for index, detail in enumerate(self.details.values(), start=1)
+        }
+
+        self.assertEqual(self.verify()["run_fingerprint"], original)
+
+    def test_run_fingerprint_changes_with_scores(self):
+        original = self.verify()["run_fingerprint"]
+        self.details["trial-2"]["verifier_result"]["rewards"].update(
+            {"partial_pass": 0.25, "final_score": 0.235}
+        )
+
+        self.assertNotEqual(self.verify()["run_fingerprint"], original)
+
+    def test_detects_a_copied_run_by_fingerprint(self):
+        report = self.verify()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            existing = root / "submissions" / "dumatebench" / "v1" / "existing.json"
+            existing.parent.mkdir(parents=True)
+            existing.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 2,
+                        "harbor_job_id": "job-87654321",
+                        "verification": {"run_fingerprint": report["run_fingerprint"]},
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            duplicates = harbor_verify.duplicate_submission_paths(
+                {
+                    "harbor_job_id": "job-99999999",
+                    "verification": {"run_fingerprint": report["run_fingerprint"]},
+                },
+                root,
+            )
+
+            self.assertEqual(duplicates, [existing])
 
     def test_rejects_wrong_task_digest(self):
         self.details["trial-2"]["config"]["task"]["ref"] = "sha256:tampered"

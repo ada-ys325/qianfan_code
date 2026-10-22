@@ -104,9 +104,10 @@ dumate submission from-harbor-job \
   --model-provider openai
 ```
 
-This records only the Harbor `job_id` and the dumatebench `task_id`s it
-covers — no score fields. Do not hand-edit in `score`, `accuracy`, `metrics`,
-or `final_score`; CI rejects manifests that carry them.
+This records the Harbor `job_id`, the dumatebench `task_id`s it covers, and the
+agent/model declaration that CI compares with Harbor's actual trial identity —
+no score fields. Do not hand-edit in `score`, `accuracy`, `metrics`, or
+`final_score`; CI rejects manifests that carry them.
 
 Validate it locally before opening a PR:
 

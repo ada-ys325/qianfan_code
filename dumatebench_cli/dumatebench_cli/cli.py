@@ -84,6 +84,7 @@ def run(
             adapter_timeout=adapter_timeout,
             no_build=no_build,
             keep_containers=keep_containers,
+            run_id=label,
         )
         typer.echo(json.dumps(result.as_dict(), indent=2, ensure_ascii=False))
         raise typer.Exit(code=0 if result.status == "completed" else 1)
@@ -102,6 +103,7 @@ def run(
         concurrency=concurrency,
         summary_path=summary_path,
         stop_on_failure=stop_on_failure,
+        run_id=label,
     )
     errors = sum(1 for r in results if r.status == "error")
     typer.echo(f"Ran {len(results)} task(s), {errors} error(s). Summary: {summary_path}")
@@ -128,7 +130,7 @@ def package_check(
     task: Path = typer.Argument(..., help="Task directory to check."),
 ) -> None:
     """Verify a task's Docker build context does not leak evaluator/gold-reference files."""
-    result: CheckResult = check_task_dir(task.resolve())
+    result: CheckResult = check_task_dir(task.resolve(), harbor_compatible=True)
     for check in result.checks:
         if check.advisory:
             color, label = typer.colors.YELLOW, "WARN"

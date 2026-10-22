@@ -33,10 +33,14 @@ from typing import Any
 
 import yaml
 
+from dumatebench_cli.task_metadata import TaskMetadataError, load_task_metadata
+from dumatebench_cli.reward import reward_error
+
 RUN_OUTPUT_FILES = ("reward.json",)
 RUN_LOG_FILES = ("agent_status.json", "agent_adapter.jsonl", "compose.log")
 MANIFEST_JOB_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{7,255}$")
 HARBOR_TASK_NAME_PREFIX = "dumate/"
+HARBOR_MANIFEST_SCHEMA_VERSION = 2
 
 
 class SubmissionError(RuntimeError):
@@ -121,15 +125,37 @@ def pack_submission(
     out_dir.mkdir(parents=True)
 
     warnings: list[str] = []
+    normalized_records: list[dict[str, Any]] = []
     for record in records:
-        task_id = record.get("task_id")
-        task_dir = record.get("task_dir")
-        if not task_id or not task_dir:
+        if not isinstance(record, dict):
             warnings.append(f"Skipping malformed summary record: {record}")
             continue
-        warnings.extend(_copy_task_artifacts(Path(task_dir), out_dir / task_id, task_id))
+        task_dir_value = record.get("task_dir")
+        if not task_dir_value:
+            warnings.append(f"Skipping summary record without task_dir: {record}")
+            continue
+        task_dir = Path(task_dir_value).resolve()
+        try:
+            _task_yaml, canonical_task_id = load_task_metadata(task_dir)
+        except TaskMetadataError as exc:
+            warnings.append(f"Skipping {task_dir}: {exc}")
+            continue
+        recorded_task_id = record.get("task_id")
+        if recorded_task_id != canonical_task_id:
+            warnings.append(
+                f"{task_dir}: replacing summary task_id {recorded_task_id!r} "
+                f"with task.yaml task_id {canonical_task_id!r}"
+            )
+        normalized_record = dict(record)
+        normalized_record["task_id"] = canonical_task_id
+        normalized_record["task_dir"] = str(task_dir)
+        normalized_records.append(normalized_record)
+        warnings.extend(_copy_task_artifacts(task_dir, out_dir / canonical_task_id, canonical_task_id))
 
-    shutil.copy2(summary_path, out_dir / "batch_summary.jsonl")
+    (out_dir / "batch_summary.jsonl").write_text(
+        "".join(json.dumps(record, ensure_ascii=False) + "\n" for record in normalized_records),
+        encoding="utf-8",
+    )
 
     metadata = {
         "agent_display_name": agent_name,
@@ -151,7 +177,7 @@ def pack_submission(
     config = dumate_run_args or {}
     (out_dir / "config.json").write_text(json.dumps(config, indent=2, ensure_ascii=False))
 
-    return PackResult(out_dir=out_dir, task_count=len(records), warnings=warnings)
+    return PackResult(out_dir=out_dir, task_count=len(normalized_records), warnings=warnings)
 
 
 def validate_submission(bundle_dir: Path) -> list[str]:
@@ -225,8 +251,6 @@ def validate_submission(bundle_dir: Path) -> list[str]:
         task_ids.append(task_id)
         if record.get("status") not in {"completed", "ok"}:
             errors.append(f"{task_id}: run status must be completed, got {record.get('status')!r}")
-        if record.get("evaluator_returncode") not in {None, 0}:
-            errors.append(f"{task_id}: evaluator_returncode must be 0")
 
     if len(task_ids) != len(set(task_ids)):
         errors.append("batch_summary.jsonl contains duplicate task_id values")
@@ -252,20 +276,9 @@ def validate_submission(bundle_dir: Path) -> list[str]:
         if not reward_path.exists():
             errors.append(f"{task_id}: missing reward.json")
         else:
-            try:
-                reward = json.loads(reward_path.read_text(encoding="utf-8"))
-            except (OSError, json.JSONDecodeError) as exc:
-                errors.append(f"{task_id}: reward.json is not valid JSON: {exc}")
-            else:
-                if not isinstance(reward, dict):
-                    errors.append(f"{task_id}: reward.json must contain an object")
-                elif reward.get("task_id") != task_id:
-                    errors.append(f"{task_id}: reward.json task_id does not match directory")
-                else:
-                    for score_field in ("complete_pass", "partial_pass"):
-                        value = reward.get(score_field)
-                        if not isinstance(value, (int, float)) or not 0 <= float(value) <= 1:
-                            errors.append(f"{task_id}: reward.json has invalid {score_field}")
+            reward_issue = reward_error(reward_path, expected_task_id=task_id)
+            if reward_issue:
+                errors.append(f"{task_id}: {reward_issue}")
         adapter_log = task_dir / "agent_adapter.jsonl"
         if not adapter_log.exists():
             errors.append(f"{task_id}: missing agent_adapter.jsonl (trajectory evidence)")
@@ -325,18 +338,34 @@ def validate_submission_manifest(manifest_path: Path) -> list[str]:
     unknown = set(value) - allowed
     if unknown:
         errors.append(f"Submission manifest has unknown fields: {sorted(unknown)}")
-    if value.get("schema_version") != 1:
-        errors.append("Submission manifest schema_version must be 1")
+    if value.get("schema_version") != HARBOR_MANIFEST_SCHEMA_VERSION:
+        errors.append(
+            "Submission manifest schema_version must be "
+            f"{HARBOR_MANIFEST_SCHEMA_VERSION}"
+        )
     job_id = value.get("harbor_job_id")
     if not isinstance(job_id, str) or not MANIFEST_JOB_ID.fullmatch(job_id):
         errors.append("Submission manifest harbor_job_id must be a non-empty Harbor job ID or URL")
-    metadata = value.get("metadata", {})
+    metadata = value.get("metadata")
     if not isinstance(metadata, dict):
         errors.append("Submission manifest metadata must be an object")
     else:
         forbidden = {"score", "accuracy", "metrics", "final_score"} & set(metadata)
         if forbidden:
             errors.append(f"Submission manifest metadata must not claim results: {sorted(forbidden)}")
+        for field_name in ("agent_display_name", "agent_org_display_name"):
+            if not isinstance(metadata.get(field_name), str) or not metadata[field_name].strip():
+                errors.append(f"Submission manifest metadata.{field_name} must be a non-empty string")
+        models = metadata.get("models")
+        if not isinstance(models, list) or len(models) != 1 or not isinstance(models[0], dict):
+            errors.append("Submission manifest metadata.models must contain exactly one model")
+        else:
+            for field_name in ("model_name", "model_provider"):
+                if not isinstance(models[0].get(field_name), str) or not models[0][field_name].strip():
+                    errors.append(
+                        f"Submission manifest metadata.models[0].{field_name} "
+                        "must be a non-empty string"
+                    )
     verification = value.get("verification")
     if verification is not None and not isinstance(verification, dict):
         errors.append("Submission manifest verification must be an object")
@@ -419,7 +448,7 @@ def pack_submission_from_harbor_job(
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     manifest = {
-        "schema_version": 1,
+        "schema_version": HARBOR_MANIFEST_SCHEMA_VERSION,
         "harbor_job_id": job_id,
         "metadata": {
             "agent_display_name": agent_name,

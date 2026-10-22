@@ -35,6 +35,7 @@ class HarborSubmissionTests(unittest.TestCase):
 
             manifest = json.loads(output.read_text(encoding="utf-8"))
             self.assertEqual(result.task_count, 1)
+            self.assertEqual(manifest["schema_version"], 2)
             self.assertEqual(manifest["harbor_job_id"], "job-12345678")
             self.assertEqual(manifest["metadata"]["task_ids"], ["task-a"])
             self.assertEqual(len(result.warnings), 1)

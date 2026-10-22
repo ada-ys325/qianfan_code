@@ -5,6 +5,9 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 
+# `dumate run` writes this next to each task on every run
+.dumate-compose.yaml
+
 # 压缩包
 *.tar.gz
 *.tar.gz.bak

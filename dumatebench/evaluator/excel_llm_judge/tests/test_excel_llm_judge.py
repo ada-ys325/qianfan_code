@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from excel_judge.artifact_summary import summarize_artifacts
-from excel_judge.prompt import SYSTEM_PROMPT, build_user_prompt
+from dumatebench.evaluator.excel_llm_judge.excel_judge.artifact_summary import summarize_artifacts
+from dumatebench.evaluator.excel_llm_judge.excel_judge.prompt import SYSTEM_PROMPT, build_user_prompt
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 

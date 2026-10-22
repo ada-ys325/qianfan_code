@@ -1,0 +1,4 @@
+# Dependencies for the repository-wide Python test suite.
+-r dumatebench/requirements.txt
+-r dumatebench/evaluator/excel_llm_judge/requirements.txt
+-r leaderboard/ci/requirements.txt
