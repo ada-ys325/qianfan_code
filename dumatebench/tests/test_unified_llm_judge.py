@@ -10,6 +10,7 @@ from dumatebench.evaluator import (
     run_llm_judge_score,
 )
 from dumatebench.evaluator.llm_judge_pdf.runner import JudgeRunner as PdfJudgeRunner
+from dumatebench.evaluator.llm_judge_pdf.cli import main as pdf_judge_cli_main
 from dumatebench.evaluator.llm_judge_pdf.schema import normalize_rubric, stable_hash
 from dumatebench.evaluator.llm_judge_image.runner import ImageJudgeRunner
 from dumatebench.evaluator.llm_judge_image.schema import normalize_rubric as normalize_image_rubric
@@ -82,7 +83,7 @@ class UnifiedLlmJudgeTest(unittest.TestCase):
         self.assertIsNone(report["final_score"])
         self.assertFalse(report["pass"])
 
-    def test_textual_unified_score_averages_checklist_and_judge_scores(self):
+    def test_textual_unified_score_uses_thirty_seventy_checklist_judge_weights(self):
         (self.root / "run_outputs" / "answer.md").write_text("Project Alpha conclusion.", encoding="utf-8")
         rubric = {
             "criteria": [
@@ -162,10 +163,8 @@ class UnifiedLlmJudgeTest(unittest.TestCase):
 
         self.assertEqual(report["checklist_score"], 0.5)
         self.assertEqual(report["judge_score"], 0.75)
-        # scoring.final_score: 30% complete + 30% partial + 40% judge.
-        self.assertEqual(report["final_score"], 0.45)
-        self.assertLess(report["final_score"], report["min_final_score"])
-        self.assertFalse(report["pass"])
+        self.assertEqual(report["final_score"], 0.675)
+        self.assertTrue(report["pass"])
         self.assertTrue((self.root / "run_outputs" / "unified.json").is_file())
 
     def test_textual_reference_selection_prefers_file_named_in_instruction(self):
@@ -279,20 +278,20 @@ class UnifiedLlmJudgeTest(unittest.TestCase):
                 ],
                 "render_slides": False,
                 "mock_response": json.dumps({"score": 80, "critical_failures": [], "dimensions": []}),
-                "min_final_score": 0.9,
+                "min_final_score": 0.85,
             },
         )
 
         self.assertEqual(report["judge_kind"], "ppt")
         self.assertEqual(report["checklist_score"], 1.0)
         self.assertEqual(report["judge_score"], 0.8)
-        self.assertEqual(report["final_score"], 0.92)
+        self.assertEqual(report["final_score"], 0.86)
         reference_summary = report["judge_report"]["evidence"]["workspace_reference_summary"]
         self.assertEqual(reference_summary["status"], "ok")
         self.assertEqual(reference_summary["text_artifacts"][0]["path"], "context.md")
         reference_ppts = report["judge_report"]["evidence"]["reference_ppt_summaries"]
         self.assertEqual(reference_ppts[0]["reference_path"], "source.pptx")
-        self.assertTrue(evaluate_llm_judge_score(self.root, {**report_args_for_ppt(), "min_final_score": 0.9}))
+        self.assertTrue(evaluate_llm_judge_score(self.root, {**report_args_for_ppt(), "min_final_score": 0.85}))
 
     @unittest.skipIf(openpyxl is None, "openpyxl is not installed")
     def test_excel_unified_score_selects_excel_judge(self):
@@ -341,9 +340,8 @@ class UnifiedLlmJudgeTest(unittest.TestCase):
         self.assertEqual(report["judge_kind"], "excel")
         self.assertEqual(report["checklist_score"], 0.5)
         self.assertEqual(report["judge_score"], 0.6)
-        self.assertEqual(report["final_score"], 0.39)
-        self.assertLess(report["final_score"], report["min_final_score"])
-        self.assertFalse(report["pass"])
+        self.assertEqual(report["final_score"], 0.57)
+        self.assertTrue(report["pass"])
         self.assertTrue((self.root / "run_outputs" / "excel_unified.json").is_file())
         self.assertTrue((self.root / "run_outputs" / "excel_llm_judge" / "judge_result.json").is_file())
         judge_input = json.loads((self.root / "run_outputs" / "excel_llm_judge" / "judge_input.json").read_text(encoding="utf-8"))
@@ -387,7 +385,7 @@ class UnifiedLlmJudgeTest(unittest.TestCase):
         self.assertEqual(report["judge_kind"], "pdf")
         self.assertEqual(report["checklist_score"], 0.5)
         self.assertEqual(report["judge_score"], 0.75)
-        self.assertEqual(report["final_score"], 0.45)
+        self.assertEqual(report["final_score"], 0.675)
         self.assertTrue((self.root / "run_outputs" / "pdf_unified.json").is_file())
         self.assertTrue((self.root / "run_outputs" / "pdf_llm_judge" / "judge_result.json").is_file())
 
@@ -464,6 +462,43 @@ class UnifiedLlmJudgeTest(unittest.TestCase):
         # Candidate artifacts are namespaced with an ``outputs/`` prefix so the
         # judge cannot confuse them with reference material.
         self.assertIn("outputs/report.pdf", evidence_path["enum"])
+
+    @unittest.skipIf(
+        importlib.util.find_spec("pypdf") is None or importlib.util.find_spec("fitz") is None,
+        "PDF judge dependencies are not installed",
+    )
+    def test_pdf_cli_run_and_evaluate_use_current_client_contract(self):
+        class SequenceClient:
+            def __init__(self, payloads):
+                self.payloads = iter(payloads)
+
+            def complete_json(self, messages, response_format=None):
+                del messages, response_format
+                return next(self.payloads)
+
+        judgment = {
+            "criteria": [
+                {"id": criterion_id, "score": 3, "confidence": 0.8, "evidence": [], "rationale": "ok"}
+                for criterion_id in ("content", "layout", "integrity")
+            ],
+            "summary": "ok",
+        }
+        self._write_minimal_pdf(self.root / "run_outputs" / "report.pdf")
+        rubric_path = self.root / "rubric.json"
+        result_path = self.root / "judge_result.json"
+
+        self.assertEqual(pdf_judge_cli_main([
+            "run", "--task-dir", str(self.root), "--rubric-out", str(rubric_path),
+            "--result-out", str(result_path), "--rule-weight", "0",
+        ], client=SequenceClient([self._pdf_rubric(), judgment])), 0)
+        self.assertTrue(rubric_path.is_file())
+        self.assertEqual(json.loads(result_path.read_text())["score"]["final_score"], 75.0)
+
+        self.assertEqual(pdf_judge_cli_main([
+            "evaluate", "--task-dir", str(self.root), "--rubric", str(rubric_path),
+            "--result-out", str(result_path), "--rule-weight", "0",
+        ], client=SequenceClient([judgment])), 0)
+        self.assertEqual(json.loads(result_path.read_text())["score"]["final_score"], 75.0)
 
     def test_pdf_judgment_keeps_low_confidence_score_when_evidence_is_filtered(self):
         class JudgmentClient:
@@ -572,7 +607,7 @@ class UnifiedLlmJudgeTest(unittest.TestCase):
         self.assertEqual(report["judge_kind"], "image")
         self.assertEqual(report["checklist_score"], 1.0)
         self.assertEqual(report["judge_score"], 0.75)
-        self.assertEqual(report["final_score"], 0.9)
+        self.assertEqual(report["final_score"], 0.825)
         self.assertTrue((self.root / "run_outputs" / "image_llm_judge" / "judge_result.json").is_file())
 
     def test_image_judgment_requests_strict_json_schema(self):

@@ -29,13 +29,12 @@ def equal_weight_partial_pass(
 
 
 def final_score(
-    complete_pass: Any,
-    partial_pass: Any,
+    checklist_score: Any,
     llm_judge_score: Any,
     *,
     precision: int = 4,
 ) -> float:
-    """Combine scores as 30% complete, 30% partial, and 40% LLM judge."""
+    """Combine the checklist score (30%) and LLM-judge score (70%)."""
 
     def unit(value: Any) -> float:
         try:
@@ -46,5 +45,5 @@ def final_score(
             score /= 100.0
         return max(0.0, min(1.0, score))
 
-    result = 0.3 * unit(complete_pass) + 0.3 * unit(partial_pass) + 0.4 * unit(llm_judge_score)
+    result = 0.3 * unit(checklist_score) + 0.7 * unit(llm_judge_score)
     return round(result, precision)

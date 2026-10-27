@@ -140,10 +140,18 @@ def _parse_json_object_response(content: str) -> dict[str, Any]:
 
 
 class _OpenAIJsonClient:
-    def __init__(self, model: str, base_url: str | None = None) -> None:
+    def __init__(
+        self,
+        model: str,
+        base_url: str | None = None,
+        *,
+        api_key_env: str = "OPENAI_API_KEY",
+        max_tokens: int | None = None,
+    ) -> None:
         self.model = model
         self.base_url = base_url or os.environ.get("OPENAI_BASE_URL")
-        self.max_tokens = int(os.environ.get("DUMATE_LLM_JUDGE_MAX_TOKENS", "16000"))
+        self.api_key_env = api_key_env
+        self.max_tokens = max_tokens if max_tokens is not None else int(os.environ.get("DUMATE_LLM_JUDGE_MAX_TOKENS", "16000"))
         self.retries = int(os.environ.get("DUMATE_LLM_JUDGE_RETRIES", "5"))
 
     def complete_json(
@@ -156,9 +164,9 @@ class _OpenAIJsonClient:
         except ImportError as exc:
             raise RuntimeError("openai>=1.x is required to call the LLM judge") from exc
 
-        api_key = os.environ.get("OPENAI_API_KEY")
+        api_key = os.environ.get(self.api_key_env)
         if not api_key:
-            raise RuntimeError("OPENAI_API_KEY is required to call the LLM judge")
+            raise RuntimeError(f"{self.api_key_env} is required to call the LLM judge")
         client = OpenAI(api_key=api_key, base_url=self.base_url, max_retries=0)
         last_exc: Exception | None = None
         for attempt in range(self.retries + 1):
@@ -288,13 +296,12 @@ def normalize_unit_score(value: Any, *, assume_percent_above_one: bool = True) -
 
 
 def merge_unit_scores(
-    complete_pass: float | None,
     checklist_score: float | None,
     judge_score: float | None,
 ) -> float:
     from ..scoring import final_score
 
-    return final_score(complete_pass, checklist_score, judge_score)
+    return final_score(checklist_score, judge_score)
 
 
 def _run_textual_judge(
@@ -1255,12 +1262,11 @@ def run_llm_judge_score(
 
     raw_judge_score = judge_report.get("judge_score")
     judge_score = normalize_unit_score(raw_judge_score) if raw_judge_score is not None else None
-    complete_pass = normalize_unit_score(rule_result.get("complete_pass", 0.0)) if isinstance(rule_result, dict) else 0.0
     threshold = normalize_unit_score(args.get("min_final_score", 0.7))
     judge_status = str(judge_report.get("status") or "ok")
     judge_reason = str(judge_report.get("reason") or "Unified LLM judge completed.")
     final_score = (
-        merge_unit_scores(complete_pass, checklist_score, judge_score)
+        merge_unit_scores(checklist_score, judge_score)
         if judge_status == "ok" and judge_score is not None
         else None
     )

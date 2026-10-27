@@ -1,6 +1,8 @@
 PDF LLM-as-Judge
 
 # PDF LLM-as-Judge
+> 本文保留了独立 PDF judge 的设计说明。当前批量运行和全局 30% checklist + 70% judge 评分请参见 [`DUMATEBENCH_LLM_AS_JUDGE_DESIGN.md`](../DUMATEBENCH_LLM_AS_JUDGE_DESIGN.md)。本报告中的 40% deterministic + 60% judge 指独立 PDF judge 内部的可选混合分数，不是 DuMateBench 最终分数。
+
  DuMateBench PDF 方向 LLM-as-Judge evaluator。确定性 evaluator 负责检查输出路径、文件存在、PDF 可解析性和任务中的机械规则；LLM Judge 负责评估内容正确性、要求完整性、文档结构、版式可读性、视觉一致性和编辑忠实性。
 
 ## 背景
@@ -64,46 +66,37 @@ Judge 必须为每条 criterion 返回文件路径，并尽可能返回页码、
 
 ## CLI 用法
 ### 一次生成 rubric 并运行 PDF judge
-以下命令在项目使用的 `dev` Docker 中运行：
+从当前仓库根目录运行。先安装 `requirements-dev.txt` 中的 Python 依赖，并确保 `pdftoppm` 等 PDF 工具可用。密钥只放在环境变量中；模型接口需要兼容 Chat Completions JSON mode，且支持 user message 中的 `image_url` data URI。
 
 ```bash
-docker exec dev sh -lc '
-  cd /mnt/cfs_algo_bj/workspace/tianhan/DataAnnotation &&
-  export OPENAI_API_KEY="..." &&
-  export OPENAI_BASE_URL="https://<openai-compatible-endpoint>/v1" &&
-  python -m pdf_bench.llm_judge_pdf.cli run \
-    --task-dir pdf_bench/generated_tasks/<task-id> \
-    --outputs-dir /path/to/agent/outputs \
-    --reference-dir pdf_bench/generated_tasks/<task-id>/workspace_seed \
-    --model <multimodal-model> \
-    --rubric-out /path/to/rubric.json \
-    --result-out /path/to/judge_result.json \
-    --rule-result /path/to/reward.json \
-    --max-pages 12 \
-    --judge-runs 1
-'
+export OPENAI_API_KEY="your-token"
+export OPENAI_BASE_URL="https://your-openai-compatible-endpoint/v1"
+
+python -m dumatebench.evaluator.llm_judge_pdf.cli run \
+  --task-dir /path/to/task \
+  --outputs-dir /path/to/task/run_outputs \
+  --model your-multimodal-model \
+  --rubric-out /path/to/rubric.json \
+  --result-out /path/to/judge_result.json \
+  --rule-result /path/to/task/run_outputs/reward.json \
+  --max-pages 12 \
+  --judge-runs 1
 ```
-模型接口必须兼容 Chat Completions JSON mode，并支持 user message 中的 `image_url` data URI。`--reference-dir -` 可禁用 reference evidence。
+`--reference-dir` 默认读取任务的 `workspace_seed/`；传 `--reference-dir -` 可禁用 reference evidence。若无 checklist 结果，可省略 `--rule-result`。
 
 ### 单独生成和复用 rubric
 ```bash
-docker exec dev sh -lc '
-  cd /mnt/cfs_algo_bj/workspace/tianhan/DataAnnotation &&
-  python -m pdf_bench.llm_judge_pdf.cli generate-rubric \
-    --task-dir pdf_bench/generated_tasks/<task-id> \
-    --rubric-out /path/to/rubric.json \
-    --model <multimodal-model>
-'
+python -m dumatebench.evaluator.llm_judge_pdf.cli generate-rubric \
+  --task-dir /path/to/task \
+  --rubric-out /path/to/rubric.json \
+  --model your-multimodal-model
 ```
 ```bash
-docker exec dev sh -lc '
-  cd /mnt/cfs_algo_bj/workspace/tianhan/DataAnnotation &&
-  python -m pdf_bench.llm_judge_pdf.cli evaluate \
-    --task-dir pdf_bench/generated_tasks/<task-id> \
-    --outputs-dir /path/to/agent/outputs \
-    --rubric /path/to/rubric.json \
-    --result-out /path/to/judge_result.json \
-    --model <multimodal-model>
-'
+python -m dumatebench.evaluator.llm_judge_pdf.cli evaluate \
+  --task-dir /path/to/task \
+  --outputs-dir /path/to/task/run_outputs \
+  --rubric /path/to/rubric.json \
+  --result-out /path/to/judge_result.json \
+  --model your-multimodal-model
 ```
 `evaluate` 会重新计算 instruction hash；任务指令改变后不能继续使用旧 rubric。

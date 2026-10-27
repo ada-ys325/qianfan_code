@@ -311,9 +311,30 @@ dumate template fill \
   --dataset "$WORK_ROOT" \
   --template "$TEMPLATE" \
   --task-glob 'task_*'
+```
 
-dumate datasets list "$WORK_ROOT" --task-glob 'task_*'
-dumate package check "$WORK_ROOT/task_1"
+```bash
+dumate run \
+  --task /absolute/path/to/task \
+  --agent 'python3 /absolute/path/to/my_agent.py' \
+  --max-steps 20 \
+  --adapter-timeout 180
+```
+
+The command named by `--agent` runs on the host and is invoked once per step.
+It receives the current state on stdin and returns one action on stdout. The
+runner, not the agent process, executes that action inside the task container.
+For the adapter contract, a third-party CLI wrapper example, and the separate
+native-CLI path, see
+[`dumatebench/docs/custom_agents.md`](dumatebench/docs/custom_agents.md).
+
+Useful options include:
+
+```text
+--max-steps N               Maximum agent steps for each task (default: 20)
+--adapter-timeout SECONDS   Timeout for each adapter invocation (default: 180)
+--no-build                  Reuse an already-built Docker image
+--keep-containers           Keep containers running for debugging
 ```
 
 The check should pass after `template fill` even though the prepared task has
@@ -332,6 +353,9 @@ dumate harbor export \
   --output "$HARBOR_TASKS" \
   --task-glob 'task_*'
 ```
+
+Unless a source `task.yaml` overrides them, each exported Harbor task gives
+the agent 1800 seconds and the container 8192 MB of memory.
 
 For a single task, use `--task` instead of `--dataset`:
 
@@ -381,14 +405,17 @@ shell that launches Harbor:
 ```bash
 export OPENAI_API_KEY="your-new-token"
 export OPENAI_BASE_URL="https://your-openai-compatible-provider.example/v1"
+export DUMATE_LLM_JUDGE_MODEL="gpt-4o"
 
 # Use an exact model ID exposed by that provider.
 MODEL="openai/claude-opus-4-8"
 ```
 
 For a compatible gateway, set `OPENAI_BASE_URL` to that gateway's `/v1`
-endpoint. Do not print or commit the token. Harbor passes the values to the
-agent container using `--ae`:
+endpoint and choose a judge model that it actually serves. Do not print or
+commit the token. The exported task also reads these
+variables for its LLM judge. Pass literal environment-variable templates to
+Harbor so the key is not expanded into the `harbor run` process arguments:
 
 ```bash
 HARBOR_TASKS=/absolute/path/to/harbor_tasks
@@ -398,8 +425,8 @@ harbor run \
   --path "$HARBOR_TASKS/task_1" \
   --agent openhands-sdk \
   --model "$MODEL" \
-  --ae "LLM_API_KEY=$OPENAI_API_KEY" \
-  --ae "LLM_BASE_URL=$OPENAI_BASE_URL" \
+  --ae 'LLM_API_KEY=${OPENAI_API_KEY}' \
+  --ae 'LLM_BASE_URL=${OPENAI_BASE_URL}' \
   --agent-setup-timeout-multiplier 5 \
   --jobs-dir "$JOBS/smoke-task-1" \
   --n-concurrent 1 \
@@ -436,8 +463,8 @@ harbor run \
   --path "$HARBOR_TASKS" \
   --agent openhands-sdk \
   --model "$MODEL" \
-  --ae "LLM_API_KEY=$OPENAI_API_KEY" \
-  --ae "LLM_BASE_URL=$OPENAI_BASE_URL" \
+  --ae 'LLM_API_KEY=${OPENAI_API_KEY}' \
+  --ae 'LLM_BASE_URL=${OPENAI_BASE_URL}' \
   --agent-setup-timeout-multiplier 5 \
   --jobs-dir "$JOBS/full-200" \
   --n-concurrent 1 \
@@ -483,14 +510,15 @@ For Harbor, inspect the job directory printed at the end of the run:
 <jobs>/<job-id>/<task-id>/result.json
 ```
 
-Interpret results separately:
+The task's verifier artifacts also contain `reward_with_llm_judge.json` when
+the judge runs. Check `llm_judge.status == "ok"` and numeric
+`llm_judge_score` and `final_score` values. The final score is 30% checklist
+(`partial_pass`) and 70% judge. Without `OPENAI_API_KEY`, Harbor still runs the
+deterministic checklist, but does not produce an LLM judge score.
 
-- `Exceptions: 0` means orchestration, agent setup, and evaluator completed.
-- `complete_pass: 1` means the task fully passed its evaluator.
-- `partial_pass < 1` means the artifact or one or more required checks were
-  incomplete.
-- `token/cost: null` usually means the model was never called, often because
-  setup or network failed first.
+For lower-level environment details, including workspace initialization,
+Docker Compose mounts, tool wrappers, and fault injection, see
+[`dumatebench/docs/docker_environment.md`](dumatebench/docs/docker_environment.md).
 
 ## Formal Leaderboard Runs
 
@@ -510,8 +538,27 @@ harbor run \
 Do not use `--upload --public` for local smoke jobs. It requires the registry
 revision, a configured Harbor account, and permission to publish results.
 
-See [leaderboard/SUBMIT.md](leaderboard/SUBMIT.md) for the submission manifest
-and verification workflow.
+`harbor run` accepts any Harbor-compatible agent. For the bundled DuMate
+bridge, select its import path and pass your adapter command as constructor
+kwargs:
+
+```bash
+harbor run --path /path/to/harbor_tasks \
+  --agent dumatebench_cli.harbor_agent:DumateBenchAgent \
+  --model openai/gpt-4o \
+  --ak agent_cmd='python3 /path/to/my_adapter.py' \
+  --ak max_steps=30 --ak adapter_timeout_sec=180
+```
+
+The adapter must implement
+[`agent_contract.md`](dumatebench/agents/agent_contract.md). Harbor's custom
+agent interface is separate from `dumate run` and from the native Docker
+runner. For the adapter and native CLI choices, current built-in backends, and
+the files that a new native backend requires, see
+[`custom_agents.md`](dumatebench/docs/custom_agents.md).
+
+After a formal Harbor run, create a score-free pointer manifest following
+[`leaderboard/SUBMIT.md`](leaderboard/SUBMIT.md).
 
 ## Citation
 

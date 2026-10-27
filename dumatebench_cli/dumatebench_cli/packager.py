@@ -234,24 +234,15 @@ def check_task_dir(task_dir: Path, *, harbor_compatible: bool = False) -> CheckR
     checks.append(Check(shared_evaluate_path().is_file(), "shared dumatebench/evaluator/evaluate.py exists"))
 
     compose_file = task_dir / "environment" / "docker-compose.yaml"
-    if compose_file.is_file():
-        checks.append(Check(
-            ok=True,
-            message="environment/docker-compose.yaml exists (legacy task compose; retained for compatibility)",
-            advisory=True,
-        ))
+    if compose_file.exists():
+        checks.append(Check(True, "environment/docker-compose.yaml exists"))
     else:
-        # Filled tasks intentionally omit a task-authored compose file. The
-        # local adapter writes .dumate-compose.yaml and Harbor supplies its
-        # own base overlay, so requiring this legacy file makes `template
-        # fill` output fail its own package check.
-        checks.append(Check(
-            ok=True,
-            message=(
-                "environment/docker-compose.yaml not present (optional; "
-                "dumate run/Harbor supplies the compose definition)"
-            ),
-        ))
+        checks.append(
+            Check(
+                True,
+                "environment/docker-compose.yaml not present (optional; dumate run/Harbor supplies the compose definition)",
+            )
+        )
 
     passed = all(c.ok for c in checks)
     return CheckResult(passed=passed, checks=checks)

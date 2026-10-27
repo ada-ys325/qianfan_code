@@ -144,24 +144,17 @@ def read_summary(reward_path: Path, reward_file: str) -> RewardSummary:
     llm_judge_score = _number(data.get("llm_judge_score"))
     if llm_judge_score is None and isinstance(data.get("llm_judge"), dict):
         llm_judge_score = _number(data["llm_judge"].get("score"))
-    complete_pass = _number(data.get("base_complete_pass"))
-    partial_pass = true_checklist_partial_pass(data)
-
-    # The recorded final_score is only a fallback: it can predate the current
-    # weights, so it is used just when the judge score is missing and the score
-    # cannot be re-derived.
-    final_score = true_llm_final_score(partial_pass, llm_judge_score, complete_pass or 0.0)
-    if final_score is None:
-        final_score = _number(data.get("final_score"))
+    true_partial_pass = true_checklist_partial_pass(data)
+    true_final_score = true_llm_final_score(true_partial_pass, llm_judge_score)
 
     return RewardSummary(
         task_id=str(data.get("task_id") or task_dir.name),
         task_dir=str(task_dir),
         reward_file=str(reward_path),
-        base_complete_pass=data.get("base_complete_pass"),
-        base_partial_pass=partial_pass,
+        base_complete_pass=data.get("base_complete_pass", data.get("complete_pass")),
+        base_partial_pass=true_partial_pass,
         llm_judge_score=llm_judge_score,
-        final_score=final_score,
+        final_score=true_final_score,
     )
 
 
@@ -232,7 +225,12 @@ def true_checklist_partial_pass(data: dict[str, Any]) -> float:
     """
     checks = data.get("checks")
     if not isinstance(checks, list) or not checks:
-        return _number(data.get("base_partial_pass")) or 0.0
+        fallback = _number(data.get("base_partial_pass", data.get("partial_pass")))
+        if fallback is None:
+            return 0.0
+        if fallback > 1.0:
+            fallback /= 100.0
+        return round(max(0.0, min(1.0, fallback)), 6)
     passed = 0
     for item in checks:
         if isinstance(item, dict) and bool(item.get("passed")):
@@ -243,11 +241,10 @@ def true_checklist_partial_pass(data: dict[str, Any]) -> float:
 def true_llm_final_score(
     true_partial_pass: float,
     llm_judge_score: float | None,
-    complete_pass: float = 0.0,
 ) -> float | None:
     if llm_judge_score is None:
         return None
-    return merge_final_score(complete_pass, true_partial_pass, llm_judge_score, precision=6)
+    return merge_final_score(true_partial_pass, llm_judge_score, precision=6)
 
 
 def _average(values: Iterable[Any]) -> float | None:

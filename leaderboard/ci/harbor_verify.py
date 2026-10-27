@@ -518,7 +518,7 @@ def extract_dumate_scores(
     and does not identify DuMateBench's checklist metrics. LLM fields are
     optional because the standard Harbor evaluator emits only the checklist
     metrics; when present, the final score is recomputed with DuMateBench's
-    shared 30/30/40 formula.
+    shared 30% checklist / 70% LLM-judge formula.
     """
     sources = _score_sources(trial, detail)
     complete = _metric_value(
@@ -587,7 +587,7 @@ def extract_dumate_scores(
         )
     if final is not None:
         final = _validate_unit_score(float(final), trial_id=trial_id, label="final_score")
-        recomputed = dumate_final_score(complete, partial, judge)
+        recomputed = dumate_final_score(partial, judge)
         if abs(final - recomputed) > 0.0001:
             raise HarborVerificationError(
                 f"Trial {trial_id} final_score mismatch: recorded {final}, "

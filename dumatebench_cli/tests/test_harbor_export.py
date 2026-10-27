@@ -36,6 +36,15 @@ class HarborExportTests(unittest.TestCase):
         self.assertEqual(config["environment"]["memory_mb"], 4096)
         self.assertEqual(config["environment"]["storage_mb"], 12000)
         self.assertEqual(config["environment"]["gpus"], 0)
+        self.assertEqual(
+            config["verifier"]["env"],
+            {
+                "OPENAI_API_KEY": "${OPENAI_API_KEY:-}",
+                "OPENAI_BASE_URL": "${OPENAI_BASE_URL:-}",
+                "OPENAI_MODEL": "${OPENAI_MODEL:-}",
+                "DUMATE_LLM_JUDGE_MODEL": "${DUMATE_LLM_JUDGE_MODEL:-}",
+            },
+        )
         self.assertEqual(warnings, [])
 
     def test_export_writes_harbor_package_without_runtime_outputs(self) -> None:
@@ -46,6 +55,7 @@ class HarborExportTests(unittest.TestCase):
             (task / "environment").mkdir(parents=True)
             (task / "environment" / "Dockerfile").write_text("FROM python:3.12-slim\n", encoding="utf-8")
             (task / "evaluator").mkdir()
+            (task / "web_reference").mkdir()
             (task / "run_outputs").mkdir()
             (task / "run_outputs" / "old.txt").write_text("old", encoding="utf-8")
             (task / "task.yaml").write_text(
@@ -53,8 +63,12 @@ class HarborExportTests(unittest.TestCase):
                 encoding="utf-8",
             )
             (task / "instruction.md").write_text("Do the task", encoding="utf-8")
+            (task / "web_reference" / "reference.md").write_text("Reference", encoding="utf-8")
             (task / "evaluator" / "checks.yaml").write_text(
                 "checks:\n  - id: smoke\n    type: evaluate_file_exist\n", encoding="utf-8"
+            )
+            (task / "evaluator" / "llm_judge_criteria.json").write_text(
+                '{"criteria": []}\n', encoding="utf-8"
             )
             (task / "evaluator" / "evaluator.py").write_text("print('ok')\n", encoding="utf-8")
 
@@ -64,8 +78,19 @@ class HarborExportTests(unittest.TestCase):
             self.assertTrue((output / "task.toml").is_file())
             self.assertTrue((output / "tests" / "test.sh").is_file())
             self.assertTrue((output / "tests" / "evaluator.py").is_file())
-            self.assertTrue((output / "tests" / "checks.yaml").is_file())
-            self.assertTrue((output / "tests" / "evaluate.py").is_file())
+            self.assertTrue((output / "tests" / "instruction.md").is_file())
+            self.assertTrue((output / "tests" / "web_reference" / "reference.md").is_file())
+            self.assertTrue((output / "tests" / "llm_judge_requirements.txt").is_file())
+            self.assertTrue((output / "tests" / "task_evaluator" / "checks.yaml").is_file())
+            self.assertTrue((output / "tests" / "task_evaluator" / "llm_judge_criteria.json").is_file())
+            self.assertTrue((output / "tests" / "run_harbor_llm_judge.py").is_file())
+            self.assertTrue((output / "tests" / "dumatebench" / "evaluator" / "llm_judge" / "unified.py").is_file())
+            test_sh = (output / "tests" / "test.sh").read_text(encoding="utf-8")
+            self.assertIn("run_harbor_llm_judge.py", test_sh)
+            self.assertIn("cp /tests/instruction.md /opt/dumate/task/instruction.md", test_sh)
+            self.assertIn("/tests/task_evaluator/", test_sh)
+            self.assertIn("llm_judge_requirements.txt", test_sh)
+            self.assertIn("reward_with_llm_judge.json", test_sh)
             self.assertFalse((output / "run_outputs").exists())
 
     def test_package_check_rejects_missing_checks_and_docker_sources(self) -> None:

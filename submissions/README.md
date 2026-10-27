@@ -34,7 +34,7 @@ and task digests, requires Harbor agent/model identity fields, and compares
 them with the manifest declaration. It then recomputes DuMateBench's
 `complete_pass`/`partial_pass` from Harbor verifier results. When LLM-judge
 fields are present, it also recomputes and checks `final_score` using
-DuMateBench's 30% complete + 30% partial + 40% judge formula.
+DuMateBench's 30% checklist (`partial_pass`) + 70% judge formula.
 
 After the source job passes, CI copies it into a leaderboard-owned Harbor job,
 re-checks the copy, and opens a bot PR. The bot PR is the record that a

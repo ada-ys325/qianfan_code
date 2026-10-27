@@ -15,8 +15,7 @@ excel_llm_judge/
 ├── tests/
 │   └── test_excel_llm_judge.py     单元测试和 dry-run 冒烟测试
 ├── requirements.txt                运行和测试依赖
-├── README.md                       使用说明
-└── excel_llm_judge_report.md       调研和设计报告
+└── README.md                       使用说明
 ```
 
 ## Rubric 维度
@@ -31,8 +30,8 @@ excel_llm_judge/
 ## 安装依赖
 
 ```bash
-cd /mnt/cfs_algo_bj/workspace/zhangjx09/baidu/personal-code/excel_llm_judge
-python3 -m pip install -r requirements.txt
+cd /path/to/qianfan_code
+python3 -m pip install -r dumatebench/evaluator/excel_llm_judge/requirements.txt
 ```
 
 ## Dry-run
@@ -40,7 +39,7 @@ python3 -m pip install -r requirements.txt
 `--dry-run` 只生成评估输入摘要和占位报告，不调用模型，适合检查 Excel 证据抽取是否正常。
 
 ```bash
-python3 excel_llm_judge.py \
+python3 -m dumatebench.evaluator.excel_llm_judge.excel_llm_judge \
     --instruction ./instruction.md \
     --checklist ./checklist.md \
     --artifact-dir ./agent_outputs \
@@ -57,7 +56,7 @@ export OPENAI_API_KEY=...
 export OPENAI_BASE_URL=https://api.openai.com/v1
 export OPENAI_MODEL=gpt-4o
 
-python3 excel_llm_judge.py \
+python3 -m dumatebench.evaluator.excel_llm_judge.excel_llm_judge \
     --instruction ./instruction.md \
     --checklist ./checklist.md \
     --artifact-dir ./agent_outputs \
@@ -67,7 +66,7 @@ python3 excel_llm_judge.py \
 也可以用 CLI 覆盖模型配置：
 
 ```bash
-python3 excel_llm_judge.py \
+python3 -m dumatebench.evaluator.excel_llm_judge.excel_llm_judge \
     --instruction ./instruction.md \
     --checklist ./checklist.md \
     --artifact-dir ./agent_outputs \
@@ -85,8 +84,8 @@ python3 excel_llm_judge.py \
 ## 测试
 
 ```bash
-cd /mnt/cfs_algo_bj/workspace/zhangjx09/baidu/personal-code/excel_llm_judge
-python3 -m pytest tests/test_excel_llm_judge.py -v
+cd /path/to/qianfan_code
+python3 -m pytest dumatebench/evaluator/excel_llm_judge/tests/test_excel_llm_judge.py -v
 ```
 
 ## 已知限制

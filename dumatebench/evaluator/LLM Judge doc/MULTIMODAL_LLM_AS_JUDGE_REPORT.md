@@ -1,5 +1,7 @@
 # DuMateBench MP3/MP4 多模态 LLM-as-Judge 方案与 group2 分析
 
+> 历史设计报告：文中的 `/mnt/cfs_algo_bj/...` 路径是原实验环境路径。当前仓库的统一入口和全局评分方式以 [`DUMATEBENCH_LLM_AS_JUDGE_DESIGN.md`](../DUMATEBENCH_LLM_AS_JUDGE_DESIGN.md) 为准。
+
 ## 1. 结论
 
 本方案在不修改原 `DataAnnotation` 框架、历史 session 和已有 `checks.yaml` 的前提下，为 DuMateBench 增加独立的 MP3/MP4 多模态评估链路。新增实现位于：

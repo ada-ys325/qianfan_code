@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 from dumatebench.scripts.run_task_batch import (
     ROOT,
+    _memory_attempts_for_task,
     build_agent_command,
     dedupe_tasks_by_name,
     discover_tasks,
@@ -74,6 +75,18 @@ class BatchRunnerTest(unittest.TestCase):
         self.assertEqual(args.agent_base_url, "https://gateway.example/v1")
         self.assertEqual(args.agent_max_turns, 0)
 
+    def test_native_memory_defaults_to_eight_gib_without_automatic_increase(self):
+        args = parse_args(["--agent-backend", "codex"])
+
+        self.assertEqual(args.native_memory_mb, 8192)
+        self.assertEqual(args.native_retry_memory_mb, 8192)
+        self.assertEqual(_memory_attempts_for_task(self.task, args), [8192])
+
+        args = parse_args([
+            "--agent-backend", "codex", "--native-retry-memory-mb", "16384",
+        ])
+        self.assertEqual(_memory_attempts_for_task(self.task, args), [8192, 16384, 16384])
+
     def test_parse_args_accepts_isolated_run_options(self):
         args = parse_args(["--run-id", "exp-a", "--runs-root", "/tmp/dumate-runs"])
 
@@ -133,7 +146,6 @@ class BatchRunnerTest(unittest.TestCase):
         data = json.loads(final.read_text(encoding="utf-8"))
         self.assertEqual(data["base_partial_pass"], 0.2)
         self.assertEqual(data["llm_judge_score"], 0.0)
-        # scoring.final_score: 30% complete + 30% partial + 40% judge.
         self.assertEqual(data["final_score"], 0.06)
         self.assertEqual(data["llm_judge"]["status"], "missing_artifact")
 
@@ -175,7 +187,7 @@ class BatchRunnerTest(unittest.TestCase):
 
         data = json.loads(Path(final_path).read_text(encoding="utf-8"))
         self.assertEqual(data["llm_judge_score"], 0.8)
-        self.assertEqual(data["final_score"], 0.44)
+        self.assertEqual(data["final_score"], 0.68)
         self.assertEqual(data["llm_judge"]["status"], "ok")
 
     def test_run_unified_llm_judge_is_called_when_artifact_exists(self):
@@ -205,7 +217,7 @@ class BatchRunnerTest(unittest.TestCase):
         final_path = write_final_reward(self.task, "run_outputs/reward_with_llm_judge.json")
         data = json.loads(Path(final_path).read_text(encoding="utf-8"))
         self.assertEqual(data["llm_judge_score"], 0.9)
-        self.assertEqual(data["final_score"], 0.48)
+        self.assertEqual(data["final_score"], 0.75)
 
     def test_run_unified_llm_judge_averages_multiple_artifacts(self):
         first = self.task / "run_outputs" / "reports" / "a.docx"
@@ -242,7 +254,7 @@ class BatchRunnerTest(unittest.TestCase):
         final_path = write_final_reward(self.task, "run_outputs/reward_with_llm_judge.json")
         data = json.loads(Path(final_path).read_text(encoding="utf-8"))
         self.assertEqual(data["llm_judge_score"], 0.5)
-        self.assertEqual(data["final_score"], 0.38)
+        self.assertEqual(data["final_score"], 0.53)
         self.assertEqual(data["llm_judge"]["output_files"], ["run_outputs/reports/a.docx", "run_outputs/reports/b.pdf"])
 
     def test_infer_output_files_reads_instruction_targets(self):
@@ -303,6 +315,7 @@ class BatchRunnerTest(unittest.TestCase):
         self.assertEqual(build_context.resolve(), runtime.resolve())
         self.assertIn("dockerfile: environment/Dockerfile", compose)
         self.assertIn('cpus: "2"', compose)
+        # Explicit per-task resources take precedence over the paper defaults.
         self.assertIn("mem_limit: 4096m", compose)
         self.assertIn('dumatebench.storage_mb: "12000"', compose)
         self.assertIn(f"{self.task.resolve().as_posix()}/run_outputs:/outputs", compose)
@@ -313,6 +326,22 @@ class BatchRunnerTest(unittest.TestCase):
         self.assertNotIn("/outputs/emails", setup)
         self.assertNotIn("/outputs/reports", setup)
         self.assertNotIn("/outputs/pptx", setup)
+
+    def test_prepare_runtime_uses_paper_resource_defaults_when_task_omits_them(self):
+        (self.task / "task.yaml").write_text(
+            "task_id: target\n"
+            "agent:\n"
+            "  timeout_sec: 1800\n"
+            "environment: {}\n",
+            encoding="utf-8",
+        )
+
+        runtime = prepare_runtime(self.task, self.template, "defaults", "dumatebench-test")
+        compose = (runtime / "docker-compose.yaml").read_text(encoding="utf-8")
+
+        self.assertIn('cpus: "2"', compose)
+        self.assertIn("mem_limit: 8192m", compose)
+        self.assertIn('dumatebench.storage_mb: "12000"', compose)
 
     def test_prepare_runtime_supports_task_directory_outside_repo_root(self):
         with tempfile.TemporaryDirectory() as external_tmp:

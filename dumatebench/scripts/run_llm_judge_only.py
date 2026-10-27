@@ -444,7 +444,7 @@ def _write_no_output_judge_report(task_dir: Path, args: argparse.Namespace, rewa
         "reason": "Could not infer an artifact path for the LLM judge.",
         "checklist_score": checklist_score,
         "judge_score": 0.0,
-        "final_score": merge_final_score(reward.get("complete_pass", 0), checklist_score, 0.0),
+        "final_score": merge_final_score(checklist_score, 0.0),
         "artifact_reports": [],
         "rule_result": reward,
     }
@@ -467,7 +467,7 @@ def _refresh_existing_judge_report(task_dir: Path, args: argparse.Namespace, rew
     report["final_score"] = (
         None
         if status in {"failed", "skipped_unavailable"} or judge_score is None
-        else merge_final_score(reward.get("complete_pass", 0), checklist_score, judge_score)
+        else merge_final_score(checklist_score, judge_score)
     )
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
@@ -490,7 +490,7 @@ def _write_failure_report(
         "output_file": output_file,
         "checklist_score": checklist_score,
         "judge_score": 0.0,
-        "final_score": merge_final_score(reward.get("complete_pass", 0), checklist_score, 0.0),
+        "final_score": merge_final_score(checklist_score, 0.0),
         "pass": False,
         "rule_result": reward,
     }

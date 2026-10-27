@@ -9,6 +9,7 @@ test on runners that provide Docker and Harbor.
 from __future__ import annotations
 
 import json
+import math
 import os
 import re
 import subprocess
@@ -26,10 +27,11 @@ def _run(
     cwd: Path | None = None,
     timeout: int = 600,
     check: bool = True,
+    env: dict[str, str] | None = None,
 ) -> subprocess.CompletedProcess[str]:
     cwd = cwd or REPO_ROOT
     print("+", " ".join(str(part) for part in command), flush=True)
-    result = subprocess.run(command, cwd=cwd, capture_output=True, text=True, timeout=timeout)
+    result = subprocess.run(command, cwd=cwd, capture_output=True, text=True, timeout=timeout, env=env)
     if result.stdout:
         print(result.stdout, end="")
     if result.stderr:
@@ -75,7 +77,10 @@ environment:
 """,
         encoding="utf-8",
     )
-    (task / "instruction.md").write_text("Finish without creating an artifact.\n", encoding="utf-8")
+    (task / "instruction.md").write_text(
+        "Create a short report that includes the phrase Harbor LLM judge smoke artifact.\n",
+        encoding="utf-8",
+    )
     (task / "evaluator").mkdir()
     (task / "evaluator" / "checks.yaml").write_text(
         "checks:\n  - id: smoke\n    type: evaluate_file_exist\n", encoding="utf-8"
@@ -93,15 +98,37 @@ args = parser.parse_args()
 task_dir = Path(args.task_dir).resolve()
 out = task_dir / 'run_outputs' / 'reward.json'
 out.parent.mkdir(parents=True, exist_ok=True)
+artifact = out.parent / 'report.md'
+artifact.write_text('Harbor LLM judge smoke artifact\\n', encoding='utf-8')
 out.write_text(json.dumps({
     'task_id': 'e2e-task',
-    'complete_pass': 0,
-    'partial_pass': 0.0,
-    'checks': [{'id': 'smoke', 'passed': False}],
+    'complete_pass': 1,
+    'partial_pass': 1.0,
+    'checks': [{'id': 'smoke', 'passed': True, 'detail': json.dumps({'file': 'run_outputs/report.md'})}],
 }), encoding='utf-8')
-raise SystemExit(1)
+raise SystemExit(0)
 """,
         encoding="utf-8",
+    )
+    rubric = {
+        "criteria": [
+            {
+                "id": criterion_id,
+                "dimension": dimension,
+                "description": f"Smoke criterion for {criterion_id}.",
+                "weight": 1,
+                "evidence_required": True,
+                "levels": {str(score): f"Level {score}." for score in range(5)},
+            }
+            for criterion_id, dimension in (
+                ("smoke_relevance", "content_relevance"),
+                ("smoke_completeness", "requirement_completeness"),
+                ("smoke_style", "language_style"),
+            )
+        ]
+    }
+    (task / "evaluator" / "llm_judge_criteria.json").write_text(
+        json.dumps(rubric, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
 
     environment = template / "environment"
@@ -145,17 +172,56 @@ exec "$@"
     )
     (template / "network_faults.yaml").write_text("faults: []\n", encoding="utf-8")
     (template / "tool_faults.yaml").write_text("faults: []\n", encoding="utf-8")
+    (root / "mock_openai.py").write_text(
+        """from __future__ import annotations
+
+import json
+from types import SimpleNamespace
+
+
+JUDGMENT = {
+    "criteria": [
+        {
+            "id": criterion_id,
+            "status": "pass",
+            "score": 4,
+            "evidence": [{
+                "artifact_path": "outputs/report.md",
+                "location": "line 1",
+                "quote": "Harbor LLM judge smoke artifact",
+            }],
+            "rationale": "The fixture contains the required smoke artifact.",
+            "confidence": 1.0,
+        }
+        for criterion_id in ("smoke_relevance", "smoke_completeness", "smoke_style")
+    ],
+    "summary": "Deterministic CI judge response.",
+}
+
+
+class Completions:
+    def create(self, *, model: str, messages: list[dict], **_kwargs: object):
+        if model != "smoke-model":
+            raise RuntimeError(f"unexpected smoke model: {model}")
+        prompt = "\\n".join(str(message.get("content", "")) for message in messages)
+        if "Harbor LLM judge smoke artifact" not in prompt:
+            raise RuntimeError("judge prompt did not contain the candidate artifact")
+        return SimpleNamespace(
+            choices=[SimpleNamespace(message=SimpleNamespace(content=json.dumps(JUDGMENT)))]
+        )
+
+
+class OpenAI:
+    def __init__(self, *, api_key: str, base_url: str | None = None, **_kwargs: object):
+        if api_key != "ci-smoke-key":
+            raise RuntimeError("Harbor did not pass the CI judge credential")
+        if base_url != "http://ci-mock-openai/v1":
+            raise RuntimeError(f"Harbor did not pass the mock judge endpoint: {base_url}")
+        self.chat = SimpleNamespace(completions=Completions())
+""",
+        encoding="utf-8",
+    )
     return raw, task, template
-
-
-def _contains_reward(value: object) -> bool:
-    if isinstance(value, dict):
-        if isinstance(value.get("rewards"), dict) and "complete_pass" in value["rewards"]:
-            return True
-        return any(_contains_reward(item) for item in value.values())
-    if isinstance(value, list):
-        return any(_contains_reward(item) for item in value)
-    return False
 
 
 def _assert_harbor_results(jobs_dir: Path, output: str) -> None:
@@ -183,8 +249,32 @@ def _assert_harbor_results(jobs_dir: Path, output: str) -> None:
         raise RuntimeError(f"Harbor reported errored trials: {error_counts}")
     if not error_counts and "Exceptions" not in output:
         raise RuntimeError("Harbor results contain no exception count")
-    if not any(_contains_reward(payload) for payload in payloads):
-        raise RuntimeError("Harbor results contain no verifier reward")
+    judge_files = sorted(jobs_dir.rglob("reward_with_llm_judge.json"))
+    if not judge_files:
+        judge_outputs = sorted(jobs_dir.rglob("llm_judge_scores/*.json"))
+        details = [f"{path}: {path.read_text(encoding='utf-8', errors='replace')}" for path in judge_outputs]
+        raise RuntimeError(
+            "Harbor verifier artifacts contain no reward_with_llm_judge.json"
+            + (f"; judge reports: {details}" if details else "")
+        )
+    for path in judge_files:
+        reward = json.loads(path.read_text(encoding="utf-8"))
+        judge = reward.get("llm_judge_score")
+        checklist = reward.get("checklist_score", reward.get("base_partial_pass"))
+        final = reward.get("final_score")
+        judge_report = reward.get("llm_judge")
+        if not isinstance(judge_report, dict) or judge_report.get("status") != "ok":
+            raise RuntimeError(f"Harbor judge did not complete successfully in {path}")
+        if not all(isinstance(value, (int, float)) and math.isfinite(value)
+                   for value in (judge, checklist, final)):
+            raise RuntimeError(f"Harbor judge reward is missing numeric scores in {path}")
+        expected = round(0.3 * float(checklist) + 0.7 * float(judge), 4)
+        if abs(float(final) - expected) > 0.0001:
+            raise RuntimeError(
+                f"Harbor final_score mismatch in {path}: got {final}, expected 30/70 score {expected}"
+            )
+        if abs(float(judge) - 1.0) > 0.0001:
+            raise RuntimeError(f"Harbor smoke judge returned {judge} in {path}, expected 1.0")
 
 
 def main() -> int:
@@ -210,13 +300,36 @@ def main() -> int:
         if not summary_files:
             raise RuntimeError("dumate run did not produce a batch summary")
         records = [json.loads(line) for line in summary_files[-1].read_text(encoding="utf-8").splitlines() if line]
-        if len(records) != 1 or records[0].get("status") != "completed" or records[0].get("evaluator_returncode") != 1:
+        if len(records) != 1 or records[0].get("status") != "completed" or records[0].get("evaluator_returncode") != 0:
             raise RuntimeError(f"unexpected dumate run summary: {records}")
         _run(["dumate", "harbor", "export", "--task", str(task), "--output", str(harbor_tasks)])
+        task_tomls = sorted(harbor_tasks.rglob("task.toml"))
+        if len(task_tomls) != 1:
+            raise RuntimeError(f"expected one exported Harbor task.toml, found {len(task_tomls)}")
+        task_toml = task_tomls[0]
+        (task_toml.parent / "tests" / "openai.py").write_text(
+            (root / "mock_openai.py").read_text(encoding="utf-8"), encoding="utf-8"
+        )
+        toml_text = task_toml.read_text(encoding="utf-8")
+        for name in ("OPENAI_API_KEY", "OPENAI_BASE_URL", "DUMATE_LLM_JUDGE_MODEL"):
+            placeholder = name + ' = "${' + name + ':-}"'
+            if placeholder not in toml_text:
+                raise RuntimeError(f"exported Harbor task has no {name} verifier setting")
+        env_file = root / "judge.env"
+        env_file.write_text(
+            "OPENAI_API_KEY=ci-smoke-key\n"
+            "OPENAI_BASE_URL=http://ci-mock-openai/v1\n"
+            "DUMATE_LLM_JUDGE_MODEL=smoke-model\n",
+            encoding="utf-8",
+        )
+        harbor_env = os.environ.copy()
+        for name in ("OPENAI_API_KEY", "OPENAI_BASE_URL", "DUMATE_LLM_JUDGE_MODEL"):
+            harbor_env.pop(name, None)
         harbor_result = _run([
             "harbor", "run", "--path", str(harbor_tasks), "--agent", "nop",
+            "--env-file", str(env_file),
             "--jobs-dir", str(jobs), "--n-concurrent", "1", "--n-attempts", "1", "--yes", "--debug",
-        ], timeout=900, check=False)
+        ], timeout=900, check=False, env=harbor_env)
         harbor_output = harbor_result.stdout + harbor_result.stderr
         if harbor_result.returncode:
             _dump_container_logs(harbor_output)

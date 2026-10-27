@@ -1,5 +1,7 @@
 # DuMateBench 文字类产物 LLM-as-Judge 方案与 group1/group4 分析
 
+> 历史设计报告：本文件中的独立 judge 评分和命令反映早期方案。当前 DuMateBench 的统一入口、产物路径和全局 30% checklist + 70% judge 公式以 [`DUMATEBENCH_LLM_AS_JUDGE_DESIGN.md`](../DUMATEBENCH_LLM_AS_JUDGE_DESIGN.md) 为准。
+
 ## 1. 结论
 
 `generated_tasks_live/claude-opus-4-8/group_1` 与 `group_4` 共包含 8 个任务、46 条规则检查。其中：

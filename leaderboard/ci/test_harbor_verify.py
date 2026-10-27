@@ -55,7 +55,7 @@ class HarborVerificationTests(unittest.TestCase):
                         "complete_pass": 1,
                         "partial_pass": 1.0,
                         "llm_judge_score": 0.8,
-                        "final_score": 0.92,
+                        "final_score": 0.86,
                     }
                 },
             },
@@ -67,7 +67,7 @@ class HarborVerificationTests(unittest.TestCase):
                         "complete_pass": 0,
                         "partial_pass": 0.5,
                         "llm_judge_score": 0.4,
-                        "final_score": 0.31,
+                        "final_score": 0.43,
                     }
                 },
             },
@@ -99,7 +99,7 @@ class HarborVerificationTests(unittest.TestCase):
         self.assertEqual(report["dumatebench_score_mode"], "with_llm_judge")
         self.assertEqual(report["complete_pass_mean"], 0.5)
         self.assertEqual(report["partial_pass_mean"], 0.75)
-        self.assertEqual(report["final_score_mean"], 0.615)
+        self.assertEqual(report["final_score_mean"], 0.645)
 
     def test_ignores_generic_harbor_reward_when_dumate_metrics_are_present(self):
         self.details["trial-1"]["verifier_result"]["rewards"].pop("final_score")
@@ -232,7 +232,7 @@ class HarborVerificationTests(unittest.TestCase):
     def test_run_fingerprint_changes_with_scores(self):
         original = self.verify()["run_fingerprint"]
         self.details["trial-2"]["verifier_result"]["rewards"].update(
-            {"partial_pass": 0.25, "final_score": 0.235}
+            {"partial_pass": 0.25, "final_score": 0.355}
         )
 
         self.assertNotEqual(self.verify()["run_fingerprint"], original)

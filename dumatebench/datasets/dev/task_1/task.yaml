@@ -21,7 +21,7 @@ environment:
   dockerfile: environment/Dockerfile
   compose_file: environment/docker-compose.yaml
   cpus: 2
-  memory_mb: 4096
+  memory_mb: 8192
   storage_mb: 12000
   allow_internet: true
   allow_package_install: true

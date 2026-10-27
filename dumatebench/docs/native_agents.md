@@ -1,5 +1,8 @@
 # Running native Claude Code and Codex agents
 
+For a comparison with the host-side adapter path and steps for adding another
+native CLI, see [`custom_agents.md`](custom_agents.md).
+
 DuMateBench supports three batch agent backends:
 
 | Backend | `--agent-backend` | Model API required |
@@ -10,7 +13,9 @@ DuMateBench supports three batch agent backends:
 
 The native CLIs run inside the task container as the `agent` Linux user. They work directly in
 `/workspace`, write artifacts under `/outputs`, inherit the benchmark tool wrappers from `PATH`, and
-are stopped at the task's `agent.timeout_sec`. The host runs the existing evaluator after the CLI exits.
+are stopped at the task's `agent.timeout_sec` (1800 seconds by default). Their Docker memory limit
+defaults to 8192 MB. An out-of-memory retry with a higher limit requires an explicit
+`--native-retry-memory-mb` value. The host runs the existing evaluator after the CLI exits.
 Unlike the ReAct backend, native CLIs do not use `--max-steps` by default; they run until the CLI exits
 or the task timeout is reached.
 

@@ -5,11 +5,7 @@ import os
 from pathlib import Path
 from typing import Any
 
-try:
-    from annotation_pipeline.llm import LLMClient
-except ModuleNotFoundError:
-    from DataAnnotation.annotation_pipeline.llm import LLMClient
-
+from ..llm_judge.unified import _OpenAIJsonClient
 from .runner import JudgeRunner, load_task_inputs, read_json, reference_inventory, write_json
 
 
@@ -61,15 +57,14 @@ def _paths(args: argparse.Namespace) -> tuple[Path, Path, Path | None]:
     return task_dir, outputs_dir, reference_dir
 
 
-def _client(args: argparse.Namespace) -> LLMClient:
+def _client(args: argparse.Namespace) -> _OpenAIJsonClient:
     if not os.environ.get(args.api_key_env, "").strip():
         raise RuntimeError(f"missing API key env var: {args.api_key_env}")
-    return LLMClient(
+    return _OpenAIJsonClient(
         model=args.model,
         base_url=args.base_url,
         api_key_env=args.api_key_env,
         max_tokens=12000,
-        temperature=0.0,
     )
 
 
@@ -97,7 +92,6 @@ def main(argv: list[str] | None = None, *, client: Any | None = None) -> int:
             instruction=instruction,
             rubric=rubric,
             outputs_dir=outputs_dir,
-            references=references,
             reference_dir=reference_dir,
             rule_result=rule_result,
             judge_runs=args.judge_runs,

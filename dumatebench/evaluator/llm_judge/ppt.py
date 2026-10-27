@@ -764,7 +764,7 @@ def write_combined_reward(
         else None
     )
     final_score = (
-        merge_final_score(reward.get("complete_pass", 0), checklist_score, judge_score)
+        merge_final_score(checklist_score, judge_score)
         if judge_score is not None
         else None
     )

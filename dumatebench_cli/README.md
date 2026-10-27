@@ -20,8 +20,9 @@ package. Keep the sibling `dumatebench/` directory in the checkout because
 `dumatebench/evaluator/evaluate.py`. Do not use `pip install .` or install a
 standalone wheel for these workflows.
 
-Requires Docker (with the `docker compose` plugin) on your machine — tasks
-build and run as local containers, images are never pulled from a registry.
+Requires Docker (with the `docker compose` plugin) on your machine. Task
+images are built and run locally; Docker may pull their base images from a
+registry on the first build.
 
 ## Quickstart
 
@@ -43,6 +44,14 @@ dumate run \
   --agent 'python3 my_agent.py' \
   --max-steps 20
 ```
+
+This adapter runs on the host and returns one container command per step. To
+run Claude Code or Codex directly inside the task container, use the native
+runner instead. The two paths, credential handling, and instructions for
+adding another native CLI are documented in
+[`dumatebench/docs/custom_agents.md`](../dumatebench/docs/custom_agents.md).
+For Harbor's agent interface and LLM judge environment variables, see the
+Harbor section of that guide.
 
 Run a batch of tasks under a directory:
 

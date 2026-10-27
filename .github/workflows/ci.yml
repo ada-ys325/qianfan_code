@@ -33,7 +33,7 @@ jobs:
 
   docker-e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Check out source
         uses: actions/checkout@v4
@@ -48,5 +48,5 @@ jobs:
           python -m pip install --disable-pip-version-check -e dumatebench_cli
           python -m pip install --disable-pip-version-check -r leaderboard/ci/requirements.txt
 
-      - name: Run Docker and Harbor smoke E2E
+      - name: Run Docker, Harbor, and LLM-judge smoke E2E
         run: python .github/scripts/docker_harbor_smoke.py

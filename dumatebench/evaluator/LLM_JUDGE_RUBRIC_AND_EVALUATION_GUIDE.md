@@ -64,7 +64,7 @@ Judge 输出每条 criterion 的评分结果时，应包含：
 3. 若传入固定 `criteria_file`、`rubric_file`、`criteria`、`task_rubrics` 或 `rubric`，则直接使用这些 criteria；否则由 LLM judge 生成 task-specific criteria。
 4. LLM judge 逐条 criterion 输出 `score`、`evidence`、`rationale`、`confidence`。
 5. 程序按归一化权重聚合 criterion 分数，得到 0 到 1 的 `judge_score`。
-6. 如果同时有 checklist 分数，统一最终分数通常取 checklist score 和 LLM judge score 的平均。
+6. 如果同时有 checklist 分数，统一最终分数按 `0.3 × checklist_score + 0.7 × llm_judge_score` 计算；LLM judge 权重为 70%。
 
 固定输入接口支持：
 

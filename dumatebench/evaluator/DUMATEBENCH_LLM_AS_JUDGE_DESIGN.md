@@ -233,7 +233,7 @@ LLM-as-Judge 的分数根据 judge 类型做归一化：
 最终分数计算公式为：
 
 ```text
-final_score = 0.3 * complete_pass + 0.3 * checklist_score + 0.4 * llm_judge_score
+final_score = 0.3 * checklist_score + 0.7 * llm_judge_score
 ```
 
 统一报告 `run_outputs/llm_judge_score.json` 包含：
@@ -244,7 +244,7 @@ final_score = 0.3 * complete_pass + 0.3 * checklist_score + 0.4 * llm_judge_scor
   "judge_kind": "pdf",
   "checklist_score": 0.8,
   "judge_score": 0.7,
-  "final_score": 0.52,
+  "final_score": 0.73,
   "pass": false,
   "rule_result": {},
   "judge_report": {}
@@ -258,9 +258,9 @@ final_score = 0.3 * complete_pass + 0.3 * checklist_score + 0.4 * llm_judge_scor
   "base_complete_pass": 0,
   "base_partial_pass": 0.8,
   "llm_judge_score": 0.7,
-  "final_score": 0.52,
+  "final_score": 0.73,
   "complete_pass_with_llm_judge": 0,
-  "partial_pass_with_llm_judge": 0.52
+  "partial_pass_with_llm_judge": 0.73
 }
 ```
 

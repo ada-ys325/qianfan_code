@@ -197,8 +197,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--native-retry-memory-mb",
         type=int,
-        default=_env_int("DUMATE_NATIVE_RETRY_MEMORY_MB", 16384),
-        help="Docker memory limit for codex/claude-code retry attempts after agent return code 137, in MB.",
+        default=_env_int("DUMATE_NATIVE_RETRY_MEMORY_MB", 8192),
+        help="Optional higher Docker memory limit for codex/claude-code retries after return code 137, in MB; defaults to 8192 (no memory retry).",
     )
     parser.add_argument("--final-reward-file", default="run_outputs/reward_with_llm_judge.json")
     parser.add_argument("--skip-llm-judge", action="store_true", help="Do not actively run the unified LLM judge; only merge existing judge reports.")
@@ -348,6 +348,8 @@ def _memory_attempts_for_task(task_dir: Path, args: argparse.Namespace) -> list[
     task_memory_mb = _read_task_memory_mb(task_dir) or 0
     initial_memory_mb = max(task_memory_mb, int(args.native_memory_mb))
     retry_memory_mb = max(task_memory_mb, int(args.native_retry_memory_mb))
+    if retry_memory_mb <= initial_memory_mb:
+        return [initial_memory_mb]
     return [initial_memory_mb, retry_memory_mb, retry_memory_mb]
 
 
@@ -426,7 +428,7 @@ def default_task_yaml_text(task_dir: Path) -> str:
     return (
         f"task_id: {json.dumps(task_dir.name, ensure_ascii=False)}\n"
         "agent:\n"
-        "  timeout_sec: 900\n"
+        "  timeout_sec: 1800\n"
     )
 
 
@@ -572,13 +574,15 @@ def prepare_runtime(
     image_name = f"{image_prefix}{backend_component}-{_sanitize_image_component(task_dir.name)}:latest"
     resources = _read_environment_resources(task_dir / "task.yaml")
     resource_lines = ""
-    if resources.get("cpus"):
-        resource_lines += f'    cpus: "{resources["cpus"]}"\n'
-    memory_mb = memory_mb_override if memory_mb_override is not None else resources.get("memory_mb")
+    cpus = resources.get("cpus", "2")
+    if cpus:
+        resource_lines += f'    cpus: "{cpus}"\n'
+    memory_mb = memory_mb_override if memory_mb_override is not None else resources.get("memory_mb", "8192")
     if memory_mb:
         resource_lines += f"    mem_limit: {memory_mb}m\n"
-    if resources.get("storage_mb"):
-        resource_lines += f'    labels:\n      dumatebench.storage_mb: "{resources["storage_mb"]}"\n'
+    storage_mb = resources.get("storage_mb", "12000")
+    if storage_mb:
+        resource_lines += f'    labels:\n      dumatebench.storage_mb: "{storage_mb}"\n'
     compose_text = f"""services:
   task:
     build:
@@ -982,7 +986,7 @@ def _write_aggregate_judge_report(task_dir: Path, reward: dict[str, Any], artifa
         "final_score": (
             None
             if status in {"failed", "skipped_unavailable"}
-            else merge_final_score(reward.get("complete_pass", 0), checklist_score, judge_score)
+            else merge_final_score(checklist_score, judge_score)
         ),
         "artifact_reports": artifact_reports,
         "rule_result": reward,
@@ -1193,7 +1197,7 @@ def write_final_reward(task_dir: Path, output_file: str) -> str | None:
     final_score = (
         None
         if judge_status in {"failed", "skipped_unavailable"} or judge_score is None
-        else merge_final_score(reward.get("complete_pass", 0), checklist_score, judge_score)
+        else merge_final_score(checklist_score, judge_score)
     )
     combined = dict(reward)
     combined["base_complete_pass"] = reward.get("complete_pass", 0)

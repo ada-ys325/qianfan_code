@@ -58,8 +58,7 @@ class TemplateFillTests(unittest.TestCase):
             self.assertTrue(compose_check.ok)
             self.assertIn("optional", compose_check.message)
 
-            # Older task packages may still provide an authored compose file;
-            # package check must continue to accept those packages.
+            # Older task packages may still provide an authored compose file.
             (task / "environment" / "docker-compose.yaml").write_text(
                 "services:\n  task: {}\n", encoding="utf-8"
             )
@@ -69,8 +68,8 @@ class TemplateFillTests(unittest.TestCase):
                 check for check in legacy_result.checks
                 if "docker-compose.yaml" in check.message
             )
-            self.assertTrue(legacy_check.advisory)
-            self.assertIn("legacy", legacy_check.message)
+            self.assertTrue(legacy_check.ok)
+            self.assertIn("exists", legacy_check.message)
 
 
 if __name__ == "__main__":

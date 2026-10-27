@@ -58,7 +58,7 @@ class LlmJudgeOnlyTest(unittest.TestCase):
             self.assertEqual(judge_args["reference_dir"], "workspace_seed")
             self.assertEqual(judge_args["model"], "mock-model")
             (self.task / "run_outputs" / "llm_judge_score.json").write_text(
-                '{"status": "ok", "judge_score": 0.8, "final_score": 0.65}\n',
+                '{"status": "ok", "judge_score": 0.8, "final_score": 0.71}\n',
                 encoding="utf-8",
             )
 
@@ -69,8 +69,7 @@ class LlmJudgeOnlyTest(unittest.TestCase):
         self.assertEqual(result.status, "ok")
         final = json.loads((self.task / "run_outputs" / "reward_with_llm_judge.json").read_text(encoding="utf-8"))
         self.assertEqual(final["llm_judge_score"], 0.8)
-        # scoring.final_score: 30% complete + 30% partial + 40% judge.
-        self.assertEqual(final["final_score"], 0.47)
+        self.assertEqual(final["final_score"], 0.71)
 
     def test_multiple_artifacts_are_judged_and_averaged(self):
         (self.task / "run_outputs" / "reports" / "report.md").write_text("answer", encoding="utf-8")
@@ -101,7 +100,7 @@ class LlmJudgeOnlyTest(unittest.TestCase):
         self.assertEqual(result.output_files, ["run_outputs/reports/report.md", "run_outputs/reports/appendix.pdf"])
         final = json.loads((self.task / "run_outputs" / "reward_with_llm_judge.json").read_text(encoding="utf-8"))
         self.assertEqual(final["llm_judge_score"], 0.5)
-        self.assertEqual(final["final_score"], 0.35)
+        self.assertEqual(final["final_score"], 0.5)
 
     def test_missing_artifact_writes_zero_final_reward(self):
         args = parse_args([])

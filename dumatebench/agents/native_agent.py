@@ -24,7 +24,7 @@ from urllib.parse import urlsplit
 
 
 AGENT_PATH = "/opt/dumate/wrappers:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-DEFAULT_TIMEOUT_SECONDS = 900
+DEFAULT_TIMEOUT_SECONDS = 1800
 HOP_BY_HOP_HEADERS = {
     "connection",
     "keep-alive",
