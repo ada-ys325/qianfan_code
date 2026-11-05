@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import tempfile
 import unittest
+import json
 from pathlib import Path
+from unittest.mock import patch
 
-from dumatebench.scripts.run_harbor_llm_judge import _checklist_score, _outputs
+from dumatebench.scripts.run_harbor_llm_judge import _artifact_specs, _checklist_score, _fixed_rubric_args, _outputs, main
 
 
 class HarborJudgeOutputDiscoveryTests(unittest.TestCase):
@@ -44,6 +46,40 @@ class HarborJudgeOutputDiscoveryTests(unittest.TestCase):
             )
 
             self.assertEqual(_outputs(task_dir, {"checks": []}), [])
+
+    def test_manifest_selects_artifacts_and_fixed_rubrics(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            task_dir = Path(temp_dir)
+            (task_dir / "evaluator" / "criteria").mkdir(parents=True)
+            (task_dir / "run_outputs").mkdir()
+            (task_dir / "run_outputs" / "figure.svg").write_text("<svg/>", encoding="utf-8")
+            (task_dir / "evaluator" / "criteria" / "figure.json").write_text('{"criteria": []}', encoding="utf-8")
+            (task_dir / "evaluator" / "llm_judge_artifacts.json").write_text(json.dumps({
+                "reference_file": "evaluator/llm_judge_references.json",
+                "artifacts": [{"output_file": "run_outputs/figure.svg", "criteria_file": "evaluator/criteria/figure.json"}],
+            }), encoding="utf-8")
+            reward = {"partial_pass": 1.0, "checks": []}
+            (task_dir / "run_outputs" / "reward.json").write_text(json.dumps(reward), encoding="utf-8")
+            specs = _artifact_specs(task_dir, reward)
+            self.assertEqual(len(specs), 1)
+            self.assertEqual(_fixed_rubric_args(task_dir, specs[0])["criteria_file"], "evaluator/criteria/figure.json")
+            with patch("sys.argv", ["run_harbor_llm_judge.py", "--task-dir", str(task_dir)]), patch(
+                "dumatebench.scripts.run_harbor_llm_judge.run_llm_judge_score",
+                return_value={"status": "ok", "judge_score": 0.75},
+            ) as judge:
+                self.assertEqual(main(), 0)
+            passed = judge.call_args.args[1]
+            self.assertEqual(passed["output_file"], "run_outputs/figure.svg")
+            self.assertEqual(passed["criteria_file"], "evaluator/criteria/figure.json")
+            self.assertEqual(passed["reference_file"], "evaluator/llm_judge_references.json")
+
+    def test_missing_fixed_rubric_does_not_fall_back_to_dynamic_generation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with self.assertRaisesRegex(FileNotFoundError, "Fixed LLM judge rubric"):
+                _fixed_rubric_args(Path(temp_dir), {
+                    "output_file": "run_outputs/figure.svg",
+                    "criteria_file": "evaluator/criteria/missing.json",
+                })
 
 
 if __name__ == "__main__":

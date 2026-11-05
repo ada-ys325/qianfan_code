@@ -113,6 +113,9 @@ set -e
 mkdir -p /opt/dumate/task/evaluator
 cp -a /tests/task_evaluator/. /opt/dumate/task/evaluator/
 cp /tests/instruction.md /opt/dumate/task/instruction.md
+if [ -d /workspace_seed ] && [ ! -e /opt/dumate/task/workspace_seed ]; then
+  ln -s /workspace_seed /opt/dumate/task/workspace_seed
+fi
 if [ -d /tests/web_reference ]; then
   rm -rf /opt/dumate/task/web_reference
   cp -a /tests/web_reference /opt/dumate/task/web_reference
@@ -123,7 +126,7 @@ if [ -n "${OPENAI_API_KEY:-}" ]; then
   # DuMateBench's host-side judge dependencies. Install them only when a judge
   # is enabled and imports are missing; preserve the deterministic reward if
   # the external judge or package index is unavailable.
-  if ! python3 -c "import openai, openpyxl, docx, pptx, PIL, pypdf, fitz, yaml" >/dev/null 2>&1; then
+  if ! python3 -c "import openai, openpyxl, docx, pptx, PIL, pypdf, fitz, yaml, cairosvg" >/dev/null 2>&1; then
     python3 -m pip install --disable-pip-version-check --quiet \
       -r /tests/llm_judge_requirements.txt \
       > /logs/verifier/llm_judge.install.log 2>&1 || true
@@ -248,6 +251,12 @@ def _make_harbor_package_portable(output_dir: Path, source_task_dir: Path) -> No
             text = text.replace(
                 "      poppler-utils \\\n",
                 "      poppler-utils \\\n      libreoffice \\\n      ffmpeg \\\n",
+                1,
+            )
+        if "      libcairo2 \\" not in text:
+            text = text.replace(
+                "      poppler-utils \\\n",
+                "      poppler-utils \\\n      libcairo2 \\\n",
                 1,
             )
         if "pip install --no-cache-dir \"openai>=1.0.0\"" not in text:
@@ -390,6 +399,7 @@ def export_task(task_dir: Path, output_dir: Path, *, overwrite: bool = False) ->
             dest = tests_dir / item.name
             if item.is_dir():
                 shutil.copytree(item, dest)
+                shutil.copytree(item, task_evaluator_dir / item.name)
             else:
                 shutil.copy2(item, dest)
                 if item.suffix.lower() in {".json", ".yaml", ".yml"}:

@@ -27,7 +27,8 @@ TEXTUAL_TYPES = {"doc", "docx", "txt", "md", "json", "html", "htm"}
 PPT_TYPES = {"ppt", "pptx"}
 EXCEL_TYPES = {"xls", "xlsx", "xlsm", "xltx", "xltm"}
 PDF_TYPES = {"pdf"}
-IMAGE_TYPES = {"png", "jpg", "jpeg", "webp"}
+# SVG uses the image backend's CairoSVG rasterization before vision transport.
+IMAGE_TYPES = {"png", "jpg", "jpeg", "webp", "svg"}
 MULTIMODAL_TYPES = {"mp3", "wav", "m4a", "flac", "aac", "ogg", "mp4", "mov", "webm", "mkv"}
 CODE_TYPES = {
     "py", "js", "jsx", "ts", "tsx", "java", "go", "rs", "cpp", "cc", "cxx", "c",
@@ -1077,6 +1078,13 @@ def _run_image_judge(
                     assume_percent_above_one=False,
                 ),
             }
+            if result.get("gate", {}).get("status") == "blocked":
+                # Missing image evidence is an evaluation failure, not a quality zero.
+                report.update(
+                    status="evaluator_error",
+                    reason="Image attachment gate blocked: " + "; ".join(result["gate"].get("reasons", [])),
+                    judge_score=None,
+                )
         except Exception as exc:
             report = _failure_report("image_llm_judge", f"Image LLM judge failed: {type(exc).__name__}: {exc}", model, candidate_dir)
             (out_dir / "judge_result.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

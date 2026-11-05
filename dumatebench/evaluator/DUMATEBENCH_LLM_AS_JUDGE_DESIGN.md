@@ -41,7 +41,7 @@ LLM-as-Judge 负责 checklist 难以可靠判断的部分。例如：
 | 文本文档 | `doc`, `docx`, `md`, `txt`, `json`, `html`, `htm` | `llm_judge.runner` |
 | Excel | `xls`, `xlsx`, `xlsm`, `xltx`, `xltm` | `excel_llm_judge` |
 | PDF | `pdf` | `llm_judge_pdf` |
-| 图片 | `png`, `jpg`, `jpeg`, `webp` | `llm_judge_image` |
+| 图片 | `png`, `jpg`, `jpeg`, `webp`, `svg` | `llm_judge_image`（SVG 先栅格化） |
 | 音频 | `mp3`, `wav`, `m4a`, `flac`, `aac`, `ogg` | `llm_judge_mm` |
 | 视频 | `mp4`, `mov`, `webm`, `mkv` | `llm_judge_mm` |
 | 代码 | `py`, `js`, `ts`, `tsx`, `java`, `go`, `rs`, `cpp`, `c`, `sh`, `sql` 等 | `llm_judge_code` |

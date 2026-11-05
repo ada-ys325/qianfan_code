@@ -1,8 +1,12 @@
 import json
 import importlib.util
+import io
+import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
+from types import SimpleNamespace
 
 from dumatebench.evaluator import (
     evaluate_llm_judge_score,
@@ -396,6 +400,35 @@ class UnifiedLlmJudgeTest(unittest.TestCase):
         normalized = normalize_rubric(rubric, task_id="task", instruction_hash=stable_hash("instruction"))
 
         self.assertEqual(normalized["criteria"][0]["dimension"], "instruction_following")
+
+    def test_svg_artifact_routes_to_image_judge(self):
+        svg = self.root / "run_outputs" / "figure.svg"
+        svg.write_text('<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><rect width="20" height="20" fill="red"/></svg>', encoding="utf-8")
+        from PIL import Image
+
+        png = io.BytesIO()
+        Image.new("RGB", (20, 20), "red").save(png, format="PNG")
+        judgment = {
+            "criteria_results": [
+                {"criterion_id": key, "status": "pass", "score": 3, "evidence": "visible"}
+                for key in ("content", "quality", "completeness")
+            ],
+            "gate": {"status": "ok", "reasons": []},
+            "summary": "ok",
+        }
+        rubric_path = self.root / "evaluator" / "svg_criteria.json"
+        rubric_path.parent.mkdir()
+        rubric_path.write_text(json.dumps(self._image_rubric()), encoding="utf-8")
+        with patch.dict(sys.modules, {"cairosvg": SimpleNamespace(svg2png=lambda **_kwargs: png.getvalue())}):
+            report = run_llm_judge_score(self.root, {
+                "output_file": "run_outputs/figure.svg",
+                "rule_result": {"partial_pass": 1.0},
+                "criteria_file": "evaluator/svg_criteria.json",
+                "mock_image_judgment": judgment,
+            })
+        self.assertEqual(report["judge_kind"], "image")
+        self.assertEqual(report["judge_score"], 0.75)
+        self.assertEqual(report["judge_report"]["result"]["attachments"][0]["mime"], "image/png")
 
     def test_pdf_rubric_generation_requests_strict_json_schema(self):
         class RecordingClient:

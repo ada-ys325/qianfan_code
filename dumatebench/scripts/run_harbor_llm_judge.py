@@ -74,6 +74,66 @@ def _checklist_score(reward: dict) -> float:
     )
 
 
+def _artifact_specs(task_dir: Path, reward: dict) -> list[dict]:
+    """Use the task's declared artifacts and fixed rubrics when available."""
+    manifest = task_dir / "evaluator" / "llm_judge_artifacts.json"
+    if not manifest.is_file():
+        return [{"output_file": path} for path in _outputs(task_dir, reward)]
+    raw = json.loads(manifest.read_text(encoding="utf-8"))
+    if isinstance(raw, dict):
+        items = next((raw[key] for key in ("artifacts", "outputs", "output_files") if key in raw), None)
+        defaults = {key: value for key, value in raw.items() if key not in {"artifacts", "outputs", "output_files"}}
+    else:
+        items, defaults = raw, {}
+    if not isinstance(items, list):
+        raise ValueError(f"Invalid LLM judge artifacts manifest: {manifest}")
+    specs: list[dict] = []
+    for index, item in enumerate(items, start=1):
+        if isinstance(item, str):
+            spec = {**defaults, "output_file": item}
+        elif isinstance(item, dict):
+            spec = {**defaults, **item}
+            spec["output_file"] = item.get("output_file") or item.get("path") or item.get("file")
+        else:
+            raise ValueError(f"Invalid artifact #{index} in {manifest}")
+        path = spec.get("output_file")
+        if not isinstance(path, str) or not path.startswith("run_outputs/") or ".." in Path(path).parts:
+            raise ValueError(f"Invalid output_file for artifact #{index} in {manifest}: {path!r}")
+        specs.append(spec)
+    return specs
+
+
+def _fixed_rubric_args(task_dir: Path, spec: dict) -> dict:
+    """Require a task-provided rubric instead of silently generating one."""
+    extra = spec.get("judge_args") or {}
+    if not isinstance(extra, dict):
+        raise ValueError("judge_args must be an object")
+    selected = {key: value for key, value in spec.items() if key in {
+        "artifact_type", "type", "doc_type", "criteria_file", "rubric_file",
+        "criteria", "task_rubrics", "rubric", "reference_file", "references_file",
+        "reference_manifest", "references_manifest", "reference_dir", "web_reference_dir",
+    }}
+    selected.update(extra)
+    if selected.get("type") and not selected.get("artifact_type"):
+        selected["artifact_type"] = selected["type"]
+    if any(isinstance(selected.get(key), (dict, list)) for key in ("criteria", "task_rubrics", "rubric")):
+        return selected
+    for key in ("criteria_file", "rubric_file", "rubric"):
+        value = selected.get(key)
+        if value:
+            rubric_path = Path(value)
+            if not rubric_path.is_absolute():
+                rubric_path = task_dir / rubric_path
+            if not rubric_path.is_file():
+                raise FileNotFoundError(f"Fixed LLM judge rubric does not exist: {rubric_path}")
+            return selected
+    for relative in ("evaluator/llm_judge_criteria.json", "evaluator/llm_judge_rubric.json"):
+        if (task_dir / relative).is_file():
+            selected["criteria_file"] = relative
+            return selected
+    raise FileNotFoundError(f"No fixed LLM judge rubric for {spec['output_file']}")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--task-dir", required=True, type=Path)
@@ -86,7 +146,9 @@ def main() -> int:
     checklist_score = _checklist_score(reward)
     scores: list[float] = []
     reports: list[dict] = []
-    for index, output_file in enumerate(_outputs(task_dir, reward), start=1):
+    for index, spec in enumerate(_artifact_specs(task_dir, reward), start=1):
+        output_file = spec["output_file"]
+        judge_options = _fixed_rubric_args(task_dir, spec)
         report = run_llm_judge_score(task_dir, {
             "output_file": output_file,
             "rule_result": reward,
@@ -95,6 +157,7 @@ def main() -> int:
             "judge_output_file": f"run_outputs/llm_judge_scores/{index}.json",
             "reference_dir": "/workspace_seed",
             "web_reference_dir": "/opt/dumate/task/web_reference",
+            **judge_options,
         })
         reports.append(report)
         if report.get("status") == "ok" and report.get("judge_score") is not None:
