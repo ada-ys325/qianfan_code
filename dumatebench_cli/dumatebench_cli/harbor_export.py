@@ -254,11 +254,23 @@ def _make_harbor_package_portable(output_dir: Path, source_task_dir: Path) -> No
                 1,
             )
         if "      libcairo2 \\" not in text:
-            text = text.replace(
+            updated = text.replace(
                 "      poppler-utils \\\n",
                 "      poppler-utils \\\n      libcairo2 \\\n",
                 1,
             )
+            if updated == text:
+                # Small custom task images have no package list to extend.
+                # CairoSVG's Python wheel still needs the native Cairo library.
+                base_images = list(re.finditer(r"(?m)^FROM[^\n]*\n", text))
+                if base_images:
+                    install = (
+                        "RUN apt-get update && apt-get install -y --no-install-recommends "
+                        "libcairo2 && rm -rf /var/lib/apt/lists/*\n"
+                    )
+                    position = base_images[-1].end()
+                    updated = text[:position] + install + text[position:]
+            text = updated
         if "pip install --no-cache-dir \"openai>=1.0.0\"" not in text:
             text = text.replace(
                 "\nRUN useradd -ms /bin/bash agent",

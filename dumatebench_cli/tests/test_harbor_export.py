@@ -95,6 +95,10 @@ class HarborExportTests(unittest.TestCase):
             self.assertTrue((output / "tests" / "task_evaluator" / "criteria" / "figure.svg.json").is_file())
             self.assertTrue((output / "tests" / "run_harbor_llm_judge.py").is_file())
             self.assertTrue((output / "tests" / "dumatebench" / "evaluator" / "llm_judge" / "unified.py").is_file())
+            self.assertIn(
+                "apt-get install -y --no-install-recommends libcairo2",
+                (output / "environment" / "Dockerfile").read_text(encoding="utf-8"),
+            )
             test_sh = (output / "tests" / "test.sh").read_text(encoding="utf-8")
             self.assertIn("run_harbor_llm_judge.py", test_sh)
             self.assertIn("cp /tests/instruction.md /opt/dumate/task/instruction.md", test_sh)
