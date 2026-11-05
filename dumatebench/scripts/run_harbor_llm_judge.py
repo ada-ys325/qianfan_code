@@ -7,6 +7,7 @@ import argparse
 import json
 import os
 import re
+import sys
 from pathlib import Path
 
 from dumatebench.evaluator.llm_judge.unified import run_llm_judge_score
@@ -104,7 +105,7 @@ def _artifact_specs(task_dir: Path, reward: dict) -> list[dict]:
 
 
 def _fixed_rubric_args(task_dir: Path, spec: dict) -> dict:
-    """Require a task-provided rubric instead of silently generating one."""
+    """Use an available fixed rubric, or let the judge generate one."""
     extra = spec.get("judge_args") or {}
     if not isinstance(extra, dict):
         raise ValueError("judge_args must be an object")
@@ -118,20 +119,27 @@ def _fixed_rubric_args(task_dir: Path, spec: dict) -> dict:
         selected["artifact_type"] = selected["type"]
     if any(isinstance(selected.get(key), (dict, list)) for key in ("criteria", "task_rubrics", "rubric")):
         return selected
-    for key in ("criteria_file", "rubric_file", "rubric"):
+    available_fixed_file = False
+    for key in (
+        "criteria_file", "rubric_file", "llm_judge_criteria_file",
+        "llm_judge_rubric_file", "rubric",
+    ):
         value = selected.get(key)
         if value:
             rubric_path = Path(value)
             if not rubric_path.is_absolute():
                 rubric_path = task_dir / rubric_path
-            if not rubric_path.is_file():
-                raise FileNotFoundError(f"Fixed LLM judge rubric does not exist: {rubric_path}")
-            return selected
+            if rubric_path.is_file():
+                available_fixed_file = True
+            else:
+                selected.pop(key)
+    if available_fixed_file:
+        return selected
     for relative in ("evaluator/llm_judge_criteria.json", "evaluator/llm_judge_rubric.json"):
         if (task_dir / relative).is_file():
             selected["criteria_file"] = relative
             return selected
-    raise FileNotFoundError(f"No fixed LLM judge rubric for {spec['output_file']}")
+    return selected
 
 
 def main() -> int:
@@ -149,6 +157,11 @@ def main() -> int:
     for index, spec in enumerate(_artifact_specs(task_dir, reward), start=1):
         output_file = spec["output_file"]
         judge_options = _fixed_rubric_args(task_dir, spec)
+        if not any(judge_options.get(key) for key in (
+            "criteria", "task_rubrics", "rubric", "criteria_file", "rubric_file",
+            "llm_judge_criteria_file", "llm_judge_rubric_file",
+        )):
+            print(f"No fixed LLM judge rubric for {output_file}; generating one with the judge model.", file=sys.stderr)
         report = run_llm_judge_score(task_dir, {
             "output_file": output_file,
             "rule_result": reward,

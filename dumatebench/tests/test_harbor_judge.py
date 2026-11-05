@@ -73,13 +73,69 @@ class HarborJudgeOutputDiscoveryTests(unittest.TestCase):
             self.assertEqual(passed["criteria_file"], "evaluator/criteria/figure.json")
             self.assertEqual(passed["reference_file"], "evaluator/llm_judge_references.json")
 
-    def test_missing_fixed_rubric_does_not_fall_back_to_dynamic_generation(self) -> None:
+    def test_missing_fixed_rubric_falls_back_to_dynamic_generation(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            with self.assertRaisesRegex(FileNotFoundError, "Fixed LLM judge rubric"):
-                _fixed_rubric_args(Path(temp_dir), {
-                    "output_file": "run_outputs/figure.svg",
-                    "criteria_file": "evaluator/criteria/missing.json",
-                })
+            options = _fixed_rubric_args(Path(temp_dir), {
+                "output_file": "run_outputs/figure.svg",
+                "criteria_file": "evaluator/criteria/missing.json",
+                "reference_file": "evaluator/references.json",
+            })
+            self.assertNotIn("criteria_file", options)
+            self.assertEqual(options["reference_file"], "evaluator/references.json")
+
+    def test_missing_artifact_rubric_uses_existing_task_rubric(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            task_dir = Path(temp_dir)
+            (task_dir / "evaluator").mkdir()
+            (task_dir / "evaluator" / "llm_judge_criteria.json").write_text(
+                '{"criteria": []}', encoding="utf-8"
+            )
+            options = _fixed_rubric_args(task_dir, {
+                "output_file": "run_outputs/figure.svg",
+                "criteria_file": "evaluator/criteria/missing.json",
+                "judge_args": {"llm_judge_rubric_file": "evaluator/also_missing.json"},
+            })
+            self.assertEqual(options["criteria_file"], "evaluator/llm_judge_criteria.json")
+            self.assertNotIn("llm_judge_rubric_file", options)
+
+    def test_missing_rubric_generates_svg_rubric_and_judge_score(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            task_dir = Path(temp_dir)
+            (task_dir / "evaluator").mkdir()
+            (task_dir / "run_outputs").mkdir()
+            (task_dir / "instruction.md").write_text("Draw a red square.", encoding="utf-8")
+            (task_dir / "run_outputs" / "figure.svg").write_text(
+                '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><rect width="20" height="20" fill="red"/></svg>',
+                encoding="utf-8",
+            )
+            rubric = {"criteria": [
+                {"id": key, "dimension": dimension, "description": key, "evidence_hint": "Visible image",
+                 "weight": 1, "levels": {str(score): f"Level {score}" for score in range(5)}}
+                for key, dimension in (
+                    ("content", "instruction_content_fidelity"),
+                    ("quality", "composition_visual_hierarchy"),
+                    ("technical", "technical_completeness"),
+                )
+            ]}
+            judgment = {"criteria_results": [
+                {"criterion_id": key, "status": "pass", "score": 4, "evidence": "Visible"}
+                for key in ("content", "quality", "technical")
+            ], "gate": {"status": "ok", "reasons": []}, "summary": "ok"}
+            (task_dir / "evaluator" / "llm_judge_artifacts.json").write_text(json.dumps({
+                "artifacts": [{"output_file": "run_outputs/figure.svg",
+                               "criteria_file": "evaluator/criteria/missing.json",
+                               "judge_args": {"mock_image_rubric": rubric, "mock_image_judgment": judgment}}],
+            }), encoding="utf-8")
+            (task_dir / "run_outputs" / "reward.json").write_text(json.dumps({
+                "partial_pass": 1.0, "checks": []
+            }), encoding="utf-8")
+            with patch("sys.argv", ["run_harbor_llm_judge.py", "--task-dir", str(task_dir)]):
+                self.assertEqual(main(), 0)
+            judge = json.loads((task_dir / "run_outputs" / "llm_judge_scores" / "1.json").read_text())
+            self.assertEqual(judge["status"], "ok")
+            self.assertEqual(judge["judge_kind"], "image")
+            self.assertEqual(judge["judge_score"], 1.0)
+            self.assertTrue((task_dir / "run_outputs" / "image_llm_judge" / "rubric.json").is_file())
 
 
 if __name__ == "__main__":
