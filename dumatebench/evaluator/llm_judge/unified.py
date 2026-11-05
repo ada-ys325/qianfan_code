@@ -27,7 +27,8 @@ TEXTUAL_TYPES = {"doc", "docx", "txt", "md", "json", "html", "htm"}
 PPT_TYPES = {"ppt", "pptx"}
 EXCEL_TYPES = {"xls", "xlsx", "xlsm", "xltx", "xltm"}
 PDF_TYPES = {"pdf"}
-IMAGE_TYPES = {"png", "jpg", "jpeg", "webp"}
+# SVG uses the image backend's CairoSVG rasterization before vision transport.
+IMAGE_TYPES = {"png", "jpg", "jpeg", "webp", "svg"}
 MULTIMODAL_TYPES = {"mp3", "wav", "m4a", "flac", "aac", "ogg", "mp4", "mov", "webm", "mkv"}
 CODE_TYPES = {
     "py", "js", "jsx", "ts", "tsx", "java", "go", "rs", "cpp", "cc", "cxx", "c",
@@ -561,6 +562,25 @@ def _selected_reference_dir(
     label: str,
 ) -> Path | None:
     reference_dir = _reference_dir(task_dir, args)
+    manifest_arg = next(
+        (args.get(key) for key in ("reference_file", "references_file", "reference_manifest", "references_manifest") if args.get(key)),
+        None,
+    )
+    if manifest_arg not in {None, "-"} or (
+        manifest_arg is None and (task_dir / "evaluator" / "llm_judge_references.json").is_file()
+    ):
+        # The manifest is already an explicit file selection. Do not narrow it
+        # again using names mentioned in the instruction.
+        files = (
+            [path.relative_to(reference_dir).as_posix() for path in sorted(reference_dir.rglob("*")) if path.is_file()]
+            if reference_dir is not None and reference_dir.is_dir() else []
+        )
+        report = {"status": "manifest", "selected": True, "files": [{"path": path, "selected": True} for path in files]}
+        selections = args.setdefault("_reference_selections", {})
+        if isinstance(selections, dict):
+            selections[label] = report
+        args["_reference_selection"] = report
+        return reference_dir
     if not bool(args.get("select_reference_files", True)):
         return reference_dir
     selected_dir, report = materialize_selected_references(
@@ -1077,6 +1097,13 @@ def _run_image_judge(
                     assume_percent_above_one=False,
                 ),
             }
+            if result.get("gate", {}).get("status") == "blocked":
+                # Missing image evidence is an evaluation failure, not a quality zero.
+                report.update(
+                    status="evaluator_error",
+                    reason="Image attachment gate blocked: " + "; ".join(result["gate"].get("reasons", [])),
+                    judge_score=None,
+                )
         except Exception as exc:
             report = _failure_report("image_llm_judge", f"Image LLM judge failed: {type(exc).__name__}: {exc}", model, candidate_dir)
             (out_dir / "judge_result.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
