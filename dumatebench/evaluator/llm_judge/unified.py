@@ -562,6 +562,25 @@ def _selected_reference_dir(
     label: str,
 ) -> Path | None:
     reference_dir = _reference_dir(task_dir, args)
+    manifest_arg = next(
+        (args.get(key) for key in ("reference_file", "references_file", "reference_manifest", "references_manifest") if args.get(key)),
+        None,
+    )
+    if manifest_arg not in {None, "-"} or (
+        manifest_arg is None and (task_dir / "evaluator" / "llm_judge_references.json").is_file()
+    ):
+        # The manifest is already an explicit file selection. Do not narrow it
+        # again using names mentioned in the instruction.
+        files = (
+            [path.relative_to(reference_dir).as_posix() for path in sorted(reference_dir.rglob("*")) if path.is_file()]
+            if reference_dir is not None and reference_dir.is_dir() else []
+        )
+        report = {"status": "manifest", "selected": True, "files": [{"path": path, "selected": True} for path in files]}
+        selections = args.setdefault("_reference_selections", {})
+        if isinstance(selections, dict):
+            selections[label] = report
+        args["_reference_selection"] = report
+        return reference_dir
     if not bool(args.get("select_reference_files", True)):
         return reference_dir
     selected_dir, report = materialize_selected_references(

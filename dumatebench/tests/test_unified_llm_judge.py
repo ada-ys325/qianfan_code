@@ -430,6 +430,41 @@ class UnifiedLlmJudgeTest(unittest.TestCase):
         self.assertEqual(report["judge_score"], 0.75)
         self.assertEqual(report["judge_report"]["result"]["attachments"][0]["mime"], "image/png")
 
+    def test_explicit_reference_manifest_keeps_image_and_text_for_svg(self):
+        (self.root / "instruction.md").write_text(
+            "Match reference.svg with a red square.", encoding="utf-8"
+        )
+        svg = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><rect width="20" height="20" fill="red"/></svg>'
+        (self.root / "run_outputs" / "figure.svg").write_text(svg, encoding="utf-8")
+        (self.root / "workspace_seed" / "reference.svg").write_text(svg, encoding="utf-8")
+        (self.root / "workspace_seed" / "spec.md").write_text("A red square.", encoding="utf-8")
+        evaluator = self.root / "evaluator"
+        evaluator.mkdir(exist_ok=True)
+        (evaluator / "llm_judge_references.json").write_text(json.dumps({"references": [
+            {"path": "workspace_seed/reference.svg", "as": "reference.svg"},
+            {"path": "workspace_seed/spec.md", "as": "spec.md"},
+        ]}), encoding="utf-8")
+        (evaluator / "svg_criteria.json").write_text(json.dumps(self._image_rubric()), encoding="utf-8")
+        judgment = {
+            "criteria_results": [
+                {"criterion_id": key, "status": "pass", "score": 4, "evidence": "visible"}
+                for key in ("content", "quality", "completeness")
+            ],
+            "gate": {"status": "ok", "reasons": []},
+            "summary": "ok",
+        }
+        report = run_llm_judge_score(self.root, {
+            "output_file": "run_outputs/figure.svg",
+            "rule_result": {"partial_pass": 1.0},
+            "criteria_file": "evaluator/svg_criteria.json",
+            "reference_file": "evaluator/llm_judge_references.json",
+            "mock_image_judgment": judgment,
+        })
+        inner = report["judge_report"]
+        self.assertEqual(inner["reference_selection"]["status"], "manifest")
+        self.assertEqual([item["role"] for item in inner["result"]["attachments"]], ["candidate", "reference"])
+        self.assertEqual(inner["reference_summary"]["text_artifacts"][0]["path"], "spec.md")
+
     def test_pdf_rubric_generation_requests_strict_json_schema(self):
         class RecordingClient:
             def __init__(self, payload):
