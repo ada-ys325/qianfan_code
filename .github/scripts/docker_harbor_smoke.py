@@ -127,8 +127,16 @@ raise SystemExit(0)
             )
         ]
     }
-    (task / "evaluator" / "llm_judge_criteria.json").write_text(
+    (task / "evaluator" / "criteria").mkdir()
+    (task / "evaluator" / "criteria" / "report.md.json").write_text(
         json.dumps(rubric, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    (task / "evaluator" / "llm_judge_artifacts.json").write_text(
+        json.dumps({"artifacts": [{
+            "output_file": "run_outputs/report.md",
+            "criteria_file": "evaluator/criteria/report.md.json",
+        }]}, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
     )
 
     environment = template / "environment"

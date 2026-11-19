@@ -203,3 +203,17 @@ successful judge call has `llm_judge.status` equal to `ok` and a numeric
 key is available, the deterministic evaluator still runs, but it does not
 provide a judge score. See the Harbor integration section in the repository
 [`README`](../../README.md#e-run-harbor-with-a-model).
+
+Harbor reads `evaluator/llm_judge_artifacts.json` from each exported task when
+present. Each artifact names its `output_file` and may specify a fixed
+`criteria_file`, for example
+`evaluator/criteria/figure.svg.json`. A top-level `reference_file` applies to
+all artifacts and an artifact entry can override it. Without a manifest,
+Harbor discovers outputs from checklist paths and looks for
+`evaluator/llm_judge_criteria.json` or `evaluator/llm_judge_rubric.json`.
+Harbor uses a fixed rubric when its file exists. If an artifact's rubric file
+is missing and no task-level fixed rubric exists, the judge model generates a
+rubric before scoring. This adds a model call. Harbor records the fallback in
+`llm_judge.stderr.log`. A rubric file that exists but is invalid still fails
+validation; Harbor does not replace it with a generated rubric.
+SVG outputs use the image judge after rasterization with CairoSVG.

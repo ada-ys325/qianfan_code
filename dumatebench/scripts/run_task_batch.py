@@ -778,6 +778,8 @@ def _artifact_type(path: str | None) -> str | None:
         return "textual"
     if suffix in {"xls", "xlsx", "xlsm", "xltx", "xltm"}:
         return "excel"
+    if suffix in {"png", "jpg", "jpeg", "webp", "svg"}:
+        return "image"
     if suffix in {
         "py", "js", "jsx", "ts", "tsx", "java", "go", "rs", "cpp", "cc", "cxx", "c",
         "h", "hpp", "cs", "rb", "php", "swift", "kt", "kts", "scala", "sh", "bash",

@@ -70,6 +70,14 @@ class HarborExportTests(unittest.TestCase):
             (task / "evaluator" / "llm_judge_criteria.json").write_text(
                 '{"criteria": []}\n', encoding="utf-8"
             )
+            (task / "evaluator" / "criteria").mkdir()
+            (task / "evaluator" / "criteria" / "figure.svg.json").write_text(
+                '{"criteria": []}\n', encoding="utf-8"
+            )
+            (task / "evaluator" / "llm_judge_artifacts.json").write_text(
+                '{"artifacts": [{"output_file": "run_outputs/figure.svg", "criteria_file": "evaluator/criteria/figure.svg.json"}]}\n',
+                encoding="utf-8",
+            )
             (task / "evaluator" / "evaluator.py").write_text("print('ok')\n", encoding="utf-8")
 
             result = export_task(task, output)
@@ -83,11 +91,18 @@ class HarborExportTests(unittest.TestCase):
             self.assertTrue((output / "tests" / "llm_judge_requirements.txt").is_file())
             self.assertTrue((output / "tests" / "task_evaluator" / "checks.yaml").is_file())
             self.assertTrue((output / "tests" / "task_evaluator" / "llm_judge_criteria.json").is_file())
+            self.assertTrue((output / "tests" / "task_evaluator" / "llm_judge_artifacts.json").is_file())
+            self.assertTrue((output / "tests" / "task_evaluator" / "criteria" / "figure.svg.json").is_file())
             self.assertTrue((output / "tests" / "run_harbor_llm_judge.py").is_file())
             self.assertTrue((output / "tests" / "dumatebench" / "evaluator" / "llm_judge" / "unified.py").is_file())
+            self.assertIn(
+                "apt-get install -y --no-install-recommends libcairo2",
+                (output / "environment" / "Dockerfile").read_text(encoding="utf-8"),
+            )
             test_sh = (output / "tests" / "test.sh").read_text(encoding="utf-8")
             self.assertIn("run_harbor_llm_judge.py", test_sh)
             self.assertIn("cp /tests/instruction.md /opt/dumate/task/instruction.md", test_sh)
+            self.assertIn("ln -s /workspace_seed /opt/dumate/task/workspace_seed", test_sh)
             self.assertIn("/tests/task_evaluator/", test_sh)
             self.assertIn("llm_judge_requirements.txt", test_sh)
             self.assertIn("reward_with_llm_judge.json", test_sh)
